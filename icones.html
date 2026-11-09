@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Icônes Salama</title>
+</head>
+<body style="font-family:sans-serif;text-align:center;padding:20px">
+  <h1>🎨 Icône de Salama</h1>
+  <canvas id="c" width="512" height="512" style="width:200px;height:200px;border:1px solid #ccc;border-radius:20px"></canvas>
+  <p><button onclick="telecharger(192)" style="padding:12px;font-size:1rem">⬇️ icon-192.png</button></p>
+  <p><button onclick="telecharger(512)" style="padding:12px;font-size:1rem">⬇️ icon-512.png</button></p>
+  <script>
+    const ctx = document.getElementById('c').getContext('2d');
+    ctx.fillStyle = '#0e7a5f';
+    ctx.fillRect(0, 0, 512, 512);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(216, 116, 80, 280);
+    ctx.fillRect(116, 216, 280, 80);
+    function telecharger(taille) {
+      const tmp = document.createElement('canvas');
+      tmp.width = tmp.height = taille;
+      tmp.getContext('2d').drawImage(document.getElementById('c'), 0, 0, taille, taille);
+      const a = document.createElement('a');
+      a.download = 'icon-' + taille + '.png';
+      a.href = tmp.toDataURL('image/png');
+      a.click();
+    }
+  </script>
+</body>
+</html>
