@@ -4,23 +4,83 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Icônes Salama</title>
+  <style>
+    body { font-family: system-ui, sans-serif; text-align: center; padding: 16px; background: #f4f7f6; }
+    .choix { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 16px 0; }
+    .option { background: white; border: 3px solid transparent; border-radius: 16px; padding: 10px; cursor: pointer; }
+    .option.selectionne { border-color: #0e7a5f; }
+    .option canvas { width: 96px; height: 96px; display: block; }
+    .option span { font-size: 0.8rem; display: block; margin-top: 6px; }
+    .dl { padding: 12px 20px; font-size: 1rem; margin: 6px; background: #0e7a5f; color: white; border: none; border-radius: 10px; }
+  </style>
 </head>
-<body style="font-family:sans-serif;text-align:center;padding:20px">
-  <h1>🎨 Icône de Salama</h1>
-  <canvas id="c" width="512" height="512" style="width:200px;height:200px;border:1px solid #ccc;border-radius:20px"></canvas>
-  <p><button onclick="telecharger(192)" style="padding:12px;font-size:1rem">⬇️ icon-192.png</button></p>
-  <p><button onclick="telecharger(512)" style="padding:12px;font-size:1rem">⬇️ icon-512.png</button></p>
+<body>
+  <h1>🎨 Choisis l'icône de Salama</h1>
+  <div class="choix" id="choix"></div>
+  <p>
+    <button class="dl" onclick="telecharger(192)">⬇️ icon-192.png</button>
+    <button class="dl" onclick="telecharger(512)">⬇️ icon-512.png</button>
+  </p>
   <script>
-    const ctx = document.getElementById('c').getContext('2d');
-    ctx.fillStyle = '#0e7a5f';
-    ctx.fillRect(0, 0, 512, 512);
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(216, 116, 80, 280);
-    ctx.fillRect(116, 216, 280, 80);
+    const T = 512;
+    let selection = 0;
+
+    function fond(ctx) {
+      const g = ctx.createLinearGradient(0, 0, T, T);
+      g.addColorStop(0, '#12a37e');
+      g.addColorStop(1, '#0b5f4a');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, T, T);
+    }
+    function croix(ctx) {
+      fond(ctx);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(216, 116, 80, 280);
+      ctx.fillRect(116, 216, 280, 80);
+    }
+    function avecEmoji(e) {
+      return function(ctx) {
+        fond(ctx);
+        ctx.font = '290px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(e, T / 2, T / 2 + 25);
+      };
+    }
+
+    const designs = [
+      { nom: 'Croix pharmacie', dessiner: croix },
+      { nom: 'Bouclier', dessiner: avecEmoji('🛡️') },
+      { nom: 'Stéthoscope', dessiner: avecEmoji('🩺') },
+      { nom: 'Cœur', dessiner: avecEmoji('💚') }
+    ];
+
+    const conteneur = document.getElementById('choix');
+    designs.forEach((d, i) => {
+      const div = document.createElement('div');
+      div.className = 'option' + (i === 0 ? ' selectionne' : '');
+      const cv = document.createElement('canvas');
+      cv.width = cv.height = T;
+      d.dessiner(cv.getContext('2d'));
+      const label = document.createElement('span');
+      label.textContent = d.nom;
+      div.appendChild(cv);
+      div.appendChild(label);
+      div.onclick = () => {
+        selection = i;
+        document.querySelectorAll('.option').forEach(o => o.classList.remove('selectionne'));
+        div.classList.add('selectionne');
+      };
+      conteneur.appendChild(div);
+    });
+
     function telecharger(taille) {
+      const grand = document.createElement('canvas');
+      grand.width = grand.height = T;
+      designs[selection].dessiner(grand.getContext('2d'));
       const tmp = document.createElement('canvas');
       tmp.width = tmp.height = taille;
-      tmp.getContext('2d').drawImage(document.getElementById('c'), 0, 0, taille, taille);
+      tmp.getContext('2d').drawImage(grand, 0, 0, taille, taille);
       const a = document.createElement('a');
       a.download = 'icon-' + taille + '.png';
       a.href = tmp.toDataURL('image/png');
