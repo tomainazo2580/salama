@@ -1,5 +1,5 @@
-const CACHE = 'salama-v4';
-const FICHIERS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
+const CACHE = 'salama-v5';
+const FICHIERS = ['./', './index.html', './style.css', './app.js', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
