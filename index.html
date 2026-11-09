@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0e7a5f">
+  <title>Salama</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; background: #f4f7f6; min-height: 100vh; }
+    header { background: #0e7a5f; color: white; padding: 24px 16px; text-align: center; }
+    header h1 { font-size: 1.5rem; }
+    header p { opacity: 0.85; font-size: 0.9rem; margin-top: 4px; }
+    main { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .carte {
+      background: white; border: none; border-radius: 12px; padding: 20px;
+      font-size: 1.05rem; text-align: left;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08); cursor: pointer;
+    }
+    .carte:active { transform: scale(0.98); }
+    footer { text-align: center; color: #999; font-size: 0.75rem; padding: 20px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🩺 Salama</h1>
+    <p>Ton assistant santé personnel</p>
+  </header>
+  <main>
+    <button class="carte" onclick="bientot()">🤒 J'ai des symptômes</button>
+    <button class="carte" onclick="bientot()">📓 Mon journal</button>
+    <button class="carte" onclick="bientot()">💊 Mes médicaments</button>
+    <button class="carte" onclick="bientot()">👥 Mes profils</button>
+  </main>
+  <footer>Salama v0.1 — données 100% locales</footer>
+  <script>
+    function bientot() {
+      alert("Cette fonction arrive à l'étape suivante 🙂");
+    }
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+</body>
+</html>
