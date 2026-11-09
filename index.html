@@ -9,7 +9,6 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    /* ===== Thèmes ===== */
     :root {
       --fond: #f0f2f5; --carte: #ffffff; --texte: #1a1a2e;
       --texte-doux: #777; --bordure: #e5e5ea; --accent: #0e7a5f;
@@ -36,11 +35,9 @@
 
     main { padding: 14px; }
 
-    /* ===== Pages ===== */
     .page { display: none; }
     .page.active { display: block; }
 
-    /* ===== Grille de tuiles (style image 2) ===== */
     .grille { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .tuile {
       border-radius: 16px; padding: 18px 14px; color: white;
@@ -59,13 +56,11 @@
     .t-medocs     { background: linear-gradient(160deg, #9b59b6, #6c3483); }
     .t-profils    { background: linear-gradient(160deg, #16a085, #0b5f4a); }
 
-    /* ===== Placeholder pages vides ===== */
     .vide {
       text-align: center; padding: 60px 20px; color: var(--texte-doux);
     }
     .vide .gros { font-size: 3rem; display: block; margin-bottom: 12px; }
 
-    /* ===== Barre de navigation du bas ===== */
     .nav-bas {
       position: fixed; bottom: 0; left: 0; right: 0;
       background: var(--carte); border-top: 1px solid var(--bordure);
@@ -80,7 +75,6 @@
     .nav-bas button .ico { font-size: 1.25rem; }
     .nav-bas button.actif { color: var(--accent); font-weight: 600; }
 
-    /* ===== Bannière d'installation (au-dessus de la nav) ===== */
     .banniere {
       position: fixed; left: 10px; right: 10px; bottom: 76px;
       background: var(--carte); border: 1px solid var(--bordure);
@@ -100,6 +94,54 @@
       background: none; border: none; font-size: 1rem;
       color: var(--texte-doux); padding: 4px; cursor: pointer;
     }
+
+    /* ===== Journal ===== */
+    .btn-principal {
+      background: var(--accent); color: white; border: none;
+      border-radius: 12px; padding: 14px; font-size: 1rem; width: 100%;
+      cursor: pointer; margin-bottom: 14px;
+    }
+    .btn-secondaire {
+      background: var(--bordure); color: var(--texte); border: none;
+      border-radius: 12px; padding: 14px; font-size: 1rem; flex: 1;
+      cursor: pointer;
+    }
+    .entree {
+      background: var(--carte); border-radius: 12px; padding: 14px;
+      margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .entree-tete { display: flex; justify-content: space-between; align-items: center; }
+    .entree-date { font-size: 0.78rem; color: var(--texte-doux); }
+    .entree-humeur { font-size: 1.4rem; }
+    .entree-symptomes { margin-top: 6px; font-size: 0.9rem; }
+    .entree-notes { margin-top: 4px; font-size: 0.85rem; color: var(--texte-doux); }
+    .entree-supp { background: none; border: none; color: #e74c3c; cursor: pointer; font-size: 0.8rem; }
+    .journal-vide { text-align: center; color: var(--texte-doux); padding: 40px 20px; }
+
+    /* ===== Modal ===== */
+    .modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      display: flex; align-items: flex-end; z-index: 200;
+    }
+    .modal.cache { display: none; }
+    .modal-contenu {
+      background: var(--carte); border-radius: 20px 20px 0 0;
+      padding: 20px; width: 100%; max-height: 85vh; overflow-y: auto;
+    }
+    .modal-contenu h2 { margin-bottom: 16px; font-size: 1.2rem; }
+    .modal-contenu label { font-size: 0.85rem; color: var(--texte-doux); display: block; margin: 12px 0 4px; }
+    .modal-contenu input, .modal-contenu textarea {
+      width: 100%; padding: 10px; border: 1px solid var(--bordure);
+      border-radius: 8px; font-size: 1rem; background: var(--fond); color: var(--texte);
+    }
+    .humeurs { display: flex; gap: 8px; justify-content: space-between; }
+    .humeur {
+      font-size: 1.8rem; background: var(--fond); border: 2px solid transparent;
+      border-radius: 12px; padding: 8px 12px; cursor: pointer;
+    }
+    .humeur.selectionnee { border-color: var(--accent); }
+    .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+    .modal-actions .btn-principal { margin-bottom: 0; flex: 1; }
   </style>
 </head>
 <body>
@@ -135,24 +177,54 @@
         </button>
       </div>
       <p style="text-align:center;color:var(--texte-doux);font-size:0.72rem;margin-top:24px">
-        Salama v0.3 — données 100% locales
+        Salama v0.4 — données 100% locales
       </p>
     </section>
 
-    <!-- ===== Pages (contenu aux étapes suivantes) ===== -->
+    <!-- ===== JOURNAL ===== -->
+    <section id="page-journal" class="page">
+      <button class="btn-principal" onclick="ouvrirFormulaire()">＋ Nouvelle entrée</button>
+      <div id="liste-journal"></div>
+    </section>
+
+    <!-- ===== SYMPTÔMES ===== -->
     <section id="page-symptomes" class="page">
       <div class="vide"><span class="gros">🤒</span>L'analyse de symptômes arrive à l'étape 3.</div>
     </section>
-    <section id="page-journal" class="page">
-      <div class="vide"><span class="gros">📓</span>Le journal de santé arrive à l'étape 2.</div>
-    </section>
+
+    <!-- ===== MÉDICAMENTS ===== -->
     <section id="page-medicaments" class="page">
       <div class="vide"><span class="gros">💊</span>Les médicaments arrivent bientôt.</div>
     </section>
+
+    <!-- ===== PROFILS ===== -->
     <section id="page-profils" class="page">
       <div class="vide"><span class="gros">👥</span>Les profils arrivent bientôt.</div>
     </section>
   </main>
+
+  <!-- ===== Formulaire journal (caché) ===== -->
+  <div id="formulaire-journal" class="modal cache">
+    <div class="modal-contenu">
+      <h2>Nouvelle entrée</h2>
+      <label>Comment te sens-tu ?</label>
+      <div class="humeurs">
+        <button class="humeur" data-val="1">😫</button>
+        <button class="humeur" data-val="2">😕</button>
+        <button class="humeur" data-val="3">😐</button>
+        <button class="humeur" data-val="4">🙂</button>
+        <button class="humeur" data-val="5">😄</button>
+      </div>
+      <label>Symptômes (séparés par des virgules)</label>
+      <input type="text" id="f-symptomes" placeholder="fièvre, toux, fatigue...">
+      <label>Notes</label>
+      <textarea id="f-notes" rows="3" placeholder="Détails, contexte..."></textarea>
+      <div class="modal-actions">
+        <button class="btn-secondaire" onclick="fermerFormulaire()">Annuler</button>
+        <button class="btn-principal" onclick="sauvegarderEntree()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ===== Navigation du bas ===== -->
   <nav class="nav-bas">
@@ -184,7 +256,7 @@
   </div>
 
   <script>
-    /* ===== Navigation par onglets ===== */
+    /* ===== Navigation ===== */
     const titres = {
       accueil: 'Ton assistant santé personnel',
       symptomes: 'Analyse de symptômes',
@@ -200,10 +272,11 @@
         b.classList.toggle('actif', b.dataset.page === page)
       );
       document.getElementById('sous-titre').textContent = titres[page];
+      if (page === 'journal') afficherJournal();
       window.scrollTo(0, 0);
     }
 
-    /* ===== Mode sombre (mémorisé) ===== */
+    /* ===== Mode sombre ===== */
     const CLE_THEME = 'salama_theme';
     function appliquerTheme(theme) {
       document.body.classList.toggle('sombre', theme === 'sombre');
@@ -273,6 +346,81 @@
     });
 
     setTimeout(() => { if (!deferredPrompt) afficherBanniere(false); }, 4000);
+
+    /* ===== Journal de santé ===== */
+    const CLE_JOURNAL = 'salama_journal';
+    let humeurChoisie = 3;
+
+    function chargerJournal() {
+      const data = localStorage.getItem(CLE_JOURNAL);
+      return data ? JSON.parse(data) : [];
+    }
+
+    function sauvegarderJournal(entrees) {
+      localStorage.setItem(CLE_JOURNAL, JSON.stringify(entrees));
+    }
+
+    function afficherJournal() {
+      const entrees = chargerJournal();
+      const liste = document.getElementById('liste-journal');
+      if (entrees.length === 0) {
+        liste.innerHTML = '<div class="journal-vide">📓<br>Aucune entrée pour l\'instant.<br>Commence par en ajouter une !</div>';
+        return;
+      }
+      liste.innerHTML = entrees.map((e, i) => `
+        <div class="entree">
+          <div class="entree-tete">
+            <span class="entree-date">${e.date}</span>
+            <span class="entree-humeur">${['😫','😕','😐','🙂','😄'][e.humeur - 1]}</span>
+          </div>
+          ${e.symptomes ? `<div class="entree-symptomes">🤒 ${e.symptomes}</div>` : ''}
+          ${e.notes ? `<div class="entree-notes">${e.notes}</div>` : ''}
+          <div style="text-align:right;margin-top:6px">
+            <button class="entree-supp" onclick="supprimerEntree(${i})">🗑 Supprimer</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function ouvrirFormulaire() {
+      humeurChoisie = 3;
+      document.querySelectorAll('.humeur').forEach(h => {
+        h.classList.toggle('selectionnee', Number(h.dataset.val) === 3);
+        h.onclick = () => {
+          humeurChoisie = Number(h.dataset.val);
+          document.querySelectorAll('.humeur').forEach(x => x.classList.remove('selectionnee'));
+          h.classList.add('selectionnee');
+        };
+      });
+      document.getElementById('f-symptomes').value = '';
+      document.getElementById('f-notes').value = '';
+      document.getElementById('formulaire-journal').classList.remove('cache');
+    }
+
+    function fermerFormulaire() {
+      document.getElementById('formulaire-journal').classList.add('cache');
+    }
+
+    function sauvegarderEntree() {
+      const entrees = chargerJournal();
+      entrees.unshift({
+        date: new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        humeur: humeurChoisie,
+        symptomes: document.getElementById('f-symptomes').value.trim(),
+        notes: document.getElementById('f-notes').value.trim()
+      });
+      sauvegarderJournal(entrees);
+      fermerFormulaire();
+      afficherJournal();
+    }
+
+    function supprimerEntree(index) {
+      if (!confirm('Supprimer cette entrée ?')) return;
+      const entrees = chargerJournal();
+      entrees.splice(index, 1);
+      sauvegarderJournal(entrees);
+      afficherJournal();
+    }
   </script>
 </body>
 </html>
