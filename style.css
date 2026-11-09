@@ -1,0 +1,163 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --fond: #f0f2f5; --carte: #ffffff; --texte: #1a1a2e;
+  --texte-doux: #777; --bordure: #e5e5ea; --accent: #0e7a5f;
+}
+body.sombre {
+  --fond: #121417; --carte: #1e2126; --texte: #f0f0f0;
+  --texte-doux: #999; --bordure: #2c2f36;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  background: var(--fond); color: var(--texte);
+  min-height: 100vh; padding-bottom: 70px;
+  transition: background 0.3s, color 0.3s;
+}
+
+header {
+  background: linear-gradient(135deg, #12a37e, #0b5f4a);
+  color: white; padding: 22px 16px;
+  position: sticky; top: 0; z-index: 50;
+}
+header h1 { font-size: 1.4rem; }
+header p { opacity: 0.85; font-size: 0.85rem; margin-top: 2px; }
+
+main { padding: 14px; }
+
+.page { display: none; }
+.page.active { display: block; }
+
+.grille { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tuile {
+  border-radius: 16px; padding: 18px 14px; color: white;
+  border: none; text-align: left; cursor: pointer;
+  min-height: 130px; display: flex; flex-direction: column;
+  justify-content: flex-end; gap: 2px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.tuile:active { transform: scale(0.97); }
+.tuile .emoji { font-size: 2.2rem; margin-bottom: auto; }
+.tuile strong { font-size: 1rem; }
+.tuile .statut { font-size: 0.72rem; opacity: 0.95; }
+.tuile .statut::before { content: "● "; color: #7dffb0; }
+.t-symptomes { background: linear-gradient(160deg, #e74c3c, #c0392b); }
+.t-journal    { background: linear-gradient(160deg, #3498db, #2c3e50); }
+.t-medocs     { background: linear-gradient(160deg, #9b59b6, #6c3483); }
+.t-profils    { background: linear-gradient(160deg, #16a085, #0b5f4a); }
+
+.version { text-align: center; color: var(--texte-doux); font-size: 0.72rem; margin-top: 24px; }
+
+.vide { text-align: center; padding: 60px 20px; color: var(--texte-doux); }
+.vide .gros { font-size: 3rem; display: block; margin-bottom: 12px; }
+
+.nav-bas {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--carte); border-top: 1px solid var(--bordure);
+  display: flex; z-index: 90;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.nav-bas button {
+  flex: 1; background: none; border: none; padding: 8px 0 10px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  font-size: 0.65rem; color: var(--texte-doux); cursor: pointer;
+}
+.nav-bas button .ico { font-size: 1.25rem; }
+.nav-bas button.actif { color: var(--accent); font-weight: 600; }
+
+.banniere {
+  position: fixed; left: 10px; right: 10px; bottom: 76px;
+  background: var(--carte); border: 1px solid var(--bordure);
+  border-left: 4px solid var(--accent); border-radius: 14px;
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  z-index: 100;
+}
+.banniere.cachee { display: none; }
+.banniere-texte { flex: 1; display: flex; flex-direction: column; }
+.banniere-texte span { font-size: 0.75rem; color: var(--texte-doux); }
+#bouton-installer {
+  background: var(--accent); color: white; border: none;
+  border-radius: 8px; padding: 9px 14px; font-size: 0.9rem;
+}
+#fermer-banniere {
+  background: none; border: none; font-size: 1rem;
+  color: var(--texte-doux); padding: 4px; cursor: pointer;
+}
+
+.btn-principal {
+  background: var(--accent); color: white; border: none;
+  border-radius: 12px; padding: 14px; font-size: 1rem; width: 100%;
+  cursor: pointer; margin-bottom: 14px;
+}
+.btn-secondaire {
+  background: var(--bordure); color: var(--texte); border: none;
+  border-radius: 12px; padding: 14px; font-size: 1rem; flex: 1;
+  cursor: pointer;
+}
+
+.entree {
+  background: var(--carte); border-radius: 12px; padding: 14px;
+  margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.entree-tete { display: flex; justify-content: space-between; align-items: center; }
+.entree-date { font-size: 0.78rem; color: var(--texte-doux); }
+.entree-humeur { font-size: 1.4rem; }
+.entree-symptomes { margin-top: 6px; font-size: 0.9rem; }
+.entree-notes { margin-top: 4px; font-size: 0.85rem; color: var(--texte-doux); }
+.entree-supp { background: none; border: none; color: #e74c3c; cursor: pointer; font-size: 0.8rem; }
+.journal-vide { text-align: center; color: var(--texte-doux); padding: 40px 20px; }
+
+.badge-profil {
+  display: none; background: var(--carte); border: 1px solid var(--bordure);
+  border-radius: 10px; padding: 8px 12px; font-size: 0.85rem;
+  margin-bottom: 10px; color: var(--texte-doux);
+}
+.badge-profil.visible { display: block; }
+
+.profil {
+  background: var(--carte); border-radius: 12px; padding: 14px;
+  margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  border: 2px solid transparent;
+}
+.profil.actif { border-color: var(--accent); }
+.profil-tete { display: flex; justify-content: space-between; align-items: center; }
+.profil-nom { font-weight: 700; font-size: 1.05rem; }
+.profil-infos { font-size: 0.85rem; color: var(--texte-doux); margin-top: 4px; }
+.profil-alertes { font-size: 0.82rem; margin-top: 6px; color: #e67e22; }
+.profil-actions { display: flex; gap: 8px; margin-top: 10px; }
+.btn-mini {
+  border: none; border-radius: 8px; padding: 8px 12px;
+  font-size: 0.8rem; cursor: pointer;
+}
+.btn-mini.activer { background: var(--accent); color: white; flex: 1; }
+.btn-mini.supprimer { background: none; color: #e74c3c; }
+.badge-actif {
+  background: var(--accent); color: white; font-size: 0.7rem;
+  border-radius: 20px; padding: 3px 10px;
+}
+
+.modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  display: flex; align-items: flex-end; z-index: 200;
+}
+.modal.cache { display: none; }
+.modal-contenu {
+  background: var(--carte); border-radius: 20px 20px 0 0;
+  padding: 20px; width: 100%; max-height: 85vh; overflow-y: auto;
+}
+.modal-contenu h2 { margin-bottom: 16px; font-size: 1.2rem; }
+.modal-contenu label { font-size: 0.85rem; color: var(--texte-doux); display: block; margin: 12px 0 4px; }
+.modal-contenu input, .modal-contenu textarea {
+  width: 100%; padding: 10px; border: 1px solid var(--bordure);
+  border-radius: 8px; font-size: 1rem; background: var(--fond); color: var(--texte);
+}
+.humeurs { display: flex; gap: 8px; justify-content: space-between; }
+.humeur {
+  font-size: 1.8rem; background: var(--fond); border: 2px solid transparent;
+  border-radius: 12px; padding: 8px 12px; cursor: pointer;
+}
+.humeur.selectionnee { border-color: var(--accent); }
+.modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+.modal-actions .btn-principal { margin-bottom: 0; flex: 1; }
