@@ -15,11 +15,31 @@
     main { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
     .carte {
       background: white; border: none; border-radius: 12px; padding: 20px;
-      font-size: 1.05rem; text-align: left;
+      font-size: 1.05rem; text-align: left; width: 100%;
       box-shadow: 0 1px 4px rgba(0,0,0,0.08); cursor: pointer;
     }
     .carte:active { transform: scale(0.98); }
     footer { text-align: center; color: #999; font-size: 0.75rem; padding: 20px; }
+
+    /* ===== Bannière d'installation ===== */
+    .banniere {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: white; border-top: 2px solid #0e7a5f;
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 14px; box-shadow: 0 -2px 12px rgba(0,0,0,0.15);
+      z-index: 100;
+    }
+    .banniere.cachee { display: none; }
+    .banniere-texte { flex: 1; display: flex; flex-direction: column; }
+    .banniere-texte span { font-size: 0.8rem; color: #666; }
+    #bouton-installer {
+      background: #0e7a5f; color: white; border: none;
+      border-radius: 8px; padding: 10px 16px; font-size: 0.95rem;
+    }
+    #fermer-banniere {
+      background: none; border: none; font-size: 1.1rem;
+      color: #999; padding: 6px; cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -33,14 +53,85 @@
     <button class="carte" onclick="bientot()">💊 Mes médicaments</button>
     <button class="carte" onclick="bientot()">👥 Mes profils</button>
   </main>
-  <footer>Salama v0.1 — données 100% locales</footer>
+  <footer>Salama v0.2 — données 100% locales</footer>
+
+  <!-- ===== Bannière d'installation ===== -->
+  <div id="banniere" class="banniere cachee">
+    <button id="fermer-banniere" aria-label="Fermer">✕</button>
+    <div class="banniere-texte">
+      <strong>Installer Salama</strong>
+      <span id="banniere-detail">Accès rapide depuis ton écran d'accueil</span>
+    </div>
+    <button id="bouton-installer">Installer</button>
+  </div>
+
   <script>
     function bientot() {
       alert("Cette fonction arrive à l'étape suivante 🙂");
     }
+
+    /* ===== Service Worker ===== */
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js');
     }
+
+    /* ===== Bannière d'installation ===== */
+    const CLE_BANNIERE = 'salama_banniere_fermee';
+    const SEPT_JOURS = 7 * 24 * 60 * 60 * 1000;
+    let deferredPrompt = null;
+
+    const banniere = document.getElementById('banniere');
+    const btnInstaller = document.getElementById('bouton-installer');
+    const btnFermer = document.getElementById('fermer-banniere');
+    const detail = document.getElementById('banniere-detail');
+
+    function estInstallee() {
+      return window.matchMedia('(display-mode: standalone)').matches
+          || window.navigator.standalone === true;
+    }
+    function fermeeRecemment() {
+      const ts = localStorage.getItem(CLE_BANNIERE);
+      return ts && (Date.now() - Number(ts)) < SEPT_JOURS;
+    }
+    function afficherBanniere(avecBouton) {
+      if (estInstallee() || fermeeRecemment()) return;
+      if (!avecBouton) {
+        detail.textContent = "Menu ⋮ → « Ajouter à l'écran d'accueil »";
+        btnInstaller.style.display = 'none';
+      }
+      banniere.classList.remove('cachee');
+    }
+
+    // Chrome propose l'installation : vrai bouton
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      afficherBanniere(true);
+    });
+
+    btnInstaller.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      banniere.classList.add('cachee');
+    });
+
+    // X : se taire pendant 7 jours
+    btnFermer.addEventListener('click', () => {
+      localStorage.setItem(CLE_BANNIERE, Date.now());
+      banniere.classList.add('cachee');
+    });
+
+    // App installée : on ne montre plus jamais
+    window.addEventListener('appinstalled', () => {
+      banniere.classList.add('cachee');
+      localStorage.removeItem(CLE_BANNIERE);
+    });
+
+    // Plan B : si Chrome ne propose rien (icônes pas encore en ligne, etc.),
+    // on affiche quand même la bannière mais en mode "instructions manuelles"
+    setTimeout(() => { if (!deferredPrompt) afficherBanniere(false); }, 4000);
   </script>
 </body>
 </html>
