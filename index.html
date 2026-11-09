@@ -2,58 +2,176 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#0e7a5f">
   <title>Salama</title>
   <link rel="manifest" href="manifest.json">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: system-ui, sans-serif; background: #f4f7f6; min-height: 100vh; }
-    header { background: #0e7a5f; color: white; padding: 24px 16px; text-align: center; }
-    header h1 { font-size: 1.5rem; }
-    header p { opacity: 0.85; font-size: 0.9rem; margin-top: 4px; }
-    main { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-    .carte {
-      background: white; border: none; border-radius: 12px; padding: 20px;
-      font-size: 1.05rem; text-align: left; width: 100%;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08); cursor: pointer;
-    }
-    .carte:active { transform: scale(0.98); }
-    footer { text-align: center; color: #999; font-size: 0.75rem; padding: 20px; }
 
-    /* ===== Bannière d'installation ===== */
-    .banniere {
+    /* ===== Thèmes ===== */
+    :root {
+      --fond: #f0f2f5; --carte: #ffffff; --texte: #1a1a2e;
+      --texte-doux: #777; --bordure: #e5e5ea; --accent: #0e7a5f;
+    }
+    body.sombre {
+      --fond: #121417; --carte: #1e2126; --texte: #f0f0f0;
+      --texte-doux: #999; --bordure: #2c2f36;
+    }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--fond); color: var(--texte);
+      min-height: 100vh; padding-bottom: 70px;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    header {
+      background: linear-gradient(135deg, #12a37e, #0b5f4a);
+      color: white; padding: 22px 16px;
+      position: sticky; top: 0; z-index: 50;
+    }
+    header h1 { font-size: 1.4rem; }
+    header p { opacity: 0.85; font-size: 0.85rem; margin-top: 2px; }
+
+    main { padding: 14px; }
+
+    /* ===== Pages ===== */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ===== Grille de tuiles (style image 2) ===== */
+    .grille { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .tuile {
+      border-radius: 16px; padding: 18px 14px; color: white;
+      border: none; text-align: left; cursor: pointer;
+      min-height: 130px; display: flex; flex-direction: column;
+      justify-content: flex-end; gap: 2px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .tuile:active { transform: scale(0.97); }
+    .tuile .emoji { font-size: 2.2rem; margin-bottom: auto; }
+    .tuile strong { font-size: 1rem; }
+    .tuile .statut { font-size: 0.72rem; opacity: 0.95; }
+    .tuile .statut::before { content: "● "; color: #7dffb0; }
+    .t-symptomes { background: linear-gradient(160deg, #e74c3c, #c0392b); }
+    .t-journal    { background: linear-gradient(160deg, #3498db, #2c3e50); }
+    .t-medocs     { background: linear-gradient(160deg, #9b59b6, #6c3483); }
+    .t-profils    { background: linear-gradient(160deg, #16a085, #0b5f4a); }
+
+    /* ===== Placeholder pages vides ===== */
+    .vide {
+      text-align: center; padding: 60px 20px; color: var(--texte-doux);
+    }
+    .vide .gros { font-size: 3rem; display: block; margin-bottom: 12px; }
+
+    /* ===== Barre de navigation du bas ===== */
+    .nav-bas {
       position: fixed; bottom: 0; left: 0; right: 0;
-      background: white; border-top: 2px solid #0e7a5f;
+      background: var(--carte); border-top: 1px solid var(--bordure);
+      display: flex; z-index: 90;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .nav-bas button {
+      flex: 1; background: none; border: none; padding: 8px 0 10px;
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      font-size: 0.65rem; color: var(--texte-doux); cursor: pointer;
+    }
+    .nav-bas button .ico { font-size: 1.25rem; }
+    .nav-bas button.actif { color: var(--accent); font-weight: 600; }
+
+    /* ===== Bannière d'installation (au-dessus de la nav) ===== */
+    .banniere {
+      position: fixed; left: 10px; right: 10px; bottom: 76px;
+      background: var(--carte); border: 1px solid var(--bordure);
+      border-left: 4px solid var(--accent); border-radius: 14px;
       display: flex; align-items: center; gap: 10px;
-      padding: 12px 14px; box-shadow: 0 -2px 12px rgba(0,0,0,0.15);
+      padding: 12px 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.2);
       z-index: 100;
     }
     .banniere.cachee { display: none; }
     .banniere-texte { flex: 1; display: flex; flex-direction: column; }
-    .banniere-texte span { font-size: 0.8rem; color: #666; }
+    .banniere-texte span { font-size: 0.75rem; color: var(--texte-doux); }
     #bouton-installer {
-      background: #0e7a5f; color: white; border: none;
-      border-radius: 8px; padding: 10px 16px; font-size: 0.95rem;
+      background: var(--accent); color: white; border: none;
+      border-radius: 8px; padding: 9px 14px; font-size: 0.9rem;
     }
     #fermer-banniere {
-      background: none; border: none; font-size: 1.1rem;
-      color: #999; padding: 6px; cursor: pointer;
+      background: none; border: none; font-size: 1rem;
+      color: var(--texte-doux); padding: 4px; cursor: pointer;
     }
   </style>
 </head>
 <body>
+
   <header>
     <h1>🩺 Salama</h1>
-    <p>Ton assistant santé personnel</p>
+    <p id="sous-titre">Ton assistant santé personnel</p>
   </header>
+
   <main>
-    <button class="carte" onclick="bientot()">🤒 J'ai des symptômes</button>
-    <button class="carte" onclick="bientot()">📓 Mon journal</button>
-    <button class="carte" onclick="bientot()">💊 Mes médicaments</button>
-    <button class="carte" onclick="bientot()">👥 Mes profils</button>
+    <!-- ===== ACCUEIL ===== -->
+    <section id="page-accueil" class="page active">
+      <div class="grille">
+        <button class="tuile t-symptomes" onclick="aller('symptomes')">
+          <span class="emoji">🤒</span>
+          <strong>Symptômes</strong>
+          <span class="statut">Analyser</span>
+        </button>
+        <button class="tuile t-journal" onclick="aller('journal')">
+          <span class="emoji">📓</span>
+          <strong>Journal</strong>
+          <span class="statut">Historique santé</span>
+        </button>
+        <button class="tuile t-medocs" onclick="aller('medicaments')">
+          <span class="emoji">💊</span>
+          <strong>Médicaments</strong>
+          <span class="statut">Ma pharmacie</span>
+        </button>
+        <button class="tuile t-profils" onclick="aller('profils')">
+          <span class="emoji">👥</span>
+          <strong>Profils</strong>
+          <span class="statut">Ma famille</span>
+        </button>
+      </div>
+      <p style="text-align:center;color:var(--texte-doux);font-size:0.72rem;margin-top:24px">
+        Salama v0.3 — données 100% locales
+      </p>
+    </section>
+
+    <!-- ===== Pages (contenu aux étapes suivantes) ===== -->
+    <section id="page-symptomes" class="page">
+      <div class="vide"><span class="gros">🤒</span>L'analyse de symptômes arrive à l'étape 3.</div>
+    </section>
+    <section id="page-journal" class="page">
+      <div class="vide"><span class="gros">📓</span>Le journal de santé arrive à l'étape 2.</div>
+    </section>
+    <section id="page-medicaments" class="page">
+      <div class="vide"><span class="gros">💊</span>Les médicaments arrivent bientôt.</div>
+    </section>
+    <section id="page-profils" class="page">
+      <div class="vide"><span class="gros">👥</span>Les profils arrivent bientôt.</div>
+    </section>
   </main>
-  <footer>Salama v0.2 — données 100% locales</footer>
+
+  <!-- ===== Navigation du bas ===== -->
+  <nav class="nav-bas">
+    <button class="actif" data-page="accueil" onclick="aller('accueil')">
+      <span class="ico">🏠</span>Accueil
+    </button>
+    <button data-page="journal" onclick="aller('journal')">
+      <span class="ico">📓</span>Journal
+    </button>
+    <button data-page="medicaments" onclick="aller('medicaments')">
+      <span class="ico">💊</span>Médoc
+    </button>
+    <button data-page="profils" onclick="aller('profils')">
+      <span class="ico">👥</span>Profils
+    </button>
+    <button onclick="basculerSombre()">
+      <span class="ico" id="ico-sombre">🌙</span>Sombre
+    </button>
+  </nav>
 
   <!-- ===== Bannière d'installation ===== -->
   <div id="banniere" class="banniere cachee">
@@ -66,9 +184,37 @@
   </div>
 
   <script>
-    function bientot() {
-      alert("Cette fonction arrive à l'étape suivante 🙂");
+    /* ===== Navigation par onglets ===== */
+    const titres = {
+      accueil: 'Ton assistant santé personnel',
+      symptomes: 'Analyse de symptômes',
+      journal: 'Ton journal de santé',
+      medicaments: 'Ta pharmacie',
+      profils: 'Profils de la famille'
+    };
+
+    function aller(page) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-' + page).classList.add('active');
+      document.querySelectorAll('.nav-bas button[data-page]').forEach(b =>
+        b.classList.toggle('actif', b.dataset.page === page)
+      );
+      document.getElementById('sous-titre').textContent = titres[page];
+      window.scrollTo(0, 0);
     }
+
+    /* ===== Mode sombre (mémorisé) ===== */
+    const CLE_THEME = 'salama_theme';
+    function appliquerTheme(theme) {
+      document.body.classList.toggle('sombre', theme === 'sombre');
+      document.getElementById('ico-sombre').textContent = theme === 'sombre' ? '☀️' : '🌙';
+    }
+    function basculerSombre() {
+      const nouveau = document.body.classList.contains('sombre') ? 'clair' : 'sombre';
+      localStorage.setItem(CLE_THEME, nouveau);
+      appliquerTheme(nouveau);
+    }
+    appliquerTheme(localStorage.getItem(CLE_THEME) || 'clair');
 
     /* ===== Service Worker ===== */
     if ('serviceWorker' in navigator) {
@@ -102,7 +248,6 @@
       banniere.classList.remove('cachee');
     }
 
-    // Chrome propose l'installation : vrai bouton
     window.addEventListener('beforeinstallprompt', e => {
       e.preventDefault();
       deferredPrompt = e;
@@ -117,20 +262,16 @@
       banniere.classList.add('cachee');
     });
 
-    // X : se taire pendant 7 jours
     btnFermer.addEventListener('click', () => {
       localStorage.setItem(CLE_BANNIERE, Date.now());
       banniere.classList.add('cachee');
     });
 
-    // App installée : on ne montre plus jamais
     window.addEventListener('appinstalled', () => {
       banniere.classList.add('cachee');
       localStorage.removeItem(CLE_BANNIERE);
     });
 
-    // Plan B : si Chrome ne propose rien (icônes pas encore en ligne, etc.),
-    // on affiche quand même la bannière mais en mode "instructions manuelles"
     setTimeout(() => { if (!deferredPrompt) afficherBanniere(false); }, 4000);
   </script>
 </body>
