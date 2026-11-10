@@ -43,11 +43,6 @@ const CLE_BANNIERE = 'salama_banniere_fermee';
 const SEPT_JOURS = 7 * 24 * 60 * 60 * 1000;
 let deferredPrompt = null;
 
-const banniere = document.getElementById('banniere');
-const btnInstaller = document.getElementById('bouton-installer');
-const btnFermer = document.getElementById('fermer-banniere');
-const detail = document.getElementById('banniere-detail');
-
 function estInstallee() {
   return window.matchMedia('(display-mode: standalone)').matches
       || window.navigator.standalone === true;
@@ -57,10 +52,11 @@ function fermeeRecemment() {
   return ts && (Date.now() - Number(ts)) < SEPT_JOURS;
 }
 function afficherBanniere(avecBouton) {
-  if (estInstallee() || fermeeRecemment()) return;
+  const banniere = document.getElementById('banniere');
+  if (!banniere || estInstallee() || fermeeRecemment()) return;
   if (!avecBouton) {
-    detail.textContent = "Menu ⋮ → « Ajouter à l'écran d'accueil »";
-    btnInstaller.style.display = 'none';
+    document.getElementById('banniere-detail').textContent = "Menu ⋮ → « Ajouter à l'écran d'accueil »";
+    document.getElementById('bouton-installer').style.display = 'none';
   }
   banniere.classList.remove('cachee');
 }
@@ -71,21 +67,21 @@ window.addEventListener('beforeinstallprompt', e => {
   afficherBanniere(true);
 });
 
-btnInstaller.addEventListener('click', async () => {
+document.getElementById('bouton-installer').addEventListener('click', async () => {
   if (!deferredPrompt) return;
   deferredPrompt.prompt();
   await deferredPrompt.userChoice;
   deferredPrompt = null;
-  banniere.classList.add('cachee');
+  document.getElementById('banniere').classList.add('cachee');
 });
 
-btnFermer.addEventListener('click', () => {
+document.getElementById('fermer-banniere').addEventListener('click', () => {
   localStorage.setItem(CLE_BANNIERE, Date.now());
-  banniere.classList.add('cachee');
+  document.getElementById('banniere').classList.add('cachee');
 });
 
 window.addEventListener('appinstalled', () => {
-  banniere.classList.add('cachee');
+  document.getElementById('banniere').classList.add('cachee');
   localStorage.removeItem(CLE_BANNIERE);
 });
 
@@ -269,128 +265,6 @@ function supprimerEntree(index) {
 }
 
 /* =====================================================
-   MOTEUR DE SYMPTÔMES
-   ===================================================== */
-let symptomesCoches = new Set();
-let intensiteChoisie = 3;
-let derniereAnalyse = null;
-
-function preparerSymptomes() {
-  // Badge profil
-  const badge = document.getElementById('sym-profil');
-  const actif = profilActif();
-  if (actif) {
-    badge.textContent = '👤 Analyse pour : ' + actif.prenom + ' (' + ageDe(actif) + ' ans)';
-    badge.classList.add('visible');
-  } else {
-    badge.textContent = '⚠️ Aucun profil actif — crée-en un pour des conseils adaptés';
-    badge.classList.add('visible');
-  }
-
-  // Boutons d'intensité
-  document.querySelectorAll('.niv').forEach(b => {
-    b.onclick = () => {
-      intensiteChoisie = Number(b.dataset.val);
-      document.querySelectorAll('.niv').forEach(x => x.classList.remove('selectionnee'));
-      b.classList.add('selectionnee');
-    };
-  });
-
-  construireListeSymptomes();
-  majCompteur();
-}
-
-function construireListeSymptomes(filtre = '') {
-  const conteneur = document.getElementById('liste-symptomes');
-  const filtreMin = filtre.toLowerCase();
-  let html = '';
-  let derniereCat = '';
-
-  SYMPTOMES.forEach(s => {
-    if (filtreMin && !s.nom.toLowerCase().includes(filtreMin)) return;
-    if (s.cat !== derniereCat) {
-      html += `<div class="cat-titre">${s.cat}</div>`;
-      derniereCat = s.cat;
-    }
-    const coche = symptomesCoches.has(s.id);
-    html += `
-      <div class="sym-item ${coche ? 'coche' : ''}" onclick="basculerSymptome('${s.id}')">
-        <span class="check">${coche ? '✓' : ''}</span>
-        <span>${s.nom}</span>
-      </div>`;
-  });
-
-  conteneur.innerHTML = html || '<div class="journal-vide">Aucun symptôme trouvé</div>';
-}
-
-function filtrerSymptomes() {
-  construireListeSymptomes(document.getElementById('recherche-symptome').value);
-}
-
-function basculerSymptome(id) {
-  if (symptomesCoches.has(id)) {
-    symptomesCoches.delete(id);
-  } else {
-    symptomesCoches.add(id);
-  }
-  construireListeSymptomes(document.getElementById('recherche-symptome').value);
-  majCompteur();
-}
-
-function majCompteur() {
-  const n = symptomesCoches.size;
-  document.getElementById('compteur-symptomes').textContent = n;
-  document.getElementById('pluriel').textContent = n > 1 ? 's' : 's';
-}
-
-/* ----- Analyse ----- */
-function analyser() {
-  if (symptomesCoches.size === 0) {
-    alert('Coche au moins un symptôme.');
-    return;
-  }
-
-  const coches = [...symptomesCoches];
-  const zone = document.getElementById('sym-resultat');
-
-  /* 1. DRAPEAUX ROUGES d'abord */
-  const alertes = DRAPEAUX.filter(d => {
-    if (!d.symptomes.every(s => coches.includes(s))) return false;
-    if (d.avec.length === 0) return true;
-    return d.avec.some(s => coches.includes(s));
-  });
-
-  let html = '';
-
-  if (alertes.length > 0) {
-    alertes.forEach(a => {
-      html += `
-        <div class="alerte-rouge">
-          <h3>🚨 ${a.titre}</h3>
-          <p>${a.message}</p>
-          <p class="num">📞 15 (SAMU) ou 112</p>
-        </div>`;
-    });
-    html += `<div class="resultat-actions">
-      <button class="btn-secondaire" onclick="recommencer()">← Modifier</button>
-    </div>`;
-    afficherResultat(html);
-    return;
-  }
-
-  /* 2. Scoring des troubles */
-  const resultats = TROUBLES.map(t => {
-    let score = 0, max = 0;
-    for (const [sym, poids] of Object.entries(t.symptomes)) {
-      max += poids;
-      if (coches.includes(sym)) score += poids;
-    }
-    return { ...t, pct: Math.round((score / max) * 100) };
-  })
-  .filter(t => t.pct >= 30)
-  .sort((a, b) => b.pct - a.pct)
-  .slice(0, 3);
-/* =====================================================
    MOTEUR DE SYMPTÔMES (v2)
    ===================================================== */
 let symptomesCoches = new Set();
@@ -402,11 +276,10 @@ function preparerSymptomes() {
   const actif = profilActif();
   if (actif) {
     badge.textContent = '👤 Analyse pour : ' + actif.prenom + ' (' + ageDe(actif) + ' ans)';
-    badge.classList.add('visible');
   } else {
     badge.textContent = '⚠️ Aucun profil actif — crée-en un pour des conseils adaptés';
-    badge.classList.add('visible');
   }
+  badge.classList.add('visible');
 
   document.querySelectorAll('.niv').forEach(b => {
     b.onclick = () => {
@@ -463,7 +336,6 @@ function majCompteur() {
   document.getElementById('pluriel').textContent = n > 1 ? 's' : '';
 }
 
-/* ----- Analyse v2 ----- */
 function analyser() {
   if (symptomesCoches.size === 0) {
     alert('Coche au moins un symptôme.');
@@ -505,10 +377,10 @@ function analyser() {
       if (coches.includes(sym)) { poidsCoches += poids; nbCoches++; }
     }
     if (nbCoches === 0) return { ...t, pct: 0 };
-    const couverture = poidsCoches / poidsTotal;       // ai-je les symptômes du trouble ?
-    const specificite = nbCoches / coches.length;      // mes symptômes sont-ils expliqués ?
+    const couverture = poidsCoches / poidsTotal;
+    const specificite = nbCoches / coches.length;
     let pct = Math.round(100 * (0.65 * couverture + 0.35 * specificite));
-    if (pct > 95) pct = 95; // jamais 100% : humilité médicale
+    if (pct > 95) pct = 95;
     return { ...t, pct };
   })
   .filter(t => t.pct >= 20)
@@ -564,7 +436,7 @@ function analyser() {
             <span class="hypo-pct">${r.pct}%</span>
           </div>
           <div class="hypo-barre"><div style="width:${r.pct}%"></div></div>
-          <div style="font-size:0.78rem;color:var(--texte-doux);margin-bottom:8px">${niveau}</div>
+          <div class="hypo-niveau">${niveau}</div>
           <ul class="hypo-conseils">
             ${r.conseils.map(c => `<li>${c}</li>`).join('')}
           </ul>
@@ -573,7 +445,6 @@ function analyser() {
     });
   }
 
-  /* 5. Symptômes hors base */
   if (inconnus.length > 0) {
     const noms = inconnus.map(id => SYMPTOMES.find(s => s.id === id).nom).join(', ');
     html += `
@@ -584,7 +455,6 @@ function analyser() {
       </div>`;
   }
 
-  /* 6. Actions */
   html += `
     <div class="resultat-actions">
       <button class="btn-secondaire" onclick="recommencer()">← Modifier</button>
@@ -593,7 +463,7 @@ function analyser() {
 
   derniereAnalyse = {
     symptomes: coches.map(id => SYMPTOMES.find(s => s.id === id).nom).join(', '),
-    hypotheses: resultats.map(r => `${r.nom} le (${r.pct}%)`).join(' · ') || 'Aucune piste claire',
+    hypotheses: resultats.map(r => `${r.nom} (${r.pct}%)`).join(' · ') || 'Aucune piste claire',
     duree: document.getElementById('sym-duree').value,
     intensite: intensiteChoisie
   };
