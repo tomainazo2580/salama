@@ -6,22 +6,23 @@ const SYMPTOMES = [
   { id: 'perte_appetit', nom: "Perte d'appétit", cat: 'Général' },
   { id: 'courbatures', nom: 'Courbatures / douleurs musculaires', cat: 'Général' },
   { id: 'sueurs', nom: 'Sueurs anormales', cat: 'Général' },
+  { id: 'perte_connaissance', nom: 'Perte de conscience / malaise', cat: 'Général' },
 
   { id: 'toux_seche', nom: 'Toux sèche', cat: 'Respiration' },
   { id: 'toux_grasse', nom: 'Toux grasse (avec glaires)', cat: 'Respiration' },
-  { id: 'essoufflement', nom: "Essoufflement / difficulté à respirer", cat: 'Respiration' },
+  { id: 'essoufflement', nom: 'Essoufflement / difficulté à respirer', cat: 'Respiration' },
   { id: 'sifflement', nom: 'Respiration sifflante', cat: 'Respiration' },
   { id: 'douleur_thorax', nom: 'Douleur dans la poitrine', cat: 'Respiration' },
 
-  { id: 'nez_coule', nom: 'Nez qui coule', cat: 'Nez & gorge' },
-  { id: 'eternuements', nom: 'Éternuements fréquents', cat: 'Nez & gorge' },
-  { id: 'congestion', nom: 'Nez bouché', cat: 'Nez & gorge' },
-  { id: 'mal_gorge', nom: 'Mal de gorge', cat: 'Nez & gorge' },
-  { id: 'deglutition', nom: 'Douleur en avalant', cat: 'Nez & gorge' },
-  { id: 'taches_gorge', nom: 'Taches blanches dans la gorge', cat: 'Nez & gorge' },
-  { id: 'douleur_face', nom: 'Douleur du visage (joues, front)', cat: 'Nez & gorge' },
-  { id: 'ganglions', nom: 'Ganglions gonflés (cou)', cat: 'Nez & gorge' },
-  { id: 'perte_odorat', nom: "Perte d'odorat ou de goût", cat: 'Nez & gorge' },
+  { id: 'nez_coule', nom: 'Nez qui coule', cat: 'Nez et gorge' },
+  { id: 'eternuements', nom: 'Éternuements fréquents', cat: 'Nez et gorge' },
+  { id: 'congestion', nom: 'Nez bouché', cat: 'Nez et gorge' },
+  { id: 'mal_gorge', nom: 'Mal de gorge', cat: 'Nez et gorge' },
+  { id: 'deglutition', nom: 'Douleur en avalant', cat: 'Nez et gorge' },
+  { id: 'taches_gorge', nom: 'Taches blanches dans la gorge', cat: 'Nez et gorge' },
+  { id: 'douleur_face', nom: 'Douleur du visage (joues, front)', cat: 'Nez et gorge' },
+  { id: 'ganglions', nom: 'Ganglions gonflés (cou)', cat: 'Nez et gorge' },
+  { id: 'perte_odorat', nom: "Perte d'odorat ou de goût", cat: 'Nez et gorge' },
 
   { id: 'maux_tete', nom: 'Maux de tête', cat: 'Tête' },
   { id: 'sensibilite_lumiere', nom: 'Gêné par la lumière', cat: 'Tête' },
@@ -54,11 +55,10 @@ const SYMPTOMES = [
   { id: 'gonflement_visage', nom: 'Gonflement du visage ou de la gorge', cat: 'Peau' },
 
   { id: 'douleur_lombaire', nom: 'Douleur en bas du dos', cat: 'Douleurs' },
-  { id: 'douleur_unilaterale', nom: "Maux de tête d'un seul côté", cat: 'Douleurs' },
-  { id: 'perte_connaissance', nom: 'Perte de conscience / malaise', cat: 'Général' }
+  { id: 'douleur_unilaterale', nom: "Maux de tête d'un seul côté", cat: 'Douleurs' }
 ];
 
-/* ===== Drapeaux rouges (vérifiés EN PREMIER) ===== */
+/* ===== Drapeaux rouges ===== */
 const DRAPEAUX = [
   {
     symptomes: ['douleur_thorax'],
@@ -69,7 +69,7 @@ const DRAPEAUX = [
   {
     symptomes: ['essoufflement'],
     avec: [],
-    titre: "Difficulté à respirer",
+    titre: 'Difficulté à respirer',
     message: "Une difficulté à respirer nécessite une évaluation rapide. Appelez le 15 si elle est importante ou s'aggrave."
   },
   {
@@ -105,7 +105,7 @@ const DRAPEAUX = [
   {
     symptomes: ['gonflement_visage'],
     avec: [],
-    titre: "Réaction allergique sévère",
+    titre: 'Réaction allergique sévère',
     message: "Un gonflement du visage ou de la gorge peut étouffer les voies respiratoires. Appelez le 15 immédiatement."
   }
 ];
@@ -115,7 +115,7 @@ const TROUBLES = [
   {
     id: 'rhume', nom: 'Rhume', gravite: 'benin',
     symptomes: { nez_coule: 3, eternuements: 3, congestion: 3, mal_gorge: 2, toux_seche: 1, fievre: 1, fatigue: 1 },
-    conseils: ["Repos et hydratation", "Lavage de nez au sérum physiologique", "Paracétamol si gêne (voir onglet Médoc)"],
+    conseils: ["Repos et hydratation", "Lavage de nez au sérum physiologique", "Paracétamol si gêne"],
     consulter: "si fièvre > 3 jours ou symptômes > 10 jours"
   },
   {
@@ -133,7 +133,7 @@ const TROUBLES = [
   {
     id: 'gastro', nom: 'Gastro-entérite', gravite: 'benin',
     symptomes: { nausees: 3, vomissements: 3, diarrhee: 3, douleur_abdo: 2, fievre: 1, perte_appetit: 2, ballonnements: 1 },
-    conseils: ["S'hydrater par petites gorgées (solution de réhydratation idéalement)", "Riz, carottes, bananes", "Éviter laitages et aliments gras"],
+    conseils: ["S'hydrater par petites gorgées", "Riz, carottes, bananes", "Éviter laitages et aliments gras"],
     consulter: "si sang dans les selles, déshydratation, ou > 3 jours"
   },
   {
@@ -155,7 +155,7 @@ const TROUBLES = [
     consulter: "si > 10 jours, fièvre élevée ou douleur intense"
   },
   {
-    id: 'allergie', nom: 'Allergie saisonnière (rhume des foins)', gravite: 'benin',
+    id: 'allergie', nom: 'Allergie saisonnière', gravite: 'benin',
     symptomes: { eternuements: 3, yeux_larmoyants: 3, demangeaisons: 2, nez_coule: 2, congestion: 1 },
     conseils: ["Éviter les allergènes (pollen, poussière)", "Antihistaminique en vente libre", "Se rincer le visage après être sorti"],
     consulter: "si gêne importante malgré le traitement"
@@ -181,7 +181,7 @@ const TROUBLES = [
   {
     id: 'otite', nom: 'Otite', gravite: 'modere',
     symptomes: { douleur_oreille: 3, ecoulement_oreille: 3, fievre: 2, fatigue: 1 },
-    conseils: ["Paracétamol pour la douleur", "Ne pas introduire quoi que ce soit dans l'oreille"],
+    conseils: ["Paracétamol pour la douleur", "Ne rien introduire dans l'oreille"],
     consulter: "pour examen de l'oreille (surtout chez l'enfant)"
   },
   {
@@ -203,15 +203,15 @@ const TROUBLES = [
     consulter: "pour confirmer, surtout chez un adulte ou une personne fragile"
   },
   {
-    id: 'rgo', nom: 'Reflux gastrique (brûlures d\'estomac)', gravite: 'benin',
+    id: 'rgo', nom: "Reflux gastrique (brûlures d'estomac)", gravite: 'benin',
     symptomes: { brulures_estomac: 3, remontees_acides: 3, ballonnements: 1, nausees: 1 },
-    conseils: ["Éviter les repas lourds et gras le soir", "Ne pas se coucher juste après manger", "Anti-acide en vente libre (type Gaviscon)"],
+    conseils: ["Éviter les repas lourds et gras le soir", "Ne pas se coucher juste après manger", "Anti-acide en vente libre"],
     consulter: "si brûlures fréquentes (> 2 fois/semaine) ou difficulté à avaler"
   },
   {
     id: 'constipation_t', nom: 'Constipation', gravite: 'benin',
     symptomes: { constipation: 3, ballonnements: 2, douleur_abdo: 1 },
-    conseils: ["Boire plus d'eau", "Fibres : fruits, légumes, céréales complètes", "Marcher / bouger régulièrement"],
+    conseils: ["Boire plus d'eau", "Fibres : fruits, légumes, céréales complètes", "Marcher régulièrement"],
     consulter: "si douleur intense, sang dans les selles ou > 1 semaine"
   },
   {
