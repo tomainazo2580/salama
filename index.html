@@ -16,7 +16,6 @@
   </header>
 
   <main>
-    <!-- ===== ACCUEIL ===== -->
     <section id="page-accueil" class="page active">
       <div class="grille">
         <button class="tuile t-symptomes" onclick="aller('symptomes')">
@@ -40,26 +39,21 @@
           <span class="statut">Ma famille</span>
         </button>
       </div>
-      <p class="version">Salama v0.6 — données 100% locales</p>
+      <p class="version">Salama v0.8 — données 100% locales</p>
     </section>
 
-    <!-- ===== JOURNAL ===== -->
     <section id="page-journal" class="page">
       <div id="journal-profil" class="badge-profil"></div>
       <button class="btn-principal" onclick="ouvrirFormulaire()">＋ Nouvelle entrée</button>
       <div id="liste-journal"></div>
     </section>
 
-    <!-- ===== SYMPTÔMES ===== -->
     <section id="page-symptomes" class="page">
-
-      <!-- Étape A : sélection -->
       <div id="sym-selection">
         <div id="sym-profil" class="badge-profil"></div>
         <input type="text" id="recherche-symptome" class="champ-recherche"
                placeholder="🔍 Rechercher un symptôme..." oninput="filtrerSymptomes()">
         <div id="liste-symptomes"></div>
-
         <div class="bloc-options">
           <label>Depuis quand ?</label>
           <select id="sym-duree">
@@ -77,30 +71,23 @@
             <button class="niv" data-val="5">5</button>
           </div>
         </div>
-
-        <button class="btn-principal btn-analyser" onclick="analyser()">
-          Analyser (<span id="compteur-symptomes">0</span> symptôme<span id="pluriel">s</span>)
+        <button class="btn-principal" onclick="analyser()">
+          Analyser (<span id="compteur-symptomes">0</span><span id="pluriel">s</span>)
         </button>
       </div>
-
-      <!-- Étape B : résultat -->
       <div id="sym-resultat" class="cache"></div>
-
     </section>
 
-    <!-- ===== MÉDICAMENTS ===== -->
     <section id="page-medicaments" class="page">
       <div class="vide"><span class="gros">💊</span>Les médicaments arrivent à l'étape 5.</div>
     </section>
 
-    <!-- ===== PROFILS ===== -->
     <section id="page-profils" class="page">
       <button class="btn-principal" onclick="ouvrirFormProfil()">＋ Nouveau profil</button>
       <div id="liste-profils"></div>
     </section>
   </main>
 
-  <!-- ===== Formulaire journal ===== -->
   <div id="formulaire-journal" class="modal cache">
     <div class="modal-contenu">
       <h2>Nouvelle entrée</h2>
@@ -123,7 +110,6 @@
     </div>
   </div>
 
-  <!-- ===== Formulaire profil ===== -->
   <div id="formulaire-profil" class="modal cache">
     <div class="modal-contenu">
       <h2>Nouveau profil</h2>
@@ -144,7 +130,6 @@
     </div>
   </div>
 
-  <!-- ===== Navigation du bas ===== -->
   <nav class="nav-bas">
     <button class="actif" data-page="accueil" onclick="aller('accueil')">
       <span class="ico">🏠</span>Accueil
@@ -163,7 +148,6 @@
     </button>
   </nav>
 
-  <!-- ===== Bannière d'installation ===== -->
   <div id="banniere" class="banniere cachee">
     <button id="fermer-banniere" aria-label="Fermer">✕</button>
     <div class="banniere-texte">
