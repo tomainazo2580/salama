@@ -132,7 +132,6 @@ function nomSymptome(id) {
   }
   return id;
 }
-
 // ================= ANALYSE =================
 let derniereAnalyse = null;
 
@@ -181,10 +180,32 @@ function analyser() {
       const badge = r.pct >= 60 ? '<span class="badge b-vert">🟢 forte probabilité</span>'
                   : r.pct >= 40 ? '<span class="badge b-jaune">🟡 possible</span>'
                   : '<span class="badge b-gris">⚪ piste faible</span>';
+      
+      // 🆕 Bloc posologie pour cette maladie
+      let blocMedocs = '';
+      if (r.trouble.medocs && r.trouble.medocs.length) {
+        blocMedocs = '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--bordure)">' +
+          '<strong>💊 Médicaments suggérés :</strong>' +
+          r.trouble.medocs.map(id => {
+            const m = MEDICAMENTS.find(x => x.id === id);
+            if (!m) return '';
+            const alertes = alertesProfilPour(m);
+            const interdit = alertes.some(a => a.grave);
+            const doseTexte = posologiePourTexte(m);
+            return '<div style="margin-top:6px;padding:8px;background:var(--accent-clair);border-radius:8px;font-size:0.88rem">' +
+              '<strong>' + m.nom + '</strong>' +
+              (interdit ? ' <span class="badge b-rouge">⛔ déconseillé</span>' : '') +
+              (doseTexte ? '<br>' + doseTexte : '') +
+              (alertes.length && !interdit ? '<br><span style="color:#8a6100">' + alertes.map(a => a.texte).join('<br>') + '</span>' : '') +
+              '</div>';
+          }).join('') + '</div>';
+      }
+
       html += '<div class="carte"><h3>' + r.trouble.nom + ' — ' + r.pct + ' %</h3>' + badge +
         '<p style="margin-top:8px"><strong>Conseils :</strong></p><ul>' +
         r.trouble.conseils.map(c => '<li>' + c + '</li>').join('') + '</ul>' +
-        '<p style="margin-top:6px"><strong>Consulter si :</strong> ' + r.trouble.consulter + '</p></div>';
+        '<p style="margin-top:6px"><strong>Consulter si :</strong> ' + r.trouble.consulter + '</p>' +
+        blocMedocs + '</div>';
     });
   }
 
@@ -253,6 +274,28 @@ function supprimerEntree(i) {
   journal.splice(i, 1);
   ecrireCle('salama_journal', journal);
   afficherJournal();
+}
+
+// ================= POSOLOGIE TEXTE (🆕 pour l'analyse) =================
+function posologiePourTexte(m) {
+  const profil = profilActif();
+  if (!profil) return m.adulte + ' (dose adulte)';
+  const age = ageDe(profil);
+  const poids = profil.poids;
+  if (m.age_min !== null && age < m.age_min) {
+    return '⛔ Déconseillé avant ' + m.age_min + ' ans';
+  }
+  if (age >= 15 || poids >= 50) {
+    return m.adulte + ' — ' + m.max;
+  }
+  if (m.enfant_mgkg) {
+    const dose = Math.round(m.enfant_mgkg * poids / 10) * 10;
+    return dose + ' mg par prise (' + m.enfant_mgkg + ' mg/kg) — ' + m.max;
+  }
+  if (m.enfant_fixe) {
+    return m.enfant_fixe + ' — ' + m.max;
+  }
+  return m.adulte;
 }
 
 // ================= MÉDICAMENTS =================
