@@ -1,4 +1,4 @@
-const CACHE = 'salama-v15';
+const CACHE = 'salama-v16';
 
 self.addEventListener('install', e => {
   e.waitUntil(
