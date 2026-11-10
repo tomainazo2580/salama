@@ -49,7 +49,6 @@ main { padding: 14px; }
 .t-profils    { background: linear-gradient(160deg, #16a085, #0b5f4a); }
 
 .version { text-align: center; color: var(--texte-doux); font-size: 0.72rem; margin-top: 24px; }
-
 .vide { text-align: center; padding: 60px 20px; color: var(--texte-doux); }
 .vide .gros { font-size: 3rem; display: block; margin-bottom: 12px; }
 
@@ -127,10 +126,7 @@ main { padding: 14px; }
 .profil-infos { font-size: 0.85rem; color: var(--texte-doux); margin-top: 4px; }
 .profil-alertes { font-size: 0.82rem; margin-top: 6px; color: #e67e22; }
 .profil-actions { display: flex; gap: 8px; margin-top: 10px; }
-.btn-mini {
-  border: none; border-radius: 8px; padding: 8px 12px;
-  font-size: 0.8rem; cursor: pointer;
-}
+.btn-mini { border: none; border-radius: 8px; padding: 8px 12px; font-size: 0.8rem; cursor: pointer; }
 .btn-mini.activer { background: var(--accent); color: white; flex: 1; }
 .btn-mini.supprimer { background: none; color: #e74c3c; }
 .badge-actif {
@@ -162,7 +158,6 @@ main { padding: 14px; }
 .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
 .modal-actions .btn-principal { margin-bottom: 0; flex: 1; }
 
-/* ===== Symptômes : sélection ===== */
 .champ-recherche {
   width: 100%; padding: 12px; border: 1px solid var(--bordure);
   border-radius: 12px; font-size: 1rem; background: var(--carte);
@@ -187,9 +182,7 @@ main { padding: 14px; }
 }
 .sym-item.coche .check { background: var(--accent); border-color: var(--accent); }
 
-.bloc-options {
-  background: var(--carte); border-radius: 12px; padding: 14px; margin: 14px 0;
-}
+.bloc-options { background: var(--carte); border-radius: 12px; padding: 14px; margin: 14px 0; }
 .bloc-options label { font-size: 0.85rem; color: var(--texte-doux); display: block; margin: 10px 0 6px; }
 .bloc-options select {
   width: 100%; padding: 10px; border: 1px solid var(--bordure);
@@ -202,9 +195,7 @@ main { padding: 14px; }
   font-size: 1rem; cursor: pointer; font-weight: 600;
 }
 .niv.selectionnee { border-color: var(--accent); background: var(--accent); color: white; }
-.btn-analyser { margin-top: 6px; }
 
-/* ===== Symptômes : résultat ===== */
 .alerte-rouge {
   background: #e74c3c; color: white; border-radius: 14px;
   padding: 18px; margin-bottom: 12px;
@@ -213,9 +204,7 @@ main { padding: 14px; }
 .alerte-rouge p { font-size: 0.92rem; line-height: 1.4; }
 .alerte-rouge .num { font-size: 1.3rem; font-weight: 800; margin-top: 10px; }
 
-.carte-verdict {
-  border-radius: 14px; padding: 16px; margin-bottom: 12px; color: white;
-}
+.carte-verdict { border-radius: 14px; padding: 16px; margin-bottom: 12px; color: white; }
 .carte-verdict.benin { background: linear-gradient(135deg, #27ae60, #1e8449); }
 .carte-verdict.modere { background: linear-gradient(135deg, #f39c12, #d68910); }
 .carte-verdict h3 { font-size: 1.05rem; }
@@ -235,6 +224,7 @@ main { padding: 14px; }
   font-size: 0.82rem; margin-top: 8px; padding: 8px 10px;
   background: rgba(230,126,34,0.12); border-radius: 8px; color: #e67e22;
 }
+.hypo-niveau { font-size: 0.78rem; color: var(--texte-doux); margin-bottom: 8px; }
 
 .resultat-actions { display: flex; gap: 10px; margin-top: 14px; }
 .resultat-actions .btn-principal { margin-bottom: 0; flex: 1; }
