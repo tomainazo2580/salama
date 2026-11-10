@@ -26,6 +26,18 @@ function appliquerTheme() {
   }
 }
 
+// ================= DÉTECTION HORS-LIGNE =================
+function majHorsLigne() {
+  if (navigator.onLine) {
+    $('horsLigne').classList.add('cache');
+  } else {
+    $('horsLigne').classList.remove('cache');
+  }
+}
+
+window.addEventListener('online', majHorsLigne);
+window.addEventListener('offline', majHorsLigne);
+
 // ================= PROFILS =================
 function profils() { return lireCle('salama_profils', []); }
 
@@ -155,6 +167,23 @@ function nomSymptome(id) {
   }
   return id;
 }
+
+// ================= ICÔNE MALADIE =================
+function iconeMaladie(t) {
+  const id = t.id;
+  if (['grippe', 'covid', 'rhume', 'angine', 'angine_bacterienne', 'sinusite', 'bronchite', 'bronchite_chronique', 'pneumonie', 'asthme', 'covid_long', 'coqueluche', 'bronchiolite'].includes(id)) return '🫁';
+  if (['gastro', 'intoxication', 'rgo', 'constipation_t', 'appendicite', 'hemorroides'].includes(id)) return '🍽️';
+  if (['migraine', 'coup_chaleur'].includes(id)) return '🤕';
+  if (['cystite'].includes(id)) return '🚽';
+  if (['lombalgie', 'sciatique', 'tendinite', 'entorse'].includes(id)) return '🦴';
+  if (['varicelle', 'rougeole', 'oreillons', 'scarlatine', 'roseole', 'pieds_mains_bouche'].includes(id)) return '🧒';
+  if (['allergie', 'conjonctivite'].includes(id)) return '🤧';
+  if (['otite'].includes(id)) return '👂';
+  if (['infection_dentaire'].includes(id)) return '🦷';
+  if (['deshydratation', 'anemie', 'diabete_depistage'].includes(id)) return '🩸';
+  if (['dysmenorrhee'].includes(id)) return '♀️';
+  return '🩺';
+}
 // ================= ANALYSE =================
 let derniereAnalyse = null;
 
@@ -178,7 +207,6 @@ function analyser() {
       : '👤 Aucun profil actif — doses adulte standard affichées') +
     '</p>';
 
-  // 1. Drapeaux rouges EN PREMIER
   const alertes = DRAPEAUX.filter(d => d.symptomes.every(s => coches.includes(s)));
   if (alertes.length) {
     html += alertes.map(a =>
@@ -186,7 +214,6 @@ function analyser() {
     ).join('');
   }
 
-  // 2. Scoring avec filtres âge et sexe
   const ecartees = [];
   const resultats = TROUBLES.map(t => {
     const ids = Object.keys(t.symptomes);
@@ -206,7 +233,6 @@ function analyser() {
     return { trouble: t, pct: pct };
   }).filter(r => r && r.pct >= 20).sort((a, b) => b.pct - a.pct);
 
-  // 3. Affichage des hypothèses
   if (!resultats.length) {
     html += '<div class="carte"><h3>🤔 Aucune piste claire</h3>' +
       '<p>Ces symptômes ne correspondent à rien dans la base actuelle. Surveille l\u2019évolution et consulte si ça persiste ou s\u2019aggrave.</p></div>';
@@ -232,7 +258,7 @@ function analyser() {
             const alertes = alertesProfilPour(m);
             const interdit = alertes.some(a => a.grave);
             const doseTexte = interdit ? '' : posologiePourTexte(m);
-            return '<div style="margin-top:6px;padding:8px;background:var(--accent-clair);border-radius:8px;font-size:0.88rem">' +
+            return '<div style="margin-top:6px;padding:8px;background:var(--accent-clair);border-radius:8px;font-size:0.88rem;box-shadow:var(--ombre)">' +
               '<strong>' + m.nom + '</strong>' +
               (interdit ? ' <span class="badge b-rouge">⛔ déconseillé</span>' : '') +
               '<br><span style="font-size:0.8rem;color:var(--texte-doux)">' + m.indication + '</span>' +
@@ -242,7 +268,7 @@ function analyser() {
           }).join('') + '</div>';
       }
 
-      html += '<div class="carte"><h3>' + r.trouble.nom + ' — ' + r.pct + ' %</h3>' + badge +
+      html += '<div class="carte"><h3>' + iconeMaladie(r.trouble) + ' ' + r.trouble.nom + ' — ' + r.pct + ' %</h3>' + badge +
         '<p style="margin-top:8px"><strong>Conseils :</strong></p><ul>' +
         r.trouble.conseils.map(c => '<li>' + c + '</li>').join('') + '</ul>' +
         '<p style="margin-top:6px"><strong>Consulter si :</strong> ' + r.trouble.consulter + '</p>' +
@@ -250,19 +276,16 @@ function analyser() {
     });
   }
 
-  // 4. Maladies écartées selon le profil
   if (ecartees.length) {
     html += '<div class="carte"><p style="font-size:0.88rem">🧬 <strong>Écartées selon le profil (âge ou sexe) :</strong> ' +
       ecartees.join(', ') + '</p></div>';
   }
 
-  // 5. Profil fragile
   if (fragile) {
     html += '<div class="carte danger"><p>⚠️ <strong>' + profil.prenom + ' a ' + age +
       ' ans (profil fragile)</strong> : consulte un médecin plus rapidement qu\u2019un adulte en bonne santé.</p></div>';
   }
 
-  // 6. Symptômes non reconnus
   const connus = new Set();
   TROUBLES.forEach(t => Object.keys(t.symptomes).forEach(id => connus.add(id)));
   const inconnus = coches.filter(id => !connus.has(id));
@@ -271,7 +294,6 @@ function analyser() {
       inconnus.map(nomSymptome).join(', ') + '</p></div>';
   }
 
-  // 7. Mémorise + bouton journal
   derniereAnalyse = {
     date: new Date().toISOString(),
     profil: profil ? profil.prenom : 'Sans profil',
@@ -284,9 +306,7 @@ function analyser() {
   html += '<button class="btn-principal" onclick="enregistrerAnalyse()">📓 Enregistrer dans le journal</button>';
   zone.innerHTML = html;
 
-  // 🆕 Décoche automatiquement les symptômes pour la prochaine analyse
   toutDecocher();
-
   zone.scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -302,11 +322,25 @@ function enregistrerAnalyse() {
 function afficherJournal() {
   const journal = lireCle('salama_journal', []);
   const zone = $('listeJournal');
-  if (!journal.length) {
-    zone.innerHTML = '<p class="vide">Journal vide. Lance une analyse pour commencer.</p>';
+  const recherche = ($('rechercheJournal') ? $('rechercheJournal').value : '').toLowerCase().trim();
+
+  let journalFiltre = journal;
+  if (recherche) {
+    journalFiltre = journal.filter(e => {
+      const texte = (e.profil + ' ' + e.symptomes.map(nomSymptome).join(' ') + ' ' +
+        (e.hypotheses || []).map(h => h.nom).join(' ')).toLowerCase();
+      return texte.includes(recherche);
+    });
+  }
+
+  if (!journalFiltre.length) {
+    zone.innerHTML = recherche
+      ? '<p class="vide">Aucun résultat pour « ' + recherche + ' »</p>'
+      : '<p class="vide">Journal vide. Lance une analyse pour commencer.</p>';
     return;
   }
-  zone.innerHTML = journal.map((e, i) => {
+
+  zone.innerHTML = journalFiltre.map((e, i) => {
     const d = new Date(e.date);
     const dateStr = d.toLocaleDateString('fr-FR') + ' ' +
       d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
@@ -315,7 +349,7 @@ function afficherJournal() {
       '<div class="date">' + dateStr + ' · ' + e.profil + ' · ' + e.duree + ' · intensité ' + e.intensite + '</div>' +
       '<strong>Symptômes :</strong> ' + e.symptomes.map(nomSymptome).join(', ') + '<br>' +
       '<strong>Pistes :</strong> ' + (hypoStr || 'aucune') +
-      '<div class="ligne-btns"><button class="btn-petit danger" onclick="supprimerEntree(' + i + ')">Supprimer</button></div>' +
+      '<div class="ligne-btns"><button class="btn-petit danger" onclick="supprimerEntree(' + journal.indexOf(e) + ')">Supprimer</button></div>' +
       '</div>';
   }).join('');
 }
@@ -325,6 +359,60 @@ function supprimerEntree(i) {
   journal.splice(i, 1);
   ecrireCle('salama_journal', journal);
   afficherJournal();
+}
+
+function effacerJournal() {
+  if (!confirm('Effacer TOUT le journal ? Cette action est irréversible.')) return;
+  ecrireCle('salama_journal', []);
+  afficherJournal();
+}
+
+function exporterJournal() {
+  const journal = lireCle('salama_journal', []);
+  if (!journal.length) {
+    alert('Journal vide : rien à exporter.');
+    return;
+  }
+  let texte = '📋 JOURNAL DE SANTÉ SALAMA\n';
+  texte += 'Exporté le ' + new Date().toLocaleDateString('fr-FR') + '\n';
+  texte += '━━━━━━━━━━━━━━━━━━━━\n\n';
+  journal.forEach(e => {
+    const d = new Date(e.date);
+    texte += '📅 ' + d.toLocaleDateString('fr-FR') + ' ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) + '\n';
+    texte += '👤 ' + e.profil + '\n';
+    texte += '🩺 Symptômes : ' + e.symptomes.map(nomSymptome).join(', ') + '\n';
+    if (e.hypotheses && e.hypotheses.length) {
+      texte += '💡 Pistes : ' + e.hypotheses.map(h => h.nom + ' (' + h.pct + '%)').join(', ') + '\n';
+    }
+    texte += '⏱️ Durée : ' + e.duree + ' | Intensité : ' + e.intensite + '\n\n';
+  });
+
+  if (navigator.share) {
+    navigator.share({ title: 'Journal de santé Salama', text: texte })
+      .catch(() => copierTexte(texte));
+  } else {
+    copierTexte(texte);
+  }
+}
+
+function copierTexte(texte) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(texte).then(() => {
+      alert('📋 Journal copié ! Colle-le où tu veux (SMS, WhatsApp, email...).');
+    }).catch(() => {
+      afficherZoneExport(texte);
+    });
+  } else {
+    afficherZoneExport(texte);
+  }
+}
+
+function afficherZoneExport(texte) {
+  const zone = $('listeJournal');
+  zone.innerHTML = '<div class="carte"><p><strong>📋 Copie ce texte :</strong></p>' +
+    '<textarea style="width:100%;height:200px;font-size:0.85rem;padding:10px;border:1px solid var(--bordure);border-radius:10px;background:var(--fond);color:var(--texte)" readonly>' +
+    texte + '</textarea>' +
+    '<button class="btn-principal" onclick="afficherJournal()">← Retour au journal</button></div>';
 }
 
 // ================= POSOLOGIE TEXTE =================
@@ -348,7 +436,6 @@ function posologiePourTexte(m) {
   }
   return m.adulte;
 }
-
 // ================= MÉDICAMENTS =================
 function preparerMedocs() {
   const profil = profilActif();
@@ -432,6 +519,7 @@ function ficheMedoc(id) {
   $('ficheMedoc').classList.remove('cache');
   window.scrollTo(0, 0);
 }
+
 // ================= NAVIGATION =================
 function aller(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.add('cache'));
@@ -453,6 +541,10 @@ function majAccueil() {
   $('profilActifAccueil').textContent = p
     ? '👤 Profil actif : ' + p.prenom
     : '👤 Aucun profil — crée-en un dans l\u2019onglet Profils';
+  const d = new Date();
+  const jours = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+  const mois = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  $('dateJour').textContent = jours[d.getDay()] + ' ' + d.getDate() + ' ' + mois[d.getMonth()] + ' ' + d.getFullYear();
 }
 
 // ================= BANNIÈRE INSTALLATION =================
@@ -500,4 +592,5 @@ if ('serviceWorker' in navigator) {
 appliquerTheme();
 preparerSymptomes();
 initialiserBanniere();
+majHorsLigne();
 aller('accueil');
