@@ -25,6 +25,7 @@ header h1 { font-size: 1.4rem; }
 header p { opacity: 0.85; font-size: 0.85rem; margin-top: 2px; }
 
 main { padding: 14px; }
+.cache { display: none !important; }
 
 .page { display: none; }
 .page.active { display: block; }
@@ -149,7 +150,7 @@ main { padding: 14px; }
 }
 .modal-contenu h2 { margin-bottom: 16px; font-size: 1.2rem; }
 .modal-contenu label { font-size: 0.85rem; color: var(--texte-doux); display: block; margin: 12px 0 4px; }
-.modal-contenu input, .modal-contenu textarea {
+.modal-contenu input, .modal-contenu textarea, .modal-contenu select {
   width: 100%; padding: 10px; border: 1px solid var(--bordure);
   border-radius: 8px; font-size: 1rem; background: var(--fond); color: var(--texte);
 }
@@ -161,3 +162,86 @@ main { padding: 14px; }
 .humeur.selectionnee { border-color: var(--accent); }
 .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
 .modal-actions .btn-principal { margin-bottom: 0; flex: 1; }
+
+/* ===== Symptômes : sélection ===== */
+.champ-recherche {
+  width: 100%; padding: 12px; border: 1px solid var(--bordure);
+  border-radius: 12px; font-size: 1rem; background: var(--carte);
+  color: var(--texte); margin-bottom: 12px;
+}
+.cat-titre {
+  font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+  color: var(--texte-doux); margin: 14px 0 8px; letter-spacing: 0.5px;
+}
+.sym-item {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--carte); border-radius: 10px; padding: 12px;
+  margin-bottom: 6px; cursor: pointer; border: 2px solid transparent;
+  font-size: 0.95rem;
+}
+.sym-item.coche { border-color: var(--accent); background: rgba(14,122,95,0.08); }
+.sym-item .check {
+  width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0;
+  border: 2px solid var(--bordure); display: flex;
+  align-items: center; justify-content: center;
+  font-size: 0.85rem; color: white;
+}
+.sym-item.coche .check { background: var(--accent); border-color: var(--accent); }
+
+.bloc-options {
+  background: var(--carte); border-radius: 12px; padding: 14px; margin: 14px 0;
+}
+.bloc-options label { font-size: 0.85rem; color: var(--texte-doux); display: block; margin: 10px 0 6px; }
+.bloc-options select {
+  width: 100%; padding: 10px; border: 1px solid var(--bordure);
+  border-radius: 8px; font-size: 1rem; background: var(--fond); color: var(--texte);
+}
+.intensite { display: flex; gap: 8px; }
+.niv {
+  flex: 1; padding: 10px 0; border: 2px solid var(--bordure);
+  border-radius: 10px; background: var(--fond); color: var(--texte);
+  font-size: 1rem; cursor: pointer; font-weight: 600;
+}
+.niv.selectionnee { border-color: var(--accent); background: var(--accent); color: white; }
+.btn-analyser { margin-top: 6px; }
+
+/* ===== Symptômes : résultat ===== */
+.alerte-rouge {
+  background: #e74c3c; color: white; border-radius: 14px;
+  padding: 18px; margin-bottom: 12px;
+}
+.alerte-rouge h3 { font-size: 1.1rem; margin-bottom: 6px; }
+.alerte-rouge p { font-size: 0.92rem; line-height: 1.4; }
+.alerte-rouge .num { font-size: 1.3rem; font-weight: 800; margin-top: 10px; }
+
+.carte-verdict {
+  border-radius: 14px; padding: 16px; margin-bottom: 12px; color: white;
+}
+.carte-verdict.benin { background: linear-gradient(135deg, #27ae60, #1e8449); }
+.carte-verdict.modere { background: linear-gradient(135deg, #f39c12, #d68910); }
+.carte-verdict h3 { font-size: 1.05rem; }
+
+.hypothese {
+  background: var(--carte); border-radius: 12px; padding: 14px;
+  margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.hypo-tete { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.hypo-nom { font-weight: 700; }
+.hypo-pct { font-size: 0.85rem; color: var(--accent); font-weight: 700; }
+.hypo-barre { height: 6px; background: var(--bordure); border-radius: 3px; overflow: hidden; margin-bottom: 10px; }
+.hypo-barre div { height: 100%; background: var(--accent); border-radius: 3px; }
+.hypo-conseils { font-size: 0.88rem; line-height: 1.5; }
+.hypo-conseils li { margin-left: 18px; margin-bottom: 2px; }
+.hypo-consulter {
+  font-size: 0.82rem; margin-top: 8px; padding: 8px 10px;
+  background: rgba(230,126,34,0.12); border-radius: 8px; color: #e67e22;
+}
+
+.resultat-actions { display: flex; gap: 10px; margin-top: 14px; }
+.resultat-actions .btn-principal { margin-bottom: 0; flex: 1; }
+.resultat-actions .btn-secondaire { flex: 1; }
+.rien {
+  text-align: center; color: var(--texte-doux); padding: 30px 16px;
+  background: var(--carte); border-radius: 12px; margin-bottom: 12px;
+  font-size: 0.92rem; line-height: 1.5;
+}
