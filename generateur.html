@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Générateur de clés — Salama</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:-apple-system,Roboto,Arial,sans-serif;
+    background:#f2f5f4; min-height:100vh;
+  }
+  .entete {
+    background:linear-gradient(135deg,#0e7a5f,#0b5f4a);
+    color:#fff; text-align:center; padding:26px 16px;
+  }
+  .entete h1 { font-size:20px; }
+  .entete p { font-size:13px; opacity:.85; margin-top:4px; }
+  .carte {
+    background:#fff; max-width:420px; margin:22px auto;
+    border-radius:16px; padding:22px; width:calc(100% - 32px);
+    box-shadow:0 4px 14px rgba(0,0,0,.10);
+  }
+  label { font-size:14px; font-weight:600; color:#333; display:block; margin-bottom:6px; }
+  input {
+    width:100%; font-size:19px; text-align:center; letter-spacing:2px;
+    padding:11px; border:2px solid #0e7a5f; border-radius:10px; outline:none;
+    text-transform:uppercase;
+  }
+  button.principal {
+    width:100%; margin-top:12px; background:#0e7a5f; color:#fff; border:none;
+    border-radius:10px; padding:13px; font-size:16px; font-weight:700; cursor:pointer;
+  }
+  .resultat {
+    display:none; margin-top:16px; background:#eef7f4; border:1px solid #cfe5de;
+    border-radius:12px; padding:16px; text-align:center;
+  }
+  .resultat .cle { font-size:30px; font-weight:800; letter-spacing:4px; color:#0b5f4a; }
+  .resultat button {
+    margin-top:10px; background:none; border:1px solid #0e7a5f; color:#0e7a5f;
+    border-radius:8px; padding:6px 14px; font-size:13px; cursor:pointer;
+  }
+  .erreur { display:none; color:#c0392b; font-size:13px; margin-top:10px; text-align:center; }
+  .note { font-size:12px; color:#888; text-align:center; margin-top:14px; line-height:1.5; }
+</style>
+</head>
+<body>
+
+<div class="entete">
+  <h1>🔑 Générateur de clés</h1>
+  <p>Salama — réservé au propriétaire de l'app</p>
+</div>
+
+<div class="carte">
+  <label for="champId">ID de l'appareil à activer :</label>
+  <input id="champId" type="text" placeholder="SLM-XXXX-XXXX" maxlength="13" autocomplete="off">
+  <button class="principal" onclick="generer()">Générer la clé</button>
+
+  <div class="erreur" id="erreur">❌ ID invalide. Il doit ressembler à SLM-XXXX-XXXX.</div>
+
+  <div class="resultat" id="resultat">
+    <div style="font-size:13px;color:#555;">Clé pour cet appareil :</div>
+    <div class="cle" id="laCle"></div>
+    <button onclick="copier()">📋 Copier la clé</button>
+  </div>
+
+  <div class="note">Chaque clé ne fonctionne que sur l'appareil dont l'ID a été saisi.<br>
+  Envoie la clé à la personne, elle la tape dans Salama.</div>
+</div>
+<script>
+/* ⚠️ Cet algorithme doit rester IDENTIQUE à celui de activation.js */
+function cleAttendue(id) {
+  var h = 7;
+  for (var i = 0; i < id.length; i++) {
+    h = (h * 33 + id.charCodeAt(i)) % 1000000;
+  }
+  h = (h * 13 + 5107) % 1000000;
+  var n = '000000' + h;
+  n = n.slice(n.length - 6);
+  return n.slice(0, 3) + '-' + n.slice(3);
+}
+
+function normaliserId(id) {
+  var brut = (id || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (brut.length === 11 && brut.indexOf('SLM') === 0) {
+    return brut.slice(0, 3) + '-' + brut.slice(3, 7) + '-' + brut.slice(7, 11);
+  }
+  return null;
+}
+
+var champ = document.getElementById('champId');
+champ.addEventListener('input', function () {
+  var v = champ.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 11);
+  if (v.length > 7) v = v.slice(0, 3) + '-' + v.slice(3, 7) + '-' + v.slice(7);
+  else if (v.length > 3) v = v.slice(0, 3) + '-' + v.slice(3);
+  champ.value = v;
+});
+
+function generer() {
+  var id = normaliserId(champ.value);
+  var bloc = document.getElementById('resultat');
+  var err = document.getElementById('erreur');
+  if (!id) { bloc.style.display = 'none'; err.style.display = 'block'; return; }
+  err.style.display = 'none';
+  document.getElementById('laCle').textContent = cleAttendue(id);
+  bloc.style.display = 'block';
+}
+
+function copier() {
+  var cle = document.getElementById('laCle').textContent;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(cle);
+  } else {
+    var z = document.createElement('textarea');
+    z.value = cle; document.body.appendChild(z); z.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(z);
+  }
+}
+</script>
+
+</body>
+</html>
