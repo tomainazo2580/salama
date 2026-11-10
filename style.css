@@ -1,5 +1,5 @@
 :root {
-  --fond: #f6f8f7;
+  --fond: #f4f7f6;
   --carte: #ffffff;
   --texte: #22312b;
   --texte-doux: #5f726c;
@@ -7,7 +7,10 @@
   --accent-clair: #e6f3ef;
   --danger: #c0392b;
   --danger-clair: #fdecea;
-  --bordure: #e1e8e5;
+  --bordure: #dde5e2;
+  --ombre: 0 2px 8px rgba(20, 40, 35, 0.08);
+  --ombre-forte: 0 4px 16px rgba(20, 40, 35, 0.12);
+  --ombre-bouton: 0 3px 10px rgba(14, 122, 95, 0.25);
 }
 
 body.sombre {
@@ -20,6 +23,9 @@ body.sombre {
   --danger: #ff6b5e;
   --danger-clair: #3d2220;
   --bordure: #2c3a3d;
+  --ombre: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --ombre-forte: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --ombre-bouton: 0 3px 10px rgba(47, 191, 154, 0.3);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,7 +38,7 @@ body {
   padding-bottom: 90px;
 }
 
-/* GRANDE CROIX MÉDICALE EN FILIGRANE */
+/* GRANDE CROIX MÉDICALE EN FILIGRANE — plus contrastée */
 body::before {
   content: '';
   position: fixed;
@@ -41,13 +47,26 @@ body::before {
   background-repeat: no-repeat;
   background-position: center 38%;
   background-size: 72vmin;
-  opacity: 0.09;
+  opacity: 0.13;
   pointer-events: none;
   z-index: 1;
 }
 body.sombre::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect x='70' y='18' width='60' height='164' rx='14' fill='%23e74c3c'/%3E%3Crect x='18' y='70' width='164' height='60' rx='14' fill='%23e74c3c'/%3E%3C/svg%3E");
-  opacity: 0.14;
+  opacity: 0.18;
+}
+
+/* BANDEAU HORS-LIGNE */
+#horsLigne {
+  background: var(--danger);
+  color: #fff;
+  text-align: center;
+  padding: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  position: sticky;
+  top: 72px;
+  z-index: 9;
 }
 
 /* EN-TÊTE */
@@ -58,7 +77,7 @@ body.sombre::before {
   padding: 16px;
   background: linear-gradient(135deg, #0e7a5f, #0b5f4a);
   border-bottom: none;
-  box-shadow: 0 2px 10px rgba(11, 95, 74, 0.3);
+  box-shadow: 0 3px 12px rgba(11, 95, 74, 0.35);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -87,6 +106,13 @@ body.sombre::before {
 .page.cache, .cache { display: none; }
 
 h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 14px; }
+/* DATE DU JOUR */
+.date-jour {
+  font-size: 0.8rem;
+  color: var(--texte-doux);
+  text-transform: capitalize;
+  margin-bottom: 4px;
+}
 
 /* BANNIÈRE INSTALLATION */
 #banniere {
@@ -100,6 +126,7 @@ h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 14px; }
   justify-content: space-between;
   gap: 8px;
   font-size: 0.88rem;
+  box-shadow: var(--ombre);
 }
 
 .banniere-btns { display: flex; gap: 8px; }
@@ -112,6 +139,7 @@ h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 14px; }
   padding: 8px 14px;
   font-weight: 600;
   cursor: pointer;
+  box-shadow: var(--ombre-bouton);
 }
 
 #btnFermerBanniere {
@@ -129,26 +157,33 @@ h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 14px; }
   color: var(--texte-doux);
   margin-bottom: 12px;
 }
-/* GRILLE D'ACCUEIL — style minimal */
+
+/* GRILLE D'ACCUEIL */
 .grille {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 14px;
   margin-top: 8px;
 }
 
 .tuile {
   border: none;
-  border-radius: 14px;
-  padding: 24px 10px;
-  font-size: 1.5rem;
+  border-radius: 16px;
+  padding: 26px 10px;
+  font-size: 1.6rem;
   color: #fff;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 2px 6px rgba(20, 40, 35, 0.08);
+  box-shadow: var(--ombre-forte);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.tuile:active {
+  transform: scale(0.97);
+  box-shadow: var(--ombre);
 }
 
 .tuile span { font-size: 0.92rem; font-weight: 600; }
@@ -189,9 +224,10 @@ select, input {
   background: var(--carte);
   color: var(--texte);
   font-size: 0.95rem;
+  box-shadow: var(--ombre);
 }
 
-/* PETIT BOUTON LIEN (Tout décocher) */
+/* PETIT BOUTON LIEN */
 .btn-lien {
   background: none;
   border: none;
@@ -202,7 +238,7 @@ select, input {
   text-decoration: underline;
 }
 
-/* SYMPTÔMES — liste avec cercles (style minimal) */
+/* SYMPTÔMES — liste avec cercles */
 .categorie { margin-bottom: 18px; }
 
 .categorie h3 {
@@ -219,6 +255,7 @@ select, input {
   border: 1px solid var(--bordure);
   border-radius: 14px;
   overflow: hidden;
+  box-shadow: var(--ombre);
 }
 
 .sym-ligne {
@@ -230,9 +267,11 @@ select, input {
   border-bottom: 1px solid var(--bordure);
   font-size: 0.93rem;
   -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
 }
 
 .sym-ligne:last-child { border-bottom: none; }
+.sym-ligne:active { background: var(--accent-clair); }
 
 .sym-cercle {
   width: 22px;
@@ -245,6 +284,7 @@ select, input {
   font-size: 0.7rem;
   color: transparent;
   flex-shrink: 0;
+  transition: all 0.15s;
 }
 
 body.sombre .sym-cercle { border-color: #46565a; }
@@ -259,6 +299,7 @@ body.sombre .sym-cercle { border-color: #46565a; }
   background: var(--accent);
   border-color: var(--accent);
   color: #fff;
+  box-shadow: 0 0 0 3px var(--accent-clair);
 }
 
 /* BOUTON ANALYSER FLOTTANT */
@@ -275,8 +316,14 @@ body.sombre .sym-cercle { border-color: #46565a; }
   padding: 15px;
   font-size: 1rem;
   font-weight: 700;
-  box-shadow: 0 6px 20px rgba(14, 122, 95, 0.35);
+  box-shadow: 0 6px 24px rgba(14, 122, 95, 0.4);
   cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+#btnFlottant:active {
+  transform: scale(0.97);
+  box-shadow: 0 3px 12px rgba(14, 122, 95, 0.3);
 }
 
 /* BOUTON PRINCIPAL */
@@ -291,6 +338,13 @@ body.sombre .sym-cercle { border-color: #46565a; }
   font-weight: 700;
   cursor: pointer;
   margin: 14px 0;
+  box-shadow: var(--ombre-bouton);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.btn-principal:active {
+  transform: scale(0.98);
+  box-shadow: var(--ombre);
 }
 /* CARTES */
 .carte {
@@ -299,12 +353,13 @@ body.sombre .sym-cercle { border-color: #46565a; }
   border-radius: 14px;
   padding: 15px;
   margin-bottom: 12px;
-  box-shadow: 0 1px 3px rgba(20, 40, 35, 0.05);
+  box-shadow: var(--ombre-forte);
 }
 
 .carte.danger {
   background: var(--danger-clair);
   border-color: var(--danger);
+  box-shadow: 0 4px 16px rgba(192, 57, 43, 0.2);
 }
 
 .carte h3 { font-size: 1rem; margin-bottom: 6px; }
@@ -336,6 +391,7 @@ body.sombre .b-gris { background: #2c3a3d; color: #9db0a9; }
   border-radius: 10px;
   font-size: 0.85rem;
   line-height: 1.45;
+  box-shadow: var(--ombre);
 }
 body.sombre .box-antibio { background: #38301f; }
 
@@ -346,6 +402,7 @@ body.sombre .box-antibio { background: #38301f; }
   margin-bottom: 6px;
   font-size: 0.88rem;
   background: #fdf0d3;
+  box-shadow: var(--ombre);
 }
 
 body.sombre .alerte-ligne { background: #38301f; }
@@ -366,6 +423,7 @@ body.sombre .alerte-ligne { background: #38301f; }
   padding: 2px 8px;
   margin-left: 6px;
   vertical-align: middle;
+  box-shadow: var(--ombre);
 }
 
 .ligne-btns { display: flex; gap: 8px; margin-top: 8px; }
@@ -379,11 +437,31 @@ body.sombre .alerte-ligne { background: #38301f; }
   padding: 8px;
   font-size: 0.85rem;
   cursor: pointer;
+  box-shadow: var(--ombre);
+  transition: transform 0.15s;
 }
 
+.btn-petit:active { transform: scale(0.96); }
 .btn-petit.danger { color: var(--danger); border-color: var(--danger); }
 
 #formProfil { display: flex; flex-direction: column; gap: 10px; }
+/* JOURNAL — barre d'actions */
+.journal-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.journal-actions input {
+  flex: 1;
+}
+
+.journal-actions .btn-petit {
+  flex: 0 0 auto;
+  width: auto;
+  padding: 8px 12px;
+  white-space: nowrap;
+}
 
 /* NAV BAS */
 #navBas {
@@ -395,6 +473,11 @@ body.sombre .alerte-ligne { background: #38301f; }
   background: var(--carte);
   border-top: 1px solid var(--bordure);
   z-index: 10;
+  box-shadow: 0 -2px 12px rgba(20, 40, 35, 0.1);
+}
+
+body.sombre #navBas {
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.3);
 }
 
 #navBas button {
@@ -409,10 +492,20 @@ body.sombre .alerte-ligne { background: #38301f; }
   flex-direction: column;
   align-items: center;
   gap: 2px;
+  position: relative;
 }
 
 #navBas button span { font-size: 0.65rem; }
 #navBas button.actif { color: var(--accent); font-weight: 700; }
+
+#navBas button.actif::after {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-top: -3px;
+}
 
 /* LISTES GÉNÉRIQUES */
 .item-liste {
@@ -422,6 +515,7 @@ body.sombre .alerte-ligne { background: #38301f; }
   padding: 12px 14px;
   margin-bottom: 10px;
   font-size: 0.92rem;
+  box-shadow: var(--ombre);
 }
 
 .item-liste .date {
@@ -435,14 +529,4 @@ body.sombre .alerte-ligne { background: #38301f; }
   color: var(--texte-doux);
   font-size: 0.9rem;
   margin-top: 30px;
-}
-
-/* POINT SOUS L'ONGLET ACTIF */
-#navBas button.actif::after {
-  content: '';
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--accent);
-  margin-top: -3px;
 }
