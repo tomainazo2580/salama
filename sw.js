@@ -1,4 +1,4 @@
-const CACHE = 'salama-v6';
+const CACHE = 'salama-v7';
 const FICHIERS = ['./', './index.html', './style.css', './app.js', './data.js', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
