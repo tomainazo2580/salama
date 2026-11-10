@@ -390,8 +390,137 @@ function analyser() {
   .filter(t => t.pct >= 30)
   .sort((a, b) => b.pct - a.pct)
   .slice(0, 3);
+/* =====================================================
+   MOTEUR DE SYMPTÔMES (v2)
+   ===================================================== */
+let symptomesCoches = new Set();
+let intensiteChoisie = 3;
+let derniereAnalyse = null;
 
-  /* 3. Verdict de gravité */
+function preparerSymptomes() {
+  const badge = document.getElementById('sym-profil');
+  const actif = profilActif();
+  if (actif) {
+    badge.textContent = '👤 Analyse pour : ' + actif.prenom + ' (' + ageDe(actif) + ' ans)';
+    badge.classList.add('visible');
+  } else {
+    badge.textContent = '⚠️ Aucun profil actif — crée-en un pour des conseils adaptés';
+    badge.classList.add('visible');
+  }
+
+  document.querySelectorAll('.niv').forEach(b => {
+    b.onclick = () => {
+      intensiteChoisie = Number(b.dataset.val);
+      document.querySelectorAll('.niv').forEach(x => x.classList.remove('selectionnee'));
+      b.classList.add('selectionnee');
+    };
+  });
+
+  construireListeSymptomes();
+  majCompteur();
+}
+
+function construireListeSymptomes(filtre = '') {
+  const conteneur = document.getElementById('liste-symptomes');
+  const filtreMin = filtre.toLowerCase();
+  let html = '';
+  let derniereCat = '';
+
+  SYMPTOMES.forEach(s => {
+    if (filtreMin && !s.nom.toLowerCase().includes(filtreMin)) return;
+    if (s.cat !== derniereCat) {
+      html += `<div class="cat-titre">${s.cat}</div>`;
+      derniereCat = s.cat;
+    }
+    const coche = symptomesCoches.has(s.id);
+    html += `
+      <div class="sym-item ${coche ? 'coche' : ''}" onclick="basculerSymptome('${s.id}')">
+        <span class="check">${coche ? '✓' : ''}</span>
+        <span>${s.nom}</span>
+      </div>`;
+  });
+
+  conteneur.innerHTML = html || '<div class="journal-vide">Aucun symptôme trouvé</div>';
+}
+
+function filtrerSymptomes() {
+  construireListeSymptomes(document.getElementById('recherche-symptome').value);
+}
+
+function basculerSymptome(id) {
+  if (symptomesCoches.has(id)) {
+    symptomesCoches.delete(id);
+  } else {
+    symptomesCoches.add(id);
+  }
+  construireListeSymptomes(document.getElementById('recherche-symptome').value);
+  majCompteur();
+}
+
+function majCompteur() {
+  const n = symptomesCoches.size;
+  document.getElementById('compteur-symptomes').textContent = n;
+  document.getElementById('pluriel').textContent = n > 1 ? 's' : '';
+}
+
+/* ----- Analyse v2 ----- */
+function analyser() {
+  if (symptomesCoches.size === 0) {
+    alert('Coche au moins un symptôme.');
+    return;
+  }
+
+  const coches = [...symptomesCoches];
+
+  /* 1. DRAPEAUX ROUGES d'abord */
+  const alertes = DRAPEAUX.filter(d => {
+    if (!d.symptomes.every(s => coches.includes(s))) return false;
+    if (d.avec.length === 0) return true;
+    return d.avec.some(s => coches.includes(s));
+  });
+
+  let html = '';
+
+  if (alertes.length > 0) {
+    alertes.forEach(a => {
+      html += `
+        <div class="alerte-rouge">
+          <h3>🚨 ${a.titre}</h3>
+          <p>${a.message}</p>
+          <p class="num">📞 15 (SAMU) ou 112</p>
+        </div>`;
+    });
+    html += `<div class="resultat-actions">
+      <button class="btn-secondaire" onclick="recommencer()">← Modifier</button>
+    </div>`;
+    afficherResultat(html);
+    return;
+  }
+
+  /* 2. Scoring v2 : couverture + spécificité */
+  const resultats = TROUBLES.map(t => {
+    let poidsCoches = 0, poidsTotal = 0, nbCoches = 0;
+    for (const [sym, poids] of Object.entries(t.symptomes)) {
+      poidsTotal += poids;
+      if (coches.includes(sym)) { poidsCoches += poids; nbCoches++; }
+    }
+    if (nbCoches === 0) return { ...t, pct: 0 };
+    const couverture = poidsCoches / poidsTotal;       // ai-je les symptômes du trouble ?
+    const specificite = nbCoches / coches.length;      // mes symptômes sont-ils expliqués ?
+    let pct = Math.round(100 * (0.65 * couverture + 0.35 * specificite));
+    if (pct > 95) pct = 95; // jamais 100% : humilité médicale
+    return { ...t, pct };
+  })
+  .filter(t => t.pct >= 20)
+  .sort((a, b) => b.pct - a.pct)
+  .slice(0, 3);
+
+  /* 3. Symptômes inconnus de la base */
+  const symConnus = new Set();
+  TROUBLES.forEach(t => Object.keys(t.symptomes).forEach(s => symConnus.add(s)));
+  const inconnus = coches.filter(id => !symConnus.has(id));
+
+  /* 4. Verdict */
   const actif = profilActif();
   const fragile = actif && (ageDe(actif) < 3 || ageDe(actif) > 65);
   const aggravant = intensiteChoisie >= 4 || fragile;
@@ -400,15 +529,22 @@ function analyser() {
     html = `
       <div class="rien">
         🤔 <strong>Aucune piste claire.</strong><br>
-        La combinaison de symptômes ne correspond pas aux troubles courants de la base.
+        Cette combinaison ne correspond à aucun trouble de la base.
         Surveille l'évolution et consulte un médecin si ça persiste ou s'aggrave.
       </div>`;
   } else {
+    const meilleure = resultats[0].pct;
     const pireGravite = resultats.some(r => r.gravite === 'modere');
+
     if (pireGravite || aggravant) {
       html += `<div class="carte-verdict modere">
         <h3>🟡 ${aggravant ? 'Surveillance renforcée conseillée' : 'Consultation médicale à prévoir'}</h3>
         <p style="font-size:0.88rem;margin-top:4px">${aggravant ? 'Intensité élevée ou profil fragile : ne tarde pas à consulter.' : 'Ces hypothèses justifient généralement l\'avis d\'un médecin.'}</p>
+      </div>`;
+    } else if (meilleure < 40) {
+      html += `<div class="carte-verdict modere">
+        <h3>🟡 Pistes incertaines</h3>
+        <p style="font-size:0.88rem;margin-top:4px">Peu de symptômes ou combinaison floue : les pistes ci-dessous sont indicatives. En cas de doute, consulte.</p>
       </div>`;
     } else {
       html += `<div class="carte-verdict benin">
@@ -418,6 +554,9 @@ function analyser() {
     }
 
     resultats.forEach((r, i) => {
+      const niveau = r.pct >= 60 ? '🟢 Piste forte'
+                   : r.pct >= 40 ? '🟡 Piste possible'
+                   : '⚪ Piste faible';
       html += `
         <div class="hypothese">
           <div class="hypo-tete">
@@ -425,6 +564,7 @@ function analyser() {
             <span class="hypo-pct">${r.pct}%</span>
           </div>
           <div class="hypo-barre"><div style="width:${r.pct}%"></div></div>
+          <div style="font-size:0.78rem;color:var(--texte-doux);margin-bottom:8px">${niveau}</div>
           <ul class="hypo-conseils">
             ${r.conseils.map(c => `<li>${c}</li>`).join('')}
           </ul>
@@ -433,7 +573,18 @@ function analyser() {
     });
   }
 
-  /* 4. Actions */
+  /* 5. Symptômes hors base */
+  if (inconnus.length > 0) {
+    const noms = inconnus.map(id => SYMPTOMES.find(s => s.id === id).nom).join(', ');
+    html += `
+      <div class="hypothese">
+        <div class="hypo-nom">🔎 Non reconnus par la base</div>
+        <div class="hypo-conseils" style="margin-top:6px">${noms}</div>
+        <div class="hypo-consulter">Ces symptômes ne sont reliés à aucun trouble courant de Salama. Surveille-les et parle-en à un médecin s'ils persistent.</div>
+      </div>`;
+  }
+
+  /* 6. Actions */
   html += `
     <div class="resultat-actions">
       <button class="btn-secondaire" onclick="recommencer()">← Modifier</button>
@@ -442,7 +593,7 @@ function analyser() {
 
   derniereAnalyse = {
     symptomes: coches.map(id => SYMPTOMES.find(s => s.id === id).nom).join(', '),
-    hypotheses: resultats.map(r => `${r.nom} (${r.pct}%)`).join(' · ') || 'Aucune piste claire',
+    hypotheses: resultats.map(r => `${r.nom} le (${r.pct}%)`).join(' · ') || 'Aucune piste claire',
     duree: document.getElementById('sym-duree').value,
     intensite: intensiteChoisie
   };
