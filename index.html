@@ -17,6 +17,8 @@
   <button id="btnTheme" onclick="basculerTheme()">🌙</button>
 </header>
 
+<div id="horsLigne" class="cache">📴 Mode hors-ligne actif</div>
+
 <main>
 
   <!-- ACCUEIL -->
@@ -29,6 +31,7 @@
       </div>
     </div>
 
+    <p id="dateJour" class="date-jour"></p>
     <p id="profilActifAccueil" class="profil-actif"></p>
 
     <div class="grille">
@@ -38,7 +41,7 @@
       <button class="tuile t-orange" onclick="aller('profils')">👤<span>Profils</span></button>
     </div>
 
-    <p class="version">Salama v0.15</p>
+    <p class="version">Salama v0.16</p>
   </section>
 
   <!-- SYMPTÔMES -->
@@ -64,7 +67,6 @@
     <div id="listeSymptomes"></div>
     <div id="resultats"></div>
   </section>
-  
     <!-- MÉDICAMENTS -->
   <section id="page-medocs" class="page cache">
     <h2>Médicaments</h2>
@@ -76,6 +78,11 @@
   <!-- JOURNAL -->
   <section id="page-journal" class="page cache">
     <h2>Journal de santé</h2>
+    <div class="journal-actions">
+      <input type="text" id="rechercheJournal" placeholder="🔍 Rechercher..." oninput="afficherJournal()">
+      <button class="btn-petit" onclick="exporterJournal()">📤 Partager</button>
+      <button class="btn-petit danger" onclick="effacerJournal()">🗑️</button>
+    </div>
     <div id="listeJournal"></div>
   </section>
 
