@@ -38,7 +38,7 @@
       <button class="tuile t-orange" onclick="aller('profils')">👤<span>Profils</span></button>
     </div>
 
-    <p class="version">Salama v0.12</p>
+    <p class="version">Salama v0.14</p>
   </section>
 
   <!-- SYMPTÔMES -->
@@ -60,10 +60,11 @@
         </select>
       </label>
     </div>
+    <button id="btnToutEffacer" class="btn-lien" onclick="toutDecocher()">✕ Tout décocher</button>
     <div id="listeSymptomes"></div>
-    <button id="btnAnalyser" class="btn-principal" onclick="analyser()">Analyser</button>
     <div id="resultats"></div>
   </section>
+  
     <!-- MÉDICAMENTS -->
   <section id="page-medocs" class="page cache">
     <h2>Médicaments</h2>
@@ -85,6 +86,11 @@
     <button id="btnNouveauProfil" class="btn-principal" onclick="nouveauProfil()">＋ Nouveau profil</button>
     <div id="formProfil" class="cache">
       <input id="pPrenom" placeholder="Prénom">
+      <select id="pSexe">
+        <option value="">Sexe...</option>
+        <option value="femme">Femme</option>
+        <option value="homme">Homme</option>
+      </select>
       <input id="pNaissance" type="number" placeholder="Année de naissance (ex : 1990)">
       <input id="pPoids" type="number" placeholder="Poids en kg (ex : 70)">
       <input id="pAllergies" placeholder="Allergies (ex : ibuprofène, aspirine)">
@@ -94,6 +100,8 @@
   </section>
 
 </main>
+
+<button id="btnFlottant" class="cache" onclick="analyser()">🔍 Analyser</button>
 
 <nav id="navBas">
   <button onclick="aller('accueil')">🏠<span>Accueil</span></button>
