@@ -32,17 +32,23 @@ body {
   padding-bottom: 90px;
 }
 
-/* FILIGRANE CROIX MÉDICALE (discret) */
+/* GRANDE CROIX MÉDICALE EN FILIGRANE */
 body::before {
   content: '';
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cpath d='M38 14h14v24h24v14H52v24H38V52H14V38h24z' fill='%23c0392b'/%3E%3C/svg%3E");
-  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect x='70' y='18' width='60' height='164' rx='14' fill='%23c0392b'/%3E%3Crect x='18' y='70' width='164' height='60' rx='14' fill='%23c0392b'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center 38%;
+  background-size: 72vmin;
+  opacity: 0.09;
   pointer-events: none;
   z-index: 1;
 }
-body.sombre::before { opacity: 0.07; }
+body.sombre::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect x='70' y='18' width='60' height='164' rx='14' fill='%23e74c3c'/%3E%3Crect x='18' y='70' width='164' height='60' rx='14' fill='%23e74c3c'/%3E%3C/svg%3E");
+  opacity: 0.14;
+}
 
 /* EN-TÊTE */
 #entete {
@@ -50,24 +56,30 @@ body.sombre::before { opacity: 0.07; }
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  background: var(--carte);
-  border-bottom: 1px solid var(--bordure);
+  background: linear-gradient(135deg, #0e7a5f, #0b5f4a);
+  border-bottom: none;
+  box-shadow: 0 2px 10px rgba(11, 95, 74, 0.3);
   position: sticky;
   top: 0;
   z-index: 10;
 }
 
-#entete h1 { font-size: 1.25rem; font-weight: 600; letter-spacing: 0.3px; }
+#entete h1 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: #ffffff;
+}
 
 #btnTheme {
-  background: none;
-  border: 1px solid var(--bordure);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 50%;
   width: 40px;
   height: 40px;
   font-size: 1.05rem;
   cursor: pointer;
-  color: var(--texte);
+  color: #ffffff;
 }
 
 /* PAGES */
@@ -423,4 +435,14 @@ body.sombre .alerte-ligne { background: #38301f; }
   color: var(--texte-doux);
   font-size: 0.9rem;
   margin-top: 30px;
+}
+
+/* POINT SOUS L'ONGLET ACTIF */
+#navBas button.actif::after {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-top: -3px;
 }
