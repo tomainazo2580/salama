@@ -79,12 +79,14 @@
     </section>
 
     <section id="page-medicaments" class="page">
-      <div class="vide"><span class="gros">💊</span>Les médicaments arrivent à l'étape 5.</div>
-    </section>
-
-    <section id="page-profils" class="page">
-      <button class="btn-principal" onclick="ouvrirFormProfil()">＋ Nouveau profil</button>
-      <div id="liste-profils"></div>
+      <div id="medoc-liste-wrap">
+        <div id="medoc-profil" class="badge-profil"></div>
+        <input type="text" id="recherche-medoc" class="champ-recherche"
+               placeholder="🔍 Rechercher un médicament..." oninput="construireListeMedocs()">
+        <select id="filtre-trouble" class="champ-recherche" onchange="construireListeMedocs()"></select>
+        <div id="liste-medocs"></div>
+      </div>
+      <div id="medoc-fiche" class="cache"></div>
     </section>
   </main>
 
