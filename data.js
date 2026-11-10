@@ -18,6 +18,7 @@ const SYMPTOMES = [
   { id: 'congestion', nom: 'Nez bouché', cat: 'Nez & gorge' },
   { id: 'mal_gorge', nom: 'Mal de gorge', cat: 'Nez & gorge' },
   { id: 'deglutition', nom: 'Douleur en avalant', cat: 'Nez & gorge' },
+  { id: 'taches_gorge', nom: 'Taches blanches dans la gorge', cat: 'Nez & gorge' },
   { id: 'douleur_face', nom: 'Douleur du visage (joues, front)', cat: 'Nez & gorge' },
   { id: 'ganglions', nom: 'Ganglions gonflés (cou)', cat: 'Nez & gorge' },
   { id: 'perte_odorat', nom: "Perte d'odorat ou de goût", cat: 'Nez & gorge' },
@@ -28,18 +29,24 @@ const SYMPTOMES = [
   { id: 'confusion', nom: 'Confusion / difficulté à parler', cat: 'Tête' },
   { id: 'raideur_nuque', nom: 'Nuque raide et douloureuse', cat: 'Tête' },
   { id: 'douleur_oreille', nom: "Douleur d'oreille", cat: 'Tête' },
+  { id: 'ecoulement_oreille', nom: "Écoulement de l'oreille", cat: 'Tête' },
   { id: 'yeux_rouges', nom: 'Yeux rouges', cat: 'Tête' },
   { id: 'yeux_larmoyants', nom: 'Yeux qui piquent / larmoient', cat: 'Tête' },
+  { id: 'yeux_colles', nom: 'Yeux collés au réveil', cat: 'Tête' },
 
   { id: 'nausees', nom: 'Nausées', cat: 'Ventre' },
   { id: 'vomissements', nom: 'Vomissements', cat: 'Ventre' },
   { id: 'diarrhee', nom: 'Diarrhée', cat: 'Ventre' },
   { id: 'douleur_abdo', nom: 'Douleur au ventre', cat: 'Ventre' },
   { id: 'douleur_abdo_intense', nom: 'Douleur au ventre intense et brutale', cat: 'Ventre' },
+  { id: 'brulures_estomac', nom: "Brûlures d'estomac", cat: 'Ventre' },
+  { id: 'remontees_acides', nom: 'Remontées acides', cat: 'Ventre' },
+  { id: 'ballonnements', nom: 'Ballonnements / ventre gonflé', cat: 'Ventre' },
+  { id: 'constipation', nom: 'Constipation', cat: 'Ventre' },
   { id: 'sang_selles', nom: 'Sang dans les selles ou les vomissements', cat: 'Ventre' },
 
   { id: 'brulures_urinaires', nom: 'Brûlures en urinant', cat: 'Urinaire' },
-  { id: 'urines_frequentes', nom: 'Envies fréquentes d\'uriner', cat: 'Urinaire' },
+  { id: 'urines_frequentes', nom: "Envies fréquentes d'uriner", cat: 'Urinaire' },
   { id: 'douleur_bas_ventre', nom: 'Douleur en bas du ventre', cat: 'Urinaire' },
 
   { id: 'eruption', nom: 'Éruption sur la peau (boutons, plaques)', cat: 'Peau' },
@@ -125,7 +132,7 @@ const TROUBLES = [
   },
   {
     id: 'gastro', nom: 'Gastro-entérite', gravite: 'benin',
-    symptomes: { nausees: 3, vomissements: 3, diarrhee: 3, douleur_abdo: 2, fievre: 1, perte_appetit: 2 },
+    symptomes: { nausees: 3, vomissements: 3, diarrhee: 3, douleur_abdo: 2, fievre: 1, perte_appetit: 2, ballonnements: 1 },
     conseils: ["S'hydrater par petites gorgées (solution de réhydratation idéalement)", "Riz, carottes, bananes", "Éviter laitages et aliments gras"],
     consulter: "si sang dans les selles, déshydratation, ou > 3 jours"
   },
@@ -137,7 +144,7 @@ const TROUBLES = [
   },
   {
     id: 'angine', nom: 'Angine', gravite: 'modere',
-    symptomes: { mal_gorge: 3, deglutition: 3, fievre: 2, ganglions: 2, fatigue: 1 },
+    symptomes: { mal_gorge: 3, deglutition: 3, taches_gorge: 3, fievre: 2, ganglions: 2, fatigue: 1 },
     conseils: ["Paracétamol pour la douleur", "Boissons tièdes, miel", "Repos de la voix"],
     consulter: "pour un test (angine bactérienne = antibiotiques possibles)"
   },
@@ -167,13 +174,13 @@ const TROUBLES = [
   },
   {
     id: 'conjonctivite', nom: 'Conjonctivite', gravite: 'benin',
-    symptomes: { yeux_rouges: 3, yeux_larmoyants: 2, demangeaisons: 1 },
+    symptomes: { yeux_rouges: 3, yeux_colles: 3, yeux_larmoyants: 2, demangeaisons: 1 },
     conseils: ["Nettoyer les yeux au sérum physiologique", "Se laver les mains souvent", "Ne pas se frotter les yeux"],
     consulter: "si douleur, gêne à la lumière ou troubles de la vision"
   },
   {
     id: 'otite', nom: 'Otite', gravite: 'modere',
-    symptomes: { douleur_oreille: 3, fievre: 2, fatigue: 1 },
+    symptomes: { douleur_oreille: 3, ecoulement_oreille: 3, fievre: 2, fatigue: 1 },
     conseils: ["Paracétamol pour la douleur", "Ne pas introduire quoi que ce soit dans l'oreille"],
     consulter: "pour examen de l'oreille (surtout chez l'enfant)"
   },
@@ -194,5 +201,23 @@ const TROUBLES = [
     symptomes: { eruption: 3, demangeaisons: 3, fievre: 2, fatigue: 1 },
     conseils: ["Ne pas gratter les boutons", "Paracétamol UNIQUEMENT (jamais d'ibuprofène)", "Isoler la personne"],
     consulter: "pour confirmer, surtout chez un adulte ou une personne fragile"
+  },
+  {
+    id: 'rgo', nom: 'Reflux gastrique (brûlures d\'estomac)', gravite: 'benin',
+    symptomes: { brulures_estomac: 3, remontees_acides: 3, ballonnements: 1, nausees: 1 },
+    conseils: ["Éviter les repas lourds et gras le soir", "Ne pas se coucher juste après manger", "Anti-acide en vente libre (type Gaviscon)"],
+    consulter: "si brûlures fréquentes (> 2 fois/semaine) ou difficulté à avaler"
+  },
+  {
+    id: 'constipation_t', nom: 'Constipation', gravite: 'benin',
+    symptomes: { constipation: 3, ballonnements: 2, douleur_abdo: 1 },
+    conseils: ["Boire plus d'eau", "Fibres : fruits, légumes, céréales complètes", "Marcher / bouger régulièrement"],
+    consulter: "si douleur intense, sang dans les selles ou > 1 semaine"
+  },
+  {
+    id: 'coup_chaleur', nom: 'Coup de chaleur / déshydratation', gravite: 'modere',
+    symptomes: { vertiges: 3, maux_tete: 2, nausees: 2, fatigue: 2, sueurs: 2 },
+    conseils: ["Se mettre au frais immédiatement", "Boire de l'eau fraîche par petites gorgées", "Se reposer à l'ombre"],
+    consulter: "si confusion, fièvre élevée ou malaise"
   }
 ];
