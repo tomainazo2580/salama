@@ -1,22 +1,26 @@
-const CACHE = 'salama-v11';
-const FICHIERS = ['./', './index.html', './style.css', './app.js', './data.js', './manifest.json', './icon-192.png', './icon-512.png'];
+const CACHE = 'salama-v12';
 
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(c =>
-      Promise.all(FICHIERS.map(f => c.add(f).catch(() => {})))
-    )
+    caches.open(CACHE).then(c => c.addAll([
+      './',
+      './index.html',
+      './style.css',
+      './app.js',
+      './data.js',
+      './manifest.json',
+      './icon-192.png',
+      './icon-512.png'
+    ])).then(() => self.skipWaiting())
   );
-  self.skipWaiting();
 });
 
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(cles =>
-      Promise.all(cles.filter(c => c !== CACHE).map(c => caches.delete(c)))
-    )
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', e => {
