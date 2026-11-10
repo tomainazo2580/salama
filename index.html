@@ -2,164 +2,108 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0e7a5f">
   <title>Salama</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <header>
-    <h1>🩺 Salama</h1>
-    <p id="sous-titre">Ton assistant santé personnel</p>
-  </header>
+<header id="entete">
+  <h1>🛡️ Salama</h1>
+  <button id="btnTheme" onclick="basculerTheme()">🌙</button>
+</header>
 
-  <main>
-    <section id="page-accueil" class="page active">
-      <div class="grille">
-        <button class="tuile t-symptomes" onclick="aller('symptomes')">
-          <span class="emoji">🤒</span>
-          <strong>Symptômes</strong>
-          <span class="statut">Analyser</span>
-        </button>
-        <button class="tuile t-journal" onclick="aller('journal')">
-          <span class="emoji">📓</span>
-          <strong>Journal</strong>
-          <span class="statut">Historique santé</span>
-        </button>
-        <button class="tuile t-medocs" onclick="aller('medicaments')">
-          <span class="emoji">💊</span>
-          <strong>Médicaments</strong>
-          <span class="statut">Ma pharmacie</span>
-        </button>
-        <button class="tuile t-profils" onclick="aller('profils')">
-          <span class="emoji">👥</span>
-          <strong>Profils</strong>
-          <span class="statut">Ma famille</span>
-        </button>
-      </div>
-      <p class="version">Salama v0.8 — données 100% locales</p>
-    </section>
+<main>
 
-    <section id="page-journal" class="page">
-      <div id="journal-profil" class="badge-profil"></div>
-      <button class="btn-principal" onclick="ouvrirFormulaire()">＋ Nouvelle entrée</button>
-      <div id="liste-journal"></div>
-    </section>
-
-    <section id="page-symptomes" class="page">
-      <div id="sym-selection">
-        <div id="sym-profil" class="badge-profil"></div>
-        <input type="text" id="recherche-symptome" class="champ-recherche"
-               placeholder="🔍 Rechercher un symptôme..." oninput="filtrerSymptomes()">
-        <div id="liste-symptomes"></div>
-        <div class="bloc-options">
-          <label>Depuis quand ?</label>
-          <select id="sym-duree">
-            <option value="aujourd'hui">Aujourd'hui</option>
-            <option value="1-2 jours" selected>1-2 jours</option>
-            <option value="3-5 jours">3-5 jours</option>
-            <option value="plus d'une semaine">Plus d'une semaine</option>
-          </select>
-          <label>Intensité globale</label>
-          <div class="intensite">
-            <button class="niv" data-val="1">1</button>
-            <button class="niv" data-val="2">2</button>
-            <button class="niv selectionnee" data-val="3">3</button>
-            <button class="niv" data-val="4">4</button>
-            <button class="niv" data-val="5">5</button>
-          </div>
-        </div>
-        <button class="btn-principal" onclick="analyser()">
-          Analyser (<span id="compteur-symptomes">0</span><span id="pluriel">s</span>)
-        </button>
-      </div>
-      <div id="sym-resultat" class="cache"></div>
-    </section>
-
-    <section id="page-medicaments" class="page">
-      <div id="medoc-liste-wrap">
-        <div id="medoc-profil" class="badge-profil"></div>
-        <input type="text" id="recherche-medoc" class="champ-recherche"
-               placeholder="🔍 Rechercher un médicament..." oninput="construireListeMedocs()">
-        <select id="filtre-trouble" class="champ-recherche" onchange="construireListeMedocs()"></select>
-        <div id="liste-medocs"></div>
-      </div>
-      <div id="medoc-fiche" class="cache"></div>
-    </section>
-  </main>
-
-  <div id="formulaire-journal" class="modal cache">
-    <div class="modal-contenu">
-      <h2>Nouvelle entrée</h2>
-      <label>Comment te sens-tu ?</label>
-      <div class="humeurs">
-        <button class="humeur" data-val="1">😫</button>
-        <button class="humeur" data-val="2">😕</button>
-        <button class="humeur" data-val="3">😐</button>
-        <button class="humeur" data-val="4">🙂</button>
-        <button class="humeur" data-val="5">😄</button>
-      </div>
-      <label>Symptômes (séparés par des virgules)</label>
-      <input type="text" id="f-symptomes" placeholder="fièvre, toux, fatigue...">
-      <label>Notes</label>
-      <textarea id="f-notes" rows="3" placeholder="Détails, contexte..."></textarea>
-      <div class="modal-actions">
-        <button class="btn-secondaire" onclick="fermerFormulaire()">Annuler</button>
-        <button class="btn-principal" onclick="sauvegarderEntree()">Enregistrer</button>
+  <!-- ACCUEIL -->
+  <section id="page-accueil" class="page">
+    <div id="banniere" class="cache">
+      <span>📲 Installe Salama sur ton téléphone</span>
+      <div class="banniere-btns">
+        <button id="btnInstaller">Installer</button>
+        <button id="btnFermerBanniere">✕</button>
       </div>
     </div>
-  </div>
 
-  <div id="formulaire-profil" class="modal cache">
-    <div class="modal-contenu">
-      <h2>Nouveau profil</h2>
-      <label>Prénom *</label>
-      <input type="text" id="p-prenom" placeholder="Ex : Awa">
-      <label>Année de naissance *</label>
-      <input type="number" id="p-annee" placeholder="Ex : 1990">
-      <label>Poids (kg) *</label>
-      <input type="number" id="p-poids" placeholder="Ex : 65">
-      <label>Allergies connues</label>
-      <input type="text" id="p-allergies" placeholder="Ex : pénicilline, arachides...">
-      <label>Traitements en cours</label>
-      <input type="text" id="p-traitements" placeholder="Ex : ventoline, ...">
-      <div class="modal-actions">
-        <button class="btn-secondaire" onclick="fermerFormProfil()">Annuler</button>
-        <button class="btn-principal" onclick="sauvegarderProfil()">Enregistrer</button>
-      </div>
+    <p id="profilActifAccueil" class="profil-actif"></p>
+
+    <div class="grille">
+      <button class="tuile t-vert" onclick="aller('symptomes')">🩺<span>Symptômes</span></button>
+      <button class="tuile t-bleu" onclick="aller('medocs')">💊<span>Médicaments</span></button>
+      <button class="tuile t-violet" onclick="aller('journal')">📓<span>Journal</span></button>
+      <button class="tuile t-orange" onclick="aller('profils')">👤<span>Profils</span></button>
     </div>
-  </div>
 
-  <nav class="nav-bas">
-    <button class="actif" data-page="accueil" onclick="aller('accueil')">
-      <span class="ico">🏠</span>Accueil
-    </button>
-    <button data-page="journal" onclick="aller('journal')">
-      <span class="ico">📓</span>Journal
-    </button>
-    <button data-page="medicaments" onclick="aller('medicaments')">
-      <span class="ico">💊</span>Médoc
-    </button>
-    <button data-page="profils" onclick="aller('profils')">
-      <span class="ico">👥</span>Profils
-    </button>
-    <button onclick="basculerSombre()">
-      <span class="ico" id="ico-sombre">🌙</span>Sombre
-    </button>
-  </nav>
+    <p class="version">Salama v0.11</p>
+  </section>
 
-  <div id="banniere" class="banniere cachee">
-    <button id="fermer-banniere" aria-label="Fermer">✕</button>
-    <div class="banniere-texte">
-      <strong>Installer Salama</strong>
-      <span id="banniere-detail">Accès rapide depuis ton écran d'accueil</span>
+  <!-- SYMPTÔMES -->
+  <section id="page-symptomes" class="page cache">
+    <h2>Que ressens-tu ?</h2>
+    <div class="champs-ligne">
+      <label>Depuis
+        <select id="duree">
+          <option value="aujourd'hui">Aujourd'hui</option>
+          <option value="2-3 jours">2-3 jours</option>
+          <option value="1 semaine ou +">1 semaine ou +</option>
+        </select>
+      </label>
+      <label>Intensité
+        <select id="intensite">
+          <option value="légère">Légère</option>
+          <option value="modérée">Modérée</option>
+          <option value="forte">Forte</option>
+        </select>
+      </label>
     </div>
-    <button id="bouton-installer">Installer</button>
-  </div>
+    <div id="listeSymptomes"></div>
+    <button id="btnAnalyser" class="btn-principal" onclick="analyser()">Analyser</button>
+    <div id="resultats"></div>
+  </section>
+    <!-- MÉDICAMENTS -->
+  <section id="page-medocs" class="page cache">
+    <h2>Médicaments</h2>
+    <p id="medocsProfil" class="profil-actif"></p>
+    <div id="listeMedocs"></div>
+    <div id="ficheMedoc" class="cache"></div>
+  </section>
 
-  <script src="data.js"></script>
-  <script src="app.js"></script>
+  <!-- JOURNAL -->
+  <section id="page-journal" class="page cache">
+    <h2>Journal de santé</h2>
+    <div id="listeJournal"></div>
+  </section>
+
+  <!-- PROFILS -->
+  <section id="page-profils" class="page cache">
+    <h2>Profils</h2>
+    <div id="listeProfils"></div>
+    <button id="btnNouveauProfil" class="btn-principal" onclick="nouveauProfil()">＋ Nouveau profil</button>
+    <div id="formProfil" class="cache">
+      <input id="pPrenom" placeholder="Prénom">
+      <input id="pNaissance" type="number" placeholder="Année de naissance (ex : 1990)">
+      <input id="pPoids" type="number" placeholder="Poids en kg (ex : 70)">
+      <input id="pAllergies" placeholder="Allergies (ex : ibuprofène, aspirine)">
+      <input id="pTraitements" placeholder="Traitements en cours (ex : cortisone)">
+      <button class="btn-principal" onclick="enregistrerProfil()">Enregistrer</button>
+    </div>
+  </section>
+
+</main>
+
+<nav id="navBas">
+  <button onclick="aller('accueil')">🏠<span>Accueil</span></button>
+  <button onclick="aller('symptomes')">🩺<span>Symptômes</span></button>
+  <button onclick="aller('medocs')">💊<span>Médocs</span></button>
+  <button onclick="aller('journal')">📓<span>Journal</span></button>
+  <button onclick="aller('profils')">👤<span>Profils</span></button>
+</nav>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
