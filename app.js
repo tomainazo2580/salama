@@ -47,16 +47,18 @@ function nouveauProfil() {
 
 function enregistrerProfil() {
   const prenom = $('pPrenom').value.trim();
+  const sexe = $('pSexe').value;
   const naissance = parseInt($('pNaissance').value);
   const poids = parseFloat($('pPoids').value);
-  if (!prenom || !naissance || !poids) {
-    alert('Remplis au moins le prénom, l\u2019année de naissance et le poids.');
+  if (!prenom || !sexe || !naissance || !poids) {
+    alert('Remplis au moins le prénom, le sexe, l\u2019année de naissance et le poids.');
     return;
   }
   const liste = profils();
   const profil = {
     id: Date.now(),
     prenom: prenom,
+    sexe: sexe,
     naissance: naissance,
     poids: poids,
     allergies: $('pAllergies').value.trim().toLowerCase(),
@@ -65,7 +67,7 @@ function enregistrerProfil() {
   liste.push(profil);
   ecrireCle('salama_profils', liste);
   if (!profilActif()) ecrireCle('salama_profil_actif', profil.id);
-  ['pPrenom', 'pNaissance', 'pPoids', 'pAllergies', 'pTraitements'].forEach(id => { $(id).value = ''; });
+  ['pPrenom', 'pSexe', 'pNaissance', 'pPoids', 'pAllergies', 'pTraitements'].forEach(id => { $(id).value = ''; });
   $('formProfil').classList.add('cache');
   $('btnNouveauProfil').classList.remove('cache');
   afficherProfils();
@@ -97,8 +99,9 @@ function afficherProfils() {
   zone.innerHTML = liste.map(p => {
     const age = ageDe(p);
     const estActif = actif && actif.id === p.id;
+    const iconeSexe = p.sexe === 'femme' ? ' ♀' : p.sexe === 'homme' ? ' ♂' : '';
     return '<div class="item-liste">' +
-      '<strong>' + p.prenom + '</strong>' + (estActif ? '<span class="mini-badge">actif</span>' : '') +
+      '<strong>' + p.prenom + iconeSexe + '</strong>' + (estActif ? '<span class="mini-badge">actif</span>' : '') +
       '<br>' + (age !== null ? age + ' ans · ' : '') + p.poids + ' kg' +
       (p.allergies ? '<br>Allergies : ' + p.allergies : '') +
       (p.traitements ? '<br>Traitements : ' + p.traitements : '') +
@@ -111,18 +114,38 @@ function afficherProfils() {
 // ================= SYMPTÔMES =================
 function preparerSymptomes() {
   $('listeSymptomes').innerHTML = SYMPTOMES.map(cat =>
-    '<div class="categorie"><h3>' + cat.categorie + '</h3><div class="chips">' +
+    '<div class="categorie"><h3>' + cat.categorie + '</h3><div class="sym-liste">' +
     cat.items.map(s =>
-      '<button class="chip" data-id="' + s.id + '" onclick="basculerChip(this)">' + s.nom + '</button>'
+      '<div class="sym-ligne" data-id="' + s.id + '" onclick="basculerChip(this)">' +
+      '<span class="sym-cercle">✓</span>' + s.nom + '</div>'
     ).join('') +
     '</div></div>'
   ).join('');
 }
 
-function basculerChip(btn) { btn.classList.toggle('on'); }
+function basculerChip(ligne) {
+  ligne.classList.toggle('on');
+  majBoutonFlottant();
+}
+
+function toutDecocher() {
+  document.querySelectorAll('.sym-ligne.on').forEach(l => l.classList.remove('on'));
+  majBoutonFlottant();
+}
+
+function majBoutonFlottant() {
+  const n = symptomesCoches().length;
+  const btn = $('btnFlottant');
+  if (n > 0) {
+    btn.classList.remove('cache');
+    btn.textContent = '🔍 Analyser (' + n + ')';
+  } else {
+    btn.classList.add('cache');
+  }
+}
 
 function symptomesCoches() {
-  return Array.from(document.querySelectorAll('.chip.on')).map(c => c.dataset.id);
+  return Array.from(document.querySelectorAll('.sym-ligne.on')).map(c => c.dataset.id);
 }
 
 function nomSymptome(id) {
@@ -143,7 +166,17 @@ function analyser() {
     return;
   }
 
+  const profil = profilActif();
+  const age = ageDe(profil);
+  const fragile = age !== null && (age < 3 || age > 65);
+
   let html = '';
+
+  html += '<p style="font-size:0.85rem;color:var(--texte-doux);margin-bottom:10px">' +
+    (profil
+      ? '👤 Analyse pour : <strong>' + profil.prenom + '</strong> (' + age + ' ans, ' + profil.poids + ' kg)'
+      : '👤 Aucun profil actif — doses adulte standard affichées') +
+    '</p>';
 
   // 1. Drapeaux rouges EN PREMIER
   const alertes = DRAPEAUX.filter(d => d.symptomes.every(s => coches.includes(s)));
@@ -153,15 +186,17 @@ function analyser() {
     ).join('');
   }
 
-  // 2. Scoring
-  const profil = profilActif();
-  const age = ageDe(profil);
-  const fragile = age !== null && (age < 3 || age > 65);
-
+  // 2. Scoring avec filtres âge et sexe
+  const ecartees = [];
   const resultats = TROUBLES.map(t => {
     const ids = Object.keys(t.symptomes);
     const trouves = ids.filter(id => coches.includes(id));
     if (!trouves.length) return null;
+    if (age !== null) {
+      if (t.age_min !== undefined && t.age_min !== null && age < t.age_min) { ecartees.push(t.nom); return null; }
+      if (t.age_max !== undefined && t.age_max !== null && age > t.age_max) { ecartees.push(t.nom); return null; }
+    }
+    if (t.sexe && profil && profil.sexe && profil.sexe.charAt(0) !== t.sexe) { ecartees.push(t.nom); return null; }
     const poidsTotal = ids.reduce((s, id) => s + t.symptomes[id], 0);
     const poidsTrouve = trouves.reduce((s, id) => s + t.symptomes[id], 0);
     const couverture = poidsTrouve / poidsTotal;
@@ -180,21 +215,27 @@ function analyser() {
       const badge = r.pct >= 60 ? '<span class="badge b-vert">🟢 forte probabilité</span>'
                   : r.pct >= 40 ? '<span class="badge b-jaune">🟡 possible</span>'
                   : '<span class="badge b-gris">⚪ piste faible</span>';
-      
-      // 🆕 Bloc posologie pour cette maladie
+
+      let blocAntibio = '';
+      if (r.trouble.antibio) {
+        blocAntibio = '<div class="box-antibio">💊 <strong>Traitement habituel :</strong> ' + r.trouble.antibio + '</div>';
+      }
+
       let blocMedocs = '';
       if (r.trouble.medocs && r.trouble.medocs.length) {
         blocMedocs = '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--bordure)">' +
-          '<strong>💊 Médicaments suggérés :</strong>' +
+          '<strong>💊 Pour soulager les symptômes :</strong>' +
+          '<br><span style="font-size:0.78rem;color:var(--texte-doux)">Ça soulage, ça ne guérit pas la cause. Lis bien « Consulter si ».</span>' +
           r.trouble.medocs.map(id => {
             const m = MEDICAMENTS.find(x => x.id === id);
             if (!m) return '';
             const alertes = alertesProfilPour(m);
             const interdit = alertes.some(a => a.grave);
-            const doseTexte = posologiePourTexte(m);
+            const doseTexte = interdit ? '' : posologiePourTexte(m);
             return '<div style="margin-top:6px;padding:8px;background:var(--accent-clair);border-radius:8px;font-size:0.88rem">' +
               '<strong>' + m.nom + '</strong>' +
               (interdit ? ' <span class="badge b-rouge">⛔ déconseillé</span>' : '') +
+              '<br><span style="font-size:0.8rem;color:var(--texte-doux)">' + m.indication + '</span>' +
               (doseTexte ? '<br>' + doseTexte : '') +
               (alertes.length && !interdit ? '<br><span style="color:#8a6100">' + alertes.map(a => a.texte).join('<br>') + '</span>' : '') +
               '</div>';
@@ -205,17 +246,23 @@ function analyser() {
         '<p style="margin-top:8px"><strong>Conseils :</strong></p><ul>' +
         r.trouble.conseils.map(c => '<li>' + c + '</li>').join('') + '</ul>' +
         '<p style="margin-top:6px"><strong>Consulter si :</strong> ' + r.trouble.consulter + '</p>' +
-        blocMedocs + '</div>';
+        blocAntibio + blocMedocs + '</div>';
     });
   }
 
-  // 4. Profil fragile
+  // 4. Maladies écartées selon le profil
+  if (ecartees.length) {
+    html += '<div class="carte"><p style="font-size:0.88rem">🧬 <strong>Écartées selon le profil (âge ou sexe) :</strong> ' +
+      ecartees.join(', ') + '</p></div>';
+  }
+
+  // 5. Profil fragile
   if (fragile) {
     html += '<div class="carte danger"><p>⚠️ <strong>' + profil.prenom + ' a ' + age +
       ' ans (profil fragile)</strong> : consulte un médecin plus rapidement qu\u2019un adulte en bonne santé.</p></div>';
   }
 
-  // 5. Symptômes non reconnus
+  // 6. Symptômes non reconnus
   const connus = new Set();
   TROUBLES.forEach(t => Object.keys(t.symptomes).forEach(id => connus.add(id)));
   const inconnus = coches.filter(id => !connus.has(id));
@@ -224,7 +271,7 @@ function analyser() {
       inconnus.map(nomSymptome).join(', ') + '</p></div>';
   }
 
-  // 6. Mémorise + bouton journal
+  // 7. Mémorise + bouton journal
   derniereAnalyse = {
     date: new Date().toISOString(),
     profil: profil ? profil.prenom : 'Sans profil',
@@ -236,6 +283,10 @@ function analyser() {
 
   html += '<button class="btn-principal" onclick="enregistrerAnalyse()">📓 Enregistrer dans le journal</button>';
   zone.innerHTML = html;
+
+  // 🆕 Décoche automatiquement les symptômes pour la prochaine analyse
+  toutDecocher();
+
   zone.scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -276,7 +327,7 @@ function supprimerEntree(i) {
   afficherJournal();
 }
 
-// ================= POSOLOGIE TEXTE (🆕 pour l'analyse) =================
+// ================= POSOLOGIE TEXTE =================
 function posologiePourTexte(m) {
   const profil = profilActif();
   if (!profil) return m.adulte + ' (dose adulte)';
@@ -394,6 +445,7 @@ function aller(page) {
   if (page === 'profils') afficherProfils();
   if (page === 'medocs') preparerMedocs();
   if (page === 'accueil') majAccueil();
+  if (page === 'symptomes') majBoutonFlottant();
 }
 
 function majAccueil() {
