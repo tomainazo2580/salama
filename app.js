@@ -502,3 +502,143 @@ function enregistrerAnalyse() {
   majCompteur();
   aller('journal');
 }
+/* =====================================================
+   MÉDICAMENTS
+   ===================================================== */
+
+/* Branche la préparation des médicaments sur la navigation */
+const _allerBase = aller;
+aller = function(page) {
+  _allerBase(page);
+  if (page === 'medicaments') preparerMedocs();
+};
+
+function preparerMedocs() {
+  const badge = document.getElementById('medoc-profil');
+  const actif = profilActif();
+  if (actif) {
+    badge.textContent = '👤 Dosages pour : ' + actif.prenom + ' (' + ageDe(actif) + ' ans, ' + actif.poids + ' kg)';
+  } else {
+    badge.textContent = '⚠️ Aucun profil actif — dosages adulte affichés';
+  }
+  badge.classList.add('visible');
+
+  const sel = document.getElementById('filtre-trouble');
+  sel.innerHTML = '<option value="">Tous les médicaments</option>' +
+    TROUBLES.filter(t => t.medocs && t.medocs.length)
+      .map(t => `<option value="${t.id}">${t.nom}</option>`).join('');
+
+  retourMedocs();
+  construireListeMedocs();
+}
+
+function construireListeMedocs() {
+  const filtre = (document.getElementById('recherche-medoc').value || '').toLowerCase();
+  const troubleId = document.getElementById('filtre-trouble').value;
+  const trouble = TROUBLES.find(t => t.id === troubleId);
+  const actif = profilActif();
+
+  const liste = MEDICAMENTS.filter(m => {
+    if (trouble && !trouble.medocs.includes(m.id)) return false;
+    if (filtre && !m.nom.toLowerCase().includes(filtre)
+              && !m.marques.toLowerCase().includes(filtre)
+              && !m.usage.toLowerCase().includes(filtre)) return false;
+    return true;
+  });
+
+  document.getElementById('liste-medocs').innerHTML = liste.map(m => {
+    const alertes = alertesProfilPour(m, actif);
+    return `<div class="medoc" onclick="ficheMedoc('${m.id}')">
+      <div class="medoc-tete">
+        <span class="medoc-nom">💊 ${m.nom}</span>
+        ${alertes.length ? '<span>⚠️</span>' : ''}
+      </div>
+      <div class="medoc-usage">${m.usage}</div>
+      <div class="medoc-marques">${m.marques}</div>
+    </div>`;
+  }).join('') || '<div class="journal-vide">Aucun médicament trouvé</div>';
+}
+
+function posologiePour(m, profil) {
+  if (!profil) {
+    return { niveau: 'ok', lignes: [m.adulte, m.max].filter(Boolean) };
+  }
+  const age = ageDe(profil);
+  const poids = Number(profil.poids) || 0;
+
+  if (m.age_min && age < m.age_min) {
+    return { niveau: 'danger', lignes: [
+      'Déconseillé avant ' + m.age_min + ' ans.',
+      'Demande conseil à un médecin ou à un pharmacien.'
+    ]};
+  }
+  if (m.bebe && age < 1) {
+    return { niveau: 'warn', lignes: [m.bebe, 'Avis médical obligatoire pour un nourrisson.'] };
+  }
+  if (age >= 15 || poids >= 50) {
+    return { niveau: 'ok', lignes: [m.adulte, m.max].filter(Boolean) };
+  }
+  const lignes = [];
+  if (m.enfant_mgkg && poids > 0) {
+    const dose = Math.round((m.enfant_mgkg * poids) / 10) * 10;
+    lignes.push('Dose calculée pour ' + poids + ' kg : ' + dose + ' mg ' + (m.enfant_rythme || ''));
+    lignes.push('Utilise une forme adaptée aux enfants (sirop dosé au poids ou suppositoire).');
+  } else if (m.enfant_fixe) {
+    lignes.push(m.enfant_fixe);
+  } else {
+    lignes.push(m.adulte);
+  }
+  return { niveau: 'ok', lignes };
+}
+
+function alertesProfilPour(m, profil) {
+  if (!profil) return [];
+  const out = [];
+  const al = (profil.allergies || '').toLowerCase();
+  (m.allergie_mots || []).forEach(mot => {
+    if (al.includes(mot)) out.push('🚫 Allergie déclarée dans ce profil : NE PAS PRENDRE.');
+  });
+  const tr = (profil.traitements || '').toLowerCase();
+  (m.interactions || []).forEach(mot => {
+    if (tr.includes(mot)) out.push('⚠️ Interaction possible avec le traitement en cours (' + mot + ') : demande avis avant.');
+  });
+  return out;
+}
+
+function ficheMedoc(id) {
+  const m = MEDICAMENTS.find(x => x.id === id);
+  const actif = profilActif();
+  const poso = posologiePour(m, actif);
+  const alertes = alertesProfilPour(m, actif);
+
+  let html = `<div class="fiche">
+    <button class="btn-secondaire" onclick="retourMedocs()">← Retour</button>
+    <h2 class="fiche-titre">💊 ${m.nom}</h2>
+    <div class="medoc-usage">${m.usage}</div>
+    <div class="medoc-marques">Marques : ${m.marques}</div>`;
+
+  alertes.forEach(a => { html += `<div class="fiche-danger">${a}</div>`; });
+
+  html += `<div class="fiche-bloc fiche-${poso.niveau}">
+      <div class="fiche-bloc-titre">${poso.niveau === 'danger' ? '⛔ Contre-indiqué pour ce profil' : actif ? '📋 Posologie pour ' + actif.prenom : '📋 Posologie adulte'}</div>
+      ${poso.lignes.map(l => `<div class="fiche-ligne">${l}</div>`).join('')}
+    </div>`;
+
+  html += `<div class="fiche-bloc">
+      <div class="fiche-bloc-titre">⚠️ Précautions</div>
+      ${m.alertes.map(a => `<div class="fiche-ligne">• ${a}</div>`).join('')}
+      <div class="fiche-ligne">• Lis toujours la notice et demande conseil à ton pharmacien.</div>
+    </div>
+  </div>`;
+
+  document.getElementById('medoc-liste-wrap').classList.add('cache');
+  const f = document.getElementById('medoc-fiche');
+  f.innerHTML = html;
+  f.classList.remove('cache');
+  window.scrollTo(0, 0);
+}
+
+function retourMedocs() {
+  document.getElementById('medoc-fiche').classList.add('cache');
+  document.getElementById('medoc-liste-wrap').classList.remove('cache');
+}
