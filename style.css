@@ -1,17 +1,17 @@
 :root {
-  --fond: #f4f6f5;
+  --fond: #f6f8f7;
   --carte: #ffffff;
-  --texte: #1c2b26;
-  --texte-doux: #5a6b65;
+  --texte: #22312b;
+  --texte-doux: #5f726c;
   --accent: #0e7a5f;
-  --accent-clair: #e2f3ee;
+  --accent-clair: #e6f3ef;
   --danger: #c0392b;
   --danger-clair: #fdecea;
-  --bordure: #dde5e2;
+  --bordure: #e1e8e5;
 }
 
 body.sombre {
-  --fond: #12181a;
+  --fond: #131a1c;
   --carte: #1c2426;
   --texte: #e8efec;
   --texte-doux: #9db0a9;
@@ -32,12 +32,24 @@ body {
   padding-bottom: 90px;
 }
 
+/* FILIGRANE CROIX MÉDICALE (discret) */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cpath d='M38 14h14v24h24v14H52v24H38V52H14V38h24z' fill='%23c0392b'/%3E%3C/svg%3E");
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 1;
+}
+body.sombre::before { opacity: 0.07; }
+
 /* EN-TÊTE */
 #entete {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 16px;
+  padding: 16px;
   background: var(--carte);
   border-bottom: 1px solid var(--bordure);
   position: sticky;
@@ -45,7 +57,7 @@ body {
   z-index: 10;
 }
 
-#entete h1 { font-size: 1.3rem; }
+#entete h1 { font-size: 1.25rem; font-weight: 600; letter-spacing: 0.3px; }
 
 #btnTheme {
   background: none;
@@ -53,19 +65,20 @@ body {
   border-radius: 50%;
   width: 40px;
   height: 40px;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   cursor: pointer;
+  color: var(--texte);
 }
 
 /* PAGES */
-.page { padding: 16px 14px; }
+.page { padding: 18px 16px; }
 .page.cache, .cache { display: none; }
 
-h2 { font-size: 1.15rem; margin-bottom: 14px; }
+h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 14px; }
 
 /* BANNIÈRE INSTALLATION */
 #banniere {
-  margin: 4px 14px 90px;
+  margin: 0 0 14px;
   padding: 12px 14px;
   background: var(--accent-clair);
   border-radius: 12px;
@@ -74,7 +87,7 @@ h2 { font-size: 1.15rem; margin-bottom: 14px; }
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
 }
 
 .banniere-btns { display: flex; gap: 8px; }
@@ -97,14 +110,14 @@ h2 { font-size: 1.15rem; margin-bottom: 14px; }
   color: var(--texte-doux);
   padding: 4px 8px;
 }
+
 /* PROFIL ACTIF */
 .profil-actif {
   font-size: 0.85rem;
   color: var(--texte-doux);
   margin-bottom: 12px;
 }
-
-/* GRILLE D'ACCUEIL */
+/* GRILLE D'ACCUEIL — style minimal */
 .grille {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -114,40 +127,42 @@ h2 { font-size: 1.15rem; margin-bottom: 14px; }
 
 .tuile {
   border: none;
-  border-radius: 16px;
-  padding: 26px 10px;
-  font-size: 1.6rem;
+  border-radius: 14px;
+  padding: 24px 10px;
+  font-size: 1.5rem;
   color: #fff;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
+  box-shadow: 0 2px 6px rgba(20, 40, 35, 0.08);
 }
 
-.tuile span { font-size: 0.95rem; font-weight: 600; }
-.t-vert   { background: linear-gradient(135deg, #12a37e, #0b5f4a); }
-.t-bleu   { background: linear-gradient(135deg, #2b6cb0, #1a3d63); }
-.t-violet { background: linear-gradient(135deg, #6b46c1, #3c2470); }
-.t-orange { background: linear-gradient(135deg, #dd6b20, #8f3c10); }
+.tuile span { font-size: 0.92rem; font-weight: 600; }
+.t-vert   { background: #0e7a5f; }
+.t-bleu   { background: #35617e; }
+.t-violet { background: #5f5390; }
+.t-orange { background: #b0601f; }
 
 .version {
   text-align: center;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--texte-doux);
-  margin-top: 24px;
+  margin-top: 26px;
+  letter-spacing: 0.5px;
 }
 
 /* CHAMPS */
 .champs-ligne {
   display: flex;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 
 .champs-ligne label {
   flex: 1;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--texte-doux);
   display: flex;
   flex-direction: column;
@@ -156,7 +171,7 @@ h2 { font-size: 1.15rem; margin-bottom: 14px; }
 
 select, input {
   width: 100%;
-  padding: 10px;
+  padding: 11px;
   border: 1px solid var(--bordure);
   border-radius: 10px;
   background: var(--carte);
@@ -164,34 +179,92 @@ select, input {
   font-size: 0.95rem;
 }
 
-/* SYMPTÔMES */
-.categorie { margin-bottom: 14px; }
+/* PETIT BOUTON LIEN (Tout décocher) */
+.btn-lien {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 0.84rem;
+  padding: 2px 0 10px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* SYMPTÔMES — liste avec cercles (style minimal) */
+.categorie { margin-bottom: 18px; }
 
 .categorie h3 {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   color: var(--texte-doux);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 6px;
+  letter-spacing: 1px;
+  font-weight: 600;
+  margin-bottom: 8px;
 }
 
-.chips { display: flex; flex-wrap: wrap; gap: 8px; }
-
-.chip {
-  border: 1px solid var(--bordure);
+.sym-liste {
   background: var(--carte);
-  color: var(--texte);
-  border-radius: 20px;
-  padding: 8px 14px;
-  font-size: 0.9rem;
-  cursor: pointer;
+  border: 1px solid var(--bordure);
+  border-radius: 14px;
+  overflow: hidden;
 }
 
-.chip.on {
+.sym-ligne {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--bordure);
+  font-size: 0.93rem;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sym-ligne:last-child { border-bottom: none; }
+
+.sym-cercle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #b7c4bf;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: transparent;
+  flex-shrink: 0;
+}
+
+body.sombre .sym-cercle { border-color: #46565a; }
+
+.sym-ligne.on {
+  color: var(--accent);
+  font-weight: 600;
+  background: var(--accent-clair);
+}
+
+.sym-ligne.on .sym-cercle {
   background: var(--accent);
   border-color: var(--accent);
   color: #fff;
-  font-weight: 600;
+}
+
+/* BOUTON ANALYSER FLOTTANT */
+#btnFlottant {
+  position: fixed;
+  left: 14px;
+  right: 14px;
+  bottom: 78px;
+  z-index: 30;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  padding: 15px;
+  font-size: 1rem;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(14, 122, 95, 0.35);
+  cursor: pointer;
 }
 
 /* BOUTON PRINCIPAL */
@@ -207,14 +280,14 @@ select, input {
   cursor: pointer;
   margin: 14px 0;
 }
-
-/* CARTES RÉSULTATS */
+/* CARTES */
 .carte {
   background: var(--carte);
   border: 1px solid var(--bordure);
   border-radius: 14px;
-  padding: 14px;
+  padding: 15px;
   margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(20, 40, 35, 0.05);
 }
 
 .carte.danger {
@@ -223,14 +296,14 @@ select, input {
 }
 
 .carte h3 { font-size: 1rem; margin-bottom: 6px; }
-.carte p, .carte li { font-size: 0.9rem; line-height: 1.5; }
+.carte p, .carte li { font-size: 0.9rem; line-height: 1.55; }
 .carte ul { padding-left: 20px; }
 
 .badge {
   display: inline-block;
   padding: 2px 10px;
   border-radius: 12px;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
 }
 
@@ -238,6 +311,21 @@ select, input {
 .b-jaune { background: #fdf0d3; color: #8a6100; }
 .b-gris { background: var(--bordure); color: var(--texte-doux); }
 .b-rouge { background: var(--danger-clair); color: var(--danger); }
+
+body.sombre .b-vert { background: #14352a; color: #5fd3a5; }
+body.sombre .b-jaune { background: #38301f; color: #e6c07a; }
+body.sombre .b-gris { background: #2c3a3d; color: #9db0a9; }
+
+/* BLOC ANTIBIO-INFO */
+.box-antibio {
+  margin-top: 8px;
+  padding: 9px 10px;
+  background: #fdf3d8;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+body.sombre .box-antibio { background: #38301f; }
 
 /* FICHE MÉDOC */
 .alerte-ligne {
@@ -247,6 +335,8 @@ select, input {
   font-size: 0.88rem;
   background: #fdf0d3;
 }
+
+body.sombre .alerte-ligne { background: #38301f; }
 
 .alerte-ligne.interdit {
   background: var(--danger-clair);
