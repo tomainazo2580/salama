@@ -40,7 +40,7 @@
           <span class="statut">Ma famille</span>
         </button>
       </div>
-      <p class="version">Salama v0.5 — données 100% locales</p>
+      <p class="version">Salama v0.6 — données 100% locales</p>
     </section>
 
     <!-- ===== JOURNAL ===== -->
@@ -52,7 +52,40 @@
 
     <!-- ===== SYMPTÔMES ===== -->
     <section id="page-symptomes" class="page">
-      <div class="vide"><span class="gros">🤒</span>L'analyse de symptômes arrive à l'étape 4.</div>
+
+      <!-- Étape A : sélection -->
+      <div id="sym-selection">
+        <div id="sym-profil" class="badge-profil"></div>
+        <input type="text" id="recherche-symptome" class="champ-recherche"
+               placeholder="🔍 Rechercher un symptôme..." oninput="filtrerSymptomes()">
+        <div id="liste-symptomes"></div>
+
+        <div class="bloc-options">
+          <label>Depuis quand ?</label>
+          <select id="sym-duree">
+            <option value="aujourd'hui">Aujourd'hui</option>
+            <option value="1-2 jours" selected>1-2 jours</option>
+            <option value="3-5 jours">3-5 jours</option>
+            <option value="plus d'une semaine">Plus d'une semaine</option>
+          </select>
+          <label>Intensité globale</label>
+          <div class="intensite">
+            <button class="niv" data-val="1">1</button>
+            <button class="niv" data-val="2">2</button>
+            <button class="niv selectionnee" data-val="3">3</button>
+            <button class="niv" data-val="4">4</button>
+            <button class="niv" data-val="5">5</button>
+          </div>
+        </div>
+
+        <button class="btn-principal btn-analyser" onclick="analyser()">
+          Analyser (<span id="compteur-symptomes">0</span> symptôme<span id="pluriel">s</span>)
+        </button>
+      </div>
+
+      <!-- Étape B : résultat -->
+      <div id="sym-resultat" class="cache"></div>
+
     </section>
 
     <!-- ===== MÉDICAMENTS ===== -->
@@ -140,6 +173,7 @@
     <button id="bouton-installer">Installer</button>
   </div>
 
+  <script src="data.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
