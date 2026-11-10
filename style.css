@@ -234,3 +234,28 @@ main { padding: 14px; }
   background: var(--carte); border-radius: 12px; margin-bottom: 12px;
   font-size: 0.92rem; line-height: 1.5;
 }
+/* ===== Médicaments ===== */
+.medoc {
+  background: var(--carte); border-radius: 12px; padding: 14px;
+  margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); cursor: pointer;
+}
+.medoc:active { transform: scale(0.98); }
+.medoc-tete { display: flex; justify-content: space-between; align-items: center; }
+.medoc-nom { font-weight: 700; }
+.medoc-usage { font-size: 0.85rem; color: var(--accent); margin-top: 3px; }
+.medoc-marques { font-size: 0.78rem; color: var(--texte-doux); margin-top: 3px; }
+
+.fiche-titre { margin: 12px 0 6px; font-size: 1.3rem; }
+.fiche-bloc {
+  background: var(--carte); border-radius: 12px; padding: 14px; margin-top: 12px;
+  border-left: 4px solid var(--accent);
+}
+.fiche-bloc.fiche-danger { border-left-color: #e74c3c; }
+.fiche-bloc.fiche-warn { border-left-color: #f39c12; }
+.fiche-bloc-titre { font-weight: 700; margin-bottom: 8px; font-size: 0.95rem; }
+.fiche-ligne { font-size: 0.9rem; line-height: 1.5; margin-bottom: 4px; }
+.fiche-danger {
+  background: #e74c3c; color: white; border-radius: 12px;
+  padding: 12px 14px; margin-top: 12px; font-size: 0.92rem; font-weight: 600;
+}
+.fiche .btn-secondaire { flex: none; width: auto; padding: 10px 16px; margin-bottom: 6px; }
