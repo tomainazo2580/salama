@@ -83,11 +83,13 @@ function enregistrerProfil() {
   $('formProfil').classList.add('cache');
   $('btnNouveauProfil').classList.remove('cache');
   afficherProfils();
+  preparerSymptomes();
 }
 
 function activerProfil(id) {
   ecrireCle('salama_profil_actif', id);
   afficherProfils();
+  preparerSymptomes();
 }
 
 function supprimerProfil(id) {
@@ -98,6 +100,7 @@ function supprimerProfil(id) {
     ecrireCle('salama_profil_actif', liste.length ? liste[0].id : null);
   }
   afficherProfils();
+  preparerSymptomes();
 }
 
 function afficherProfils() {
@@ -125,14 +128,27 @@ function afficherProfils() {
 }
 // ================= SYMPTÔMES =================
 function preparerSymptomes() {
-  $('listeSymptomes').innerHTML = SYMPTOMES.map(cat =>
-    '<div class="categorie"><h3>' + cat.categorie + '</h3><div class="sym-liste">' +
-    cat.items.map(s =>
+  $('listeSymptomes').innerHTML = categoriesSymptomes.map(cat =>
+    '<div class="categorie"><h3>' + cat.nom + '</h3><div class="sym-liste">' +
+    cat.symptomes.map(s =>
       '<div class="sym-ligne" data-id="' + s.id + '" onclick="basculerChip(this)">' +
       '<span class="sym-cercle">✓</span>' + s.nom + '</div>'
     ).join('') +
     '</div></div>'
   ).join('');
+
+  // Masque les symptômes intimes réservés à l'autre sexe selon le profil actif
+  const profil = profilActif();
+  const sx = profil && profil.sexe ? profil.sexe.charAt(0) : null;
+  if (sx) {
+    const symptomesF = ['pertes_anormales'];
+    const symptomesH = ['ecoulement_uretral', 'douleur_testicule', 'gonflement_testicule'];
+    document.querySelectorAll('.sym-ligne').forEach(ligne => {
+      const id = ligne.dataset.id;
+      if (sx === 'f' && symptomesH.indexOf(id) !== -1) ligne.classList.add('cache');
+      if (sx === 'm' && symptomesF.indexOf(id) !== -1) ligne.classList.add('cache');
+    });
+  }
 }
 
 function basculerChip(ligne) {
@@ -148,11 +164,18 @@ function toutDecocher() {
 function majBoutonFlottant() {
   const n = symptomesCoches().length;
   const btn = $('btnFlottant');
-  if (n > 0) {
-    btn.classList.remove('cache');
-    btn.textContent = '🔍 Analyser (' + n + ')';
-  } else {
-    btn.classList.add('cache');
+  if (btn) {
+    if (n > 0) {
+      btn.classList.remove('cache');
+      btn.textContent = '🔍 Analyser (' + n + ')';
+    } else {
+      btn.classList.add('cache');
+    }
+  }
+  const btnR = $('btnRemonter');
+  if (btnR) {
+    if (window.scrollY > 300) btnR.classList.remove('cache');
+    else btnR.classList.add('cache');
   }
 }
 
@@ -161,8 +184,8 @@ function symptomesCoches() {
 }
 
 function nomSymptome(id) {
-  for (const cat of SYMPTOMES) {
-    const s = cat.items.find(i => i.id === id);
+  for (const cat of categoriesSymptomes) {
+    const s = cat.symptomes.find(i => i.id === id);
     if (s) return s.nom;
   }
   return id;
@@ -174,14 +197,16 @@ function iconeMaladie(t) {
   if (['grippe', 'covid', 'rhume', 'angine', 'angine_bacterienne', 'sinusite', 'bronchite', 'bronchite_chronique', 'pneumonie', 'asthme', 'covid_long', 'coqueluche', 'bronchiolite'].includes(id)) return '🫁';
   if (['gastro', 'intoxication', 'rgo', 'constipation_t', 'appendicite', 'hemorroides'].includes(id)) return '🍽️';
   if (['migraine', 'coup_chaleur'].includes(id)) return '🤕';
-  if (['cystite'].includes(id)) return '🚽';
+  if (['cystite', 'pyelonephrite', 'colique_nephretique', 'insuffisance_renale'].includes(id)) return '🚽';
   if (['lombalgie', 'sciatique', 'tendinite', 'entorse'].includes(id)) return '🦴';
   if (['varicelle', 'rougeole', 'oreillons', 'scarlatine', 'roseole', 'pieds_mains_bouche'].includes(id)) return '🧒';
   if (['allergie', 'conjonctivite'].includes(id)) return '🤧';
   if (['otite'].includes(id)) return '👂';
   if (['infection_dentaire'].includes(id)) return '🦷';
   if (['deshydratation', 'anemie', 'diabete_depistage'].includes(id)) return '🩸';
-  if (['dysmenorrhee'].includes(id)) return '♀️';
+  if (['dysmenorrhee', 'mycose_vaginale', 'vaginose', 'infection_pelvienne', 'herpes_genital_f', 'trichomonase'].includes(id)) return '♀️';
+  if (['uretrite', 'herpes_genital_h', 'epididymite'].includes(id)) return '♂️';
+  if (['hepatite_alcoolique', 'cirrhose', 'alcoolisme'].includes(id)) return '🍺';
   return '🩺';
 }
 // ================= ANALYSE =================
@@ -207,7 +232,13 @@ function analyser() {
       : '👤 Aucun profil actif — doses adulte standard affichées') +
     '</p>';
 
-  const alertes = DRAPEAUX.filter(d => d.symptomes.every(s => coches.includes(s)));
+  const alertes = drapeauxRouges.filter(d => {
+    if (!d.symptomes || !d.symptomes.length) return false;
+    if (!d.symptomes.every(s => coches.includes(s))) return false;
+    if (age !== null && d.age_max !== undefined && age > d.age_max) return false;
+    if (age !== null && d.age_min !== undefined && age < d.age_min) return false;
+    return true;
+  });
   if (alertes.length) {
     html += alertes.map(a =>
       '<div class="carte danger"><h3>🚨 URGENCE</h3><p>' + a.message + '</p></div>'
@@ -414,7 +445,6 @@ function afficherZoneExport(texte) {
     texte + '</textarea>' +
     '<button class="btn-principal" onclick="afficherJournal()">← Retour au journal</button></div>';
 }
-
 // ================= POSOLOGIE TEXTE =================
 function posologiePourTexte(m) {
   const profil = profilActif();
@@ -436,6 +466,7 @@ function posologiePourTexte(m) {
   }
   return m.adulte;
 }
+
 // ================= MÉDICAMENTS =================
 function preparerMedocs() {
   const profil = profilActif();
@@ -588,6 +619,8 @@ function initialiserBanniere() {
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js');
 }
+
+window.addEventListener('scroll', majBoutonFlottant);
 
 appliquerTheme();
 preparerSymptomes();
