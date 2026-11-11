@@ -138,4 +138,3 @@
   else document.addEventListener('DOMContentLoaded', demarrer);
 
 })();
-    '<div style="font-size:11px;color:#999;margin-top:14px;">Découvre <a href="https://tomainazo2580.github.io/tsiky/" target="_blank" style="color:#0e7a5f;font-weight:600;">Tsiky</a>, la messagerie malgache gratuite 🇲🇬</div>' +
