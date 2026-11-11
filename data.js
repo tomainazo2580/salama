@@ -608,3 +608,29 @@ const MEDICAMENTS = [
     antibio: "Sevrage encadré médicalement — dangereux de stopper seul si forte dépendance (risque de convulsions).",
     conseils: "Consulte un médecin ou un centre d'écoute. L'aide existe et ça marche. Parle-en à un proche de confiance."
   }
+const symptomDisplayNames = {
+  fievre: "Fièvre", fatigue: "Fatigue", frissons: "Frissons", sueurs_nocturnes: "Sueurs nocturnes",
+  perte_poids: "Perte de poids", ganglions: "Ganglions gonflés", paleur: "Pâleur",
+  toux: "Toux", toux_seche: "Toux sèche", toux_grasse: "Toux grasse", essoufflement: "Essoufflement",
+  oppression_thoracique: "Oppression thoracique", sifflements: "Sifflements", douleur_thorax: "Douleur thorax",
+  nez_coule: "Nez qui coule", nez_bouche: "Nez bouché", eternuements: "Éternuements", mal_gorge: "Mal de gorge",
+  deglutition: "Douleur en avalant", voix_enrouee: "Voix enrouée", pression_visage: "Pression visage",
+  ganglions_cou: "Ganglions cou", perte_odorat: "Perte d'odorat", mal_tete: "Mal de tête",
+  sensibilite_lumiere: "Gêne lumière", vertiges: "Vertiges", nausees: "Nausées", mal_oreille: "Mal d'oreille",
+  mal_yeux: "Yeux rouges", confusion: "Confusion", mal_ventre: "Mal au ventre", vomissements: "Vomissements",
+  diarrhee: "Diarrhée", ballonnements: "Ballonnements", constipation: "Constipation", brulures_estomac: "Brûlures estomac",
+  remontees_acides: "Remontées acides", perte_appetit: "Perte d'appétit", douleur_fosse_droite: "Douleur fosse droite",
+  selles_sang: "Sang selles", douleur_defecation: "Douleur défécation", demangeaisons_anus: "Démangeaisons anus",
+  brulures_urines: "Brûlures urines", envies_frequentes: "Envies fréquentes", urines_troubles: "Urines troubles",
+  soif_excessive: "Soif excessive", urines_frequentes: "Urines fréquentes", sang_urines: "Sang urines",
+  urines_diminuees: "Urines diminuées", oedemes: "Œdèmes", pertes_anormales: "Pertes anormales",
+  demangeaisons_intimes: "Démangeaisons intimes", ecoulement_uretral: "Écoulement urétral",
+  vesicules_genitales: "Vésicules génitales", douleur_bassin: "Douleur bassin", douleur_testicule: "Douleur testicule",
+  gonflement_testicule: "Gonflement testicule", douleurs_musculaires: "Douleurs musculaires",
+  douleurs_articulaires: "Douleurs articulaires", douleur_dos: "Mal au dos", douleur_flanc: "Douleur flanc",
+  douleur_irradiee_jambe: "Douleur irradiée jambe", douleur_gonflement_membre: "Douleur/gonflement membre",
+  eruption: "Éruption cutanée", demangeaisons: "Démangeaisons", plaie_bouche: "Plaies bouche",
+  douleur_dent: "Mal de dent", visage_gonfle: "Visage gonflé", jaunisse: "Jaunisse", ventre_gonfle: "Ventre gonflé",
+  demangeaisons_corps: "Démangeaisons corps", tremblements: "Tremblements", perte_memoire: "Perte mémoire",
+  besoin_alcool: "Besoin alcool", sang_vomissements: "Sang vomissements"
+};
