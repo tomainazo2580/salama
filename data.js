@@ -444,4 +444,167 @@ const MEDICAMENTS = [
     alertes: ['Ne pas avaler, usage externe uniquement'],
     allergie_mots: ['chlorhexidine', 'biseptine', 'iode', 'betadine'],
     interactions: [] }
-];
+  
+];  ,
+  {
+    id: "mycose_vaginale",
+    nom: "Mycose vaginale",
+    sexe: 'f', age_min: 10, age_max: 55,
+    symptomes: ["pertes_anormales", "demangeaisons_intimes"],
+    poids: { pertes_anormales: 3, demangeaisons_intimes: 3 },
+    gravite: 1,
+    description: "Infection bénigne due à un champignon. Pertes blanches épaisses, démangeaisons intenses, brûlures.",
+    medicaments: [],
+    antibio: "Traitement local antifongique (ovule/crème) sur conseil du pharmacien ou médecin.",
+    conseils: "Porte des sous-vêtements en coton, évite les savons agressifs. Si fièvre ou douleur du bas-ventre : consulte rapidement."
+  },
+  {
+    id: "vaginose",
+    nom: "Vaginose bactérienne",
+    sexe: 'f', age_min: 10, age_max: 55,
+    symptomes: ["pertes_anormales"],
+    poids: { pertes_anormales: 3 },
+    gravite: 2,
+    description: "Déséquilibre de la flore vaginale. Pertes grisâtres avec odeur désagréable (poisson), sans démangeaisons.",
+    medicaments: [],
+    antibio: "Antibiotique local (métronidazole) sur prescription médicale.",
+    conseils: "Ne pas faire de douche vaginale. Consulter pour diagnostic et traitement."
+  },
+  {
+    id: "infection_pelvienne",
+    nom: "Infection pelvienne (salpingite)",
+    sexe: 'f', age_min: 12, age_max: 50,
+    symptomes: ["douleur_bassin", "fievre", "pertes_anormales"],
+    poids: { douleur_bassin: 3, fievre: 2, pertes_anormales: 2 },
+    gravite: 3,
+    description: "Infection des trompes de Fallope. Douleur bas-ventre + fièvre + pertes anormales. Risque pour la fertilité si non traitée.",
+    medicaments: [],
+    antibio: "Antibiotiques par voie orale ou intraveineuse — consultation urgente obligatoire.",
+    conseils: "⚠️ CONSULTE RAPIDEMENT. Cette infection peut rendre stérile si on attend. Rapports protégés en attendant."
+  },
+  {
+    id: "herpes_genital_f",
+    nom: "Herpès génital",
+    sexe: 'f', age_min: 12,
+    symptomes: ["vesicules_genitales", "demangeaisons_intimes", "douleur_bassin"],
+    poids: { vesicules_genitales: 3, demangeaisons_intimes: 2, douleur_bassin: 1 },
+    gravite: 2,
+    description: "Infection virale (HSV). Vésicules douloureuses sur les parties génitales, brûlures, parfois fièvre.",
+    medicaments: [],
+    antibio: "Traitement antiviral sur prescription médicale (aciclovir).",
+    conseils: "Rapports protégés en cas de lésions. Le virus reste dans l'organisme mais les poussées s'espacent avec le temps."
+  },
+  {
+    id: "trichomonase",
+    nom: "Trichomonase",
+    sexe: 'f', age_min: 12, age_max: 55,
+    symptomes: ["pertes_anormales", "demangeaisons_intimes", "brulures_urines"],
+    poids: { pertes_anormales: 3, demangeaisons_intimes: 2, brulures_urines: 1 },
+    gravite: 2,
+    description: "IST parasitaire. Pertes mousseuses ou verdâtres, démangeaisons, brûlures urinaires.",
+    medicaments: [],
+    antibio: "Antibiotique (métronidazole) — traiter aussi le partenaire même s'il n'a pas de symptômes.",
+    conseils: "Évite les rapports non protégés jusqu'à la fin du traitement. Dépistage des autres IST conseillé."
+  },
+  {
+    id: "uretrite",
+    nom: "Urétrite (IST)",
+    sexe: 'm', age_min: 15,
+    symptomes: ["ecoulement_uretral", "brulures_urines"],
+    poids: { ecoulement_uretral: 3, brulures_urines: 3 },
+    gravite: 2,
+    description: "Infection de l'urètre (gonococcie, chlamydia). Écoulement par le pénis, brûlures en urinant.",
+    medicaments: [],
+    antibio: "Antibiotiques sur diagnostic médical (test de dépistage).",
+    conseils: "⚠️ Rapports protégés obligatoires. Dépistage du VIH et autres IST conseillé. Traiter aussi la partenaire."
+  },
+  {
+    id: "herpes_genital_h",
+    nom: "Herpès génital",
+    sexe: 'm', age_min: 12,
+    symptomes: ["vesicules_genitales", "demangeaisons_intimes", "douleur_testicule"],
+    poids: { vesicules_genitales: 3, demangeaisons_intimes: 2, douleur_testicule: 1 },
+    gravite: 2,
+    description: "Infection virale (HSV). Vésicules douloureuses sur le pénis, brûlures, parfois ganglions.",
+    medicaments: [],
+    antibio: "Traitement antiviral sur prescription médicale (aciclovir).",
+    conseils: "Rapports protégés en cas de lésions. Le virus reste dans l'organisme mais les poussées s'espacent."
+  },
+  {
+    id: "epididymite",
+    nom: "Épididymite / Orchite",
+    sexe: 'm', age_min: 15,
+    symptomes: ["douleur_testicule", "gonflement_testicule", "fievre"],
+    poids: { douleur_testicule: 3, gonflement_testicule: 3, fievre: 2 },
+    gravite: 3,
+    description: "Infection de l'épididyme ou du testicule. Douleur + gonflement + fièvre. Peut compromettre la fertilité.",
+    medicaments: [],
+    antibio: "Antibiotiques obligatoires sur diagnostic médical.",
+    conseils: "⚠️ CONSULTE RAPIDEMENT. Repos, soutien du scrotum. Si douleur brutale et intense : URGENCE (torsion)."
+  },
+  {
+    id: "pyelonephrite",
+    nom: "Pyélonéphrite (infection rénale)",
+    symptomes: ["fievre", "douleur_flanc", "brulures_urines", "sang_urines"],
+    poids: { fievre: 3, douleur_flanc: 3, brulures_urines: 2, sang_urines: 2 },
+    gravite: 3,
+    description: "Infection bactérienne du rein, souvent complication d'une cystite mal soignée. Fièvre + douleur lombaire d'un côté.",
+    medicaments: [],
+    antibio: "Antibiotiques par voie orale ou intraveineuse — consultation urgente obligatoire.",
+    conseils: "⚠️ CONSULTE RAPIDEMENT. Risque d'abcès du rein et septicémie. Bois beaucoup d'eau."
+  },
+  {
+    id: "colique_nephretique",
+    nom: "Colique néphrétique",
+    symptomes: ["douleur_flanc", "sang_urines", "nausees", "douleur_bassin"],
+    poids: { douleur_flanc: 3, sang_urines: 2, nausees: 2, douleur_bassin: 2 },
+    gravite: 2,
+    description: "Calcul rénal qui se déplace. Douleur lombaire brutale et très intense, irradiant vers l'aine, agitation.",
+    medicaments: ["paracetamol"],
+    antibio: "Pas d'antibiotique — échographie pour voir la taille du calcul.",
+    conseils: "Bois beaucoup d'eau (2-3L/jour). Consulte pour échographie. Si fièvre ou impossible d'uriner : urgence."
+  },
+  {
+    id: "insuffisance_renale",
+    nom: "Insuffisance rénale (dépistage)",
+    symptomes: ["fatigue", "oedemes", "urines_diminuees", "nausees"],
+    poids: { fatigue: 2, oedemes: 3, urines_diminuees: 3, nausees: 2 },
+    gravite: 3,
+    description: "Les reins ne filtrent plus correctement. Signes : fatigue, gonflements, urines réduites. Dépistage sanguin nécessaire.",
+    medicaments: [],
+    antibio: "Pas d'automédication — bilan sanguin (créatinine) et suivi médical.",
+    conseils: "⚠️ CONSULTE pour bilan. Contrôle du diabète et de la tension essentiel. Réduis le sel, bois normalement."
+  },
+  {
+    id: "hepatite_alcoolique",
+    nom: "Hépatite alcoolique",
+    symptomes: ["jaunisse", "fatigue", "nausees", "perte_appetit", "douleur_fosse_droite"],
+    poids: { jaunisse: 3, fatigue: 2, nausees: 2, perte_appetit: 2, douleur_fosse_droite: 2 },
+    gravite: 3,
+    description: "Inflammation du foie due à l'alcool. Jaunisse, fatigue, nausées. Souvent réversible si arrêt immédiat.",
+    medicaments: [],
+    antibio: "Arrêt total de l'alcool + traitement médical (vitamines, protection hépatique).",
+    conseils: "⚠️ ARRÊTE L'ALCOOL immédiatement. Consulte un médecin. Si confusion ou vomissement de sang : urgence."
+  },
+  {
+    id: "cirrhose",
+    nom: "Cirrhose",
+    symptomes: ["ventre_gonfle", "jaunisse", "fatigue", "demangeaisons_corps", "sang_vomissements"],
+    poids: { ventre_gonfle: 3, jaunisse: 3, fatigue: 2, demangeaisons_corps: 2, sang_vomissements: 3 },
+    gravite: 3,
+    description: "Foie définitivement abîmé. Ventre gonflé (liquide), jaunisse, fatigue intense. Complications graves possibles.",
+    medicaments: [],
+    antibio: "Traitement médical complexe — diurétiques, endoscopies, transplantation si possible.",
+    conseils: "⚠️ URGENCE MÉDICALE. Si vomissement de sang ou confusion : urgences immédiates. Arrêt total de l'alcool obligatoire."
+  },
+  {
+    id: "alcoolisme",
+    nom: "Alcoolisme chronique (dépistage)",
+    symptomes: ["besoin_alcool", "tremblements", "perte_memoire", "fatigue"],
+    poids: { besoin_alcool: 3, tremblements: 3, perte_memoire: 2, fatigue: 2 },
+    gravite: 2,
+    description: "Dépendance à l'alcool. Besoin quotidien, tremblements au réveil, trous de mémoire, problèmes relationnels.",
+    medicaments: [],
+    antibio: "Sevrage encadré médicalement — dangereux de stopper seul si forte dépendance (risque de convulsions).",
+    conseils: "Consulte un médecin ou un centre d'écoute. L'aide existe et ça marche. Parle-en à un proche de confiance."
+  }
