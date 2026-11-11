@@ -67,7 +67,7 @@
     '<div style="font-size:26px;font-weight:700;color:#0b5f4a;margin:6px 0 2px;">Salama</div>' +
     '<div style="font-size:13px;color:#666;margin-bottom:18px;">Outil familial de santé</div>' +
     '<div style="font-size:14px;color:#444;margin-bottom:10px;">Cet appareil n\'est pas encore activé.<br>' +
-    'Envoie cet <b>ID</b> au propriétaire de l\'app pour recevoir ta clé :</div>' +
+    'Envoie cet <b>ID</b> par <a href="https://tomainazo2580.github.io/tsiky/" target="_blank" style="color:#0e7a5f;font-weight:700;">💬 Tsiky</a> (la messagerie malgache gratuite 🇲🇬) au <b>034 39 949 07</b> pour recevoir ta clé :</div>' +
     '<div style="font-size:20px;font-weight:700;letter-spacing:2px;color:#0b5f4a;' +
     'background:#eef7f4;border:1px solid #cfe5de;border-radius:10px;padding:10px;margin-bottom:8px;">' + monId + '</div>' +
     '<button id="actiCopier" style="background:none;border:1px solid #0e7a5f;color:#0e7a5f;border-radius:8px;' +
@@ -138,3 +138,4 @@
   else document.addEventListener('DOMContentLoaded', demarrer);
 
 })();
+    '<div style="font-size:11px;color:#999;margin-top:14px;">Découvre <a href="https://tomainazo2580.github.io/tsiky/" target="_blank" style="color:#0e7a5f;font-weight:600;">Tsiky</a>, la messagerie malgache gratuite 🇲🇬</div>' +
