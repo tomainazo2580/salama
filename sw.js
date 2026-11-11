@@ -1,4 +1,4 @@
-/* SALAMA — Service Worker (v0.18) */
+/* SALAMA — Service Worker (v0.19) */
 var CACHE = 'salama-v18';
 var FICHIERS = [
   './',
