@@ -1,118 +1,139 @@
 // ================= SYMPTÔMES =================
-const SYMPTOMES = [
-  { categorie: 'Général', items: [
-    { id: 'fievre', nom: 'Fièvre' },
-    { id: 'fatigue', nom: 'Fatigue' },
-    { id: 'frissons', nom: 'Frissons' },
-    { id: 'sueurs', nom: 'Sueurs inhabituelles' },
-    { id: 'perte_appetit', nom: "Perte d'appétit" },
-    { id: 'perte_poids', nom: 'Perte de poids' },
-    { id: 'soif_intense', nom: 'Soif intense' },
-    { id: 'bouche_seche', nom: 'Bouche sèche' },
-    { id: 'ganglions', nom: 'Ganglions gonflés (cou)' },
-    { id: 'brouillard_mental', nom: 'Difficulté de concentration' },
-    { id: 'difficulte_avaler', nom: 'Difficulté à avaler' },
-    { id: 'paleur', nom: 'Pâleur' },
-    { id: 'vertiges', nom: 'Vertiges' }
-  ]},
-  { categorie: 'Respiration', items: [
-    { id: 'toux_seche', nom: 'Toux sèche' },
-    { id: 'toux_grasse', nom: 'Toux grasse (crachats)' },
-    { id: 'toux_quinteuse', nom: 'Toux par quintes (violente)' },
-    { id: 'essoufflement', nom: 'Difficulté à respirer' },
-    { id: 'douleur_thorax', nom: 'Douleur dans la poitrine' },
-    { id: 'oppression', nom: 'Oppression thoracique' },
-    { id: 'sifflement', nom: 'Sifflement en respirant' },
-    { id: 'respiration_rapide', nom: 'Respiration rapide' }
-  ]},
-    { categorie: 'Nez et gorge', items: [
-    { id: 'nez_coule', nom: 'Nez qui coule' },
-    { id: 'nez_bouche', nom: 'Nez bouché' },
-    { id: 'eternuements', nom: 'Éternuements' },
-    { id: 'mal_gorge', nom: 'Mal de gorge' },
-    { id: 'voix_enrouee', nom: 'Voix enrouée' },
-    { id: 'perte_odorat', nom: "Perte d'odorat" },
-    { id: 'perte_gout', nom: 'Perte de goût' },
-    { id: 'taches_blanches_gorge', nom: 'Taches blanches dans la gorge' }
-  ]},
-  { categorie: 'Tête', items: [
-    { id: 'maux_tete', nom: 'Maux de tête' },
-    { id: 'confusion', nom: 'Confusion / désorientation' },
-    { id: 'raideur_nuque', nom: 'Raideur de la nuque' },
-    { id: 'sensibilite_lumiere', nom: 'Gêne à la lumière' },
-    { id: 'perte_connaissance', nom: 'Perte de connaissance' },
-    { id: 'yeux_rouges', nom: 'Yeux rouges ou qui piquent' },
-    { id: 'yeux_larmoyants', nom: 'Yeux qui larmoient' }
-  ]},
-  { categorie: 'Ventre', items: [
-    { id: 'nausees', nom: 'Nausées' },
-    { id: 'vomissements', nom: 'Vomissements' },
-    { id: 'diarrhee', nom: 'Diarrhée' },
-    { id: 'constipation', nom: 'Constipation' },
-    { id: 'douleur_abdo', nom: 'Douleur au ventre' },
-    { id: 'douleur_abdo_intense', nom: 'Douleur au ventre intense' },
-    { id: 'douleur_abdo_droite', nom: 'Douleur ventre côté droit (bas)' },
-    { id: 'brulures_estomac', nom: "Brûlures d'estomac" },
-    { id: 'ballonnements', nom: 'Ballonnements' },
-    { id: 'sang_selles', nom: 'Sang dans les selles' },
-    { id: 'douleur_anale', nom: 'Douleur anale (à la selle)' },
-    { id: 'demangeaisons_anale', nom: 'Démangeaisons anales' }
-  ]},
-    { categorie: 'Urinaire', items: [
-    { id: 'brulures_urinaires', nom: 'Brûlures en urinant' },
-    { id: 'envies_frequentes', nom: "Envies fréquentes d'uriner" },
-    { id: 'urines_troubles', nom: 'Urines troubles ou odorantes' },
-    { id: 'urines_foncees', nom: 'Urines foncées' },
-    { id: 'urines_abondantes', nom: 'Urines très abondantes' }
-  ]},
-  { categorie: 'Douleurs et peau', items: [
-    { id: 'douleurs_musculaires', nom: 'Courbatures / douleurs musculaires' },
-    { id: 'douleurs_articulaires', nom: 'Douleurs articulaires' },
-    { id: 'mal_dos', nom: 'Mal de dos' },
-    { id: 'mal_oreille', nom: "Mal d'oreille" },
-    { id: 'mal_dent', nom: 'Mal de dent' },
-    { id: 'douleur_jambe', nom: 'Douleur dans la jambe' },
-    { id: 'douleur_tendon', nom: 'Douleur de tendon (au mouvement)' },
-    { id: 'douleur_articulation', nom: "Douleur d'articulation (entorse)" },
-    { id: 'crampes', nom: 'Crampes (ventre)' },
-    { id: 'gonflement', nom: "Gonflement d'une zone" },
-    { id: 'gonflement_joue', nom: 'Gonflement de la joue' },
-    { id: 'gonflement_visage', nom: 'Gonflement du visage / des lèvres' },
-    { id: 'difficulte_mouvement', nom: 'Difficulté à bouger une articulation' },
-    { id: 'engourdissement', nom: 'Engourdissement' },
-    { id: 'fourmillements', nom: 'Fourmillements' },
-    { id: 'raideur', nom: "Raideur d'une articulation" },
-    { id: 'ecchymose', nom: 'Bleu / ecchymose' },
-    { id: 'eruption', nom: 'Éruption cutanée (boutons, taches)' },
-    { id: 'eruption_rouge', nom: 'Taches rouges sur la peau' },
-    { id: 'demangeaisons', nom: 'Démangeaisons' }
-  ]}
+const categoriesSymptomes = [
+  {
+    nom: "🌡️ Général",
+    symptomes: [
+      { id: "fievre", nom: "Fièvre" },
+      { id: "fatigue", nom: "Fatigue / épuisement" },
+      { id: "frissons", nom: "Frissons" },
+      { id: "sueurs_nocturnes", nom: "Sueurs nocturnes" },
+      { id: "perte_poids", nom: "Perte de poids inexpliquée" },
+      { id: "ganglions", nom: "Ganglions gonflés" },
+      { id: "paleur", nom: "Pâleur" }
+    ]
+  },
+  {
+    nom: "🫁 Respiration",
+    symptomes: [
+      { id: "toux", nom: "Toux" },
+      { id: "toux_seche", nom: "Toux sèche" },
+      { id: "toux_grasse", nom: "Toux grasse (avec crachats)" },
+      { id: "essoufflement", nom: "Essoufflement" },
+      { id: "oppression_thoracique", nom: "Oppression thoracique" },
+      { id: "sifflements", nom: "Sifflements en respirant" },
+      { id: "douleur_thorax", nom: "Douleur dans le thorax" }
+    ]
+  },
+  {
+    nom: "👃 Nez et gorge",
+    symptomes: [
+      { id: "nez_coule", nom: "Nez qui coule" },
+      { id: "nez_bouche", nom: "Nez bouché" },
+      { id: "eternuements", nom: "Éternuements" },
+      { id: "mal_gorge", nom: "Mal de gorge" },
+      { id: "deglutition", nom: "Douleur en avalant" },
+      { id: "voix_enrouee", nom: "Voix enrouée" },
+      { id: "pression_visage", nom: "Pression / douleur au visage" },
+      { id: "ganglions_cou", nom: "Ganglions dans le cou" },
+      { id: "perte_odorat", nom: "Perte d'odorat ou de goût" }
+    ]
+  },
+  {
+    nom: "🧠 Tête",
+    symptomes: [
+      { id: "mal_tete", nom: "Mal de tête" },
+      { id: "sensibilite_lumiere", nom: "Gêne à la lumière / au bruit" },
+      { id: "vertiges", nom: "Vertiges" },
+      { id: "nausees", nom: "Nausées" },
+      { id: "mal_oreille", nom: "Mal d'oreille" },
+      { id: "mal_yeux", nom: "Yeux rouges ou qui piquent" },
+      { id: "confusion", nom: "Confusion" }
+    ]
+  },
+  {
+    nom: "🤢 Ventre",
+    symptomes: [
+      { id: "mal_ventre", nom: "Mal au ventre" },
+      { id: "vomissements", nom: "Vomissements" },
+      { id: "diarrhee", nom: "Diarrhée" },
+      { id: "ballonnements", nom: "Ballonnements / gaz" },
+      { id: "constipation", nom: "Constipation" },
+      { id: "brulures_estomac", nom: "Brûlures d'estomac" },
+      { id: "remontees_acides", nom: "Remontées acides" },
+      { id: "perte_appetit", nom: "Perte d'appétit" },
+      { id: "douleur_fosse_droite", nom: "Douleur en bas à droite du ventre" },
+      { id: "selles_sang", nom: "Sang dans les selles" },
+      { id: "douleur_defecation", nom: "Douleur en allant à la selle" },
+      { id: "demangeaisons_anus", nom: "Démangeaisons anales" }
+    ]
+  },
+  {
+    nom: "🚻 Urinaire / Intime",
+    symptomes: [
+      { id: "brulures_urines", nom: "Brûlures en urinant" },
+      { id: "envies_frequentes", nom: "Envies fréquentes d'uriner" },
+      { id: "urines_troubles", nom: "Urines troubles ou foncées" },
+      { id: "soif_excessive", nom: "Soif excessive" },
+      { id: "urines_frequentes", nom: "Uriner très souvent (grandes quantités)" },
+      { id: "sang_urines", nom: "Sang dans les urines" },
+      { id: "urines_diminuees", nom: "Urines diminuées / mousseuses" },
+      { id: "oedemes", nom: "Chevilles ou visage gonflés" },
+      { id: "pertes_anormales", nom: "Pertes vaginales anormales" },
+      { id: "demangeaisons_intimes", nom: "Démangeaisons / brûlures intimes" },
+      { id: "ecoulement_uretral", nom: "Écoulement par le pénis" },
+      { id: "vesicules_genitales", nom: "Boutons / vésicules génitales" },
+      { id: "douleur_bassin", nom: "Douleur du bas-ventre (hors règles)" },
+      { id: "douleur_testicule", nom: "Douleur d'un testicule" },
+      { id: "gonflement_testicule", nom: "Testicule gonflé" }
+    ]
+  },
+  {
+    nom: "💪 Douleurs et peau",
+    symptomes: [
+      { id: "douleurs_musculaires", nom: "Courbatures / douleurs musculaires" },
+      { id: "douleurs_articulaires", nom: "Douleurs articulaires" },
+      { id: "douleur_dos", nom: "Mal au dos" },
+      { id: "douleur_flanc", nom: "Douleur lombaire d'un seul côté" },
+      { id: "douleur_irradiee_jambe", nom: "Douleur qui descend dans la jambe" },
+      { id: "douleur_gonflement_membre", nom: "Douleur et gonflement d'un membre" },
+      { id: "eruption", nom: "Éruption cutanée / boutons" },
+      { id: "demangeaisons", nom: "Démangeaisons" },
+      { id: "plaie_bouche", nom: "Plaies ou boutons dans la bouche" },
+      { id: "douleur_dent", nom: "Mal de dent" },
+      { id: "visage_gonfle", nom: "Visage ou joue gonflé(e)" },
+      { id: "jaunisse", nom: "Jaunisse (yeux ou peau jaunes)" },
+      { id: "ventre_gonfle", nom: "Ventre anormalement gonflé (liquide)" },
+      { id: "demangeaisons_corps", nom: "Démangeaisons généralisées" }
+    ]
+  },
+  {
+    nom: "🍺 Comportement / Santé mentale",
+    symptomes: [
+      { id: "tremblements", nom: "Tremblements des mains" },
+      { id: "perte_memoire", nom: "Trous de mémoire" },
+      { id: "besoin_alcool", nom: "Besoin quotidien d'alcool" },
+      { id: "sang_vomissements", nom: "Sang dans les vomissements" }
+    ]
+  }
 ];
 
 // ================= DRAPEAUX ROUGES =================
-const DRAPEAUX = [
-  { symptomes: ['douleur_thorax', 'essoufflement'],
-    message: "Douleur poitrine + difficulté à respirer : possible urgence cardiaque. Appelez le 15 ou le 112 MAINTENANT." },
-  { symptomes: ['douleur_thorax', 'sueurs'],
-    message: "Douleur poitrine + sueurs : possible urgence cardiaque. Appelez le 15 ou le 112 MAINTENANT." },
-  { symptomes: ['essoufflement'],
-    message: "Difficulté à respirer inhabituelle : si soudaine ou intense, appelez le 15 ou le 112." },
-  { symptomes: ['confusion'],
-    message: "Confusion ou désorientation : signe potentiellement grave. Appelez le 15 ou le 112." },
-  { symptomes: ['raideur_nuque', 'fievre'],
-    message: "Fièvre + nuque raide : possible méningite. Appelez le 15 ou le 112 MAINTENANT." },
-  { symptomes: ['perte_connaissance'],
-    message: "Perte de connaissance : appelez le 15 ou le 112 immédiatement." },
-  { symptomes: ['sang_selles'],
-    message: "Sang dans les selles : consultez un médecin aujourd'hui, les urgences si abondant." },
-  { symptomes: ['douleur_abdo_intense'],
-    message: "Douleur au ventre intense : possible urgence (appendicite...). Consultez en urgence ou appelez le 15." },
-  { symptomes: ['douleur_abdo_droite', 'fievre'],
-    message: "Douleur en bas à droite du ventre + fièvre : possible appendicite. URGENCE (15/112)." },
-  { symptomes: ['gonflement_visage'],
-    message: "Gonflement du visage ou des lèvres : possible allergie sévère. Appelez le 15 ou le 112." },
-  { symptomes: ['respiration_rapide', 'essoufflement'],
-    message: "Respiration rapide et difficile : urgence respiratoire possible. Appelez le 15 ou le 112." }
+const drapeauxRouges = [
+  { id: "respiration_difficile", nom: "🚨 Difficulté grave pour respirer", message: "URGENCE — Appelle ou rends-toi immédiatement aux urgences." },
+  { id: "douleur_poitrine", nom: "🚨 Douleur forte dans la poitrine", message: "URGENCE — Peut être cardiaque. Consulte immédiatement." },
+  { id: "perte_conscience", nom: "🚨 Perte de conscience / malaise", message: "URGENCE — Appelle les secours immédiatement." },
+  { id: "raideur_cou", nom: "🚨 Raideur de la nuque avec fièvre", message: "URGENCE — Possible méningite. Consulte immédiatement." },
+  { id: "sang_selles_urgence", nom: "🚨 Sang abondant dans les selles", message: "URGENCE — Consulte immédiatement." },
+  { id: "vomissement_sang", nom: "🚨 Vomissement de sang", message: "URGENCE — Consulte immédiatement (risque hémorragie interne)." },
+  { id: "confusion_urgence", nom: "🚨 Confusion mentale soudaine", message: "URGENCE — Consulte immédiatement." },
+  { id: "fievre_3jours", nom: "⚠️ Fièvre qui dure plus de 3 jours", message: "Consulte un médecin sans tarder." },
+  { id: "dehydratation_signes", nom: "⚠️ Signes de déshydratation (bouche sèche, pas d'urine depuis 8h)", message: "Consulte rapidement un médecin." },
+  { id: "fievre_bebe", nom: "🚨 Fièvre chez un bébé de moins de 3 mois", message: "URGENCE — Consulte immédiatement." },
+  { id: "fievre_bassin_pertes", nom: "🚨 Fièvre + douleur du bas-ventre + pertes anormales", message: "URGENCE — Infection pelvienne possible. Consulte immédiatement." },
+  { id: "douleur_testicule_brutale", nom: "🚨 Douleur testiculaire brutale et intense", message: "URGENCE — Torsion possible. Opération en quelques heures, sinon perte du testicule." },
+  { id: "fievre_flanc_urines", nom: "🚨 Fièvre + douleur d'un seul côté du dos + brûlures urinaires", message: "URGENCE — Infection rénale possible. Consulte immédiatement." },
+  { id: "sang_vomissements_alcool", nom: "🚨 Vomissement de sang (surtout si consommation d'alcool)", message: "URGENCE ABSOLUE — Hémorragie interne possible. Urgences immédiates." },
+  { id: "confusion_jaunisse", nom: "🚨 Confusion mentale + jaunisse", message: "URGENCE — Atteinte hépatique grave. Urgences immédiates." }
 ];
 // ================= MALADIES =================
 const TROUBLES = [
