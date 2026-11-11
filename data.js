@@ -128,19 +128,17 @@ const categoriesSymptomes = [
 // ================= DRAPEAUX ROUGES =================
 const drapeauxRouges = [
   { id: "respiration_difficile", nom: "🚨 Difficulté grave pour respirer", message: "URGENCE — Appelle ou rends-toi immédiatement aux urgences.", symptomes: ["essoufflement", "oppression"] },
-  { id: "douleur_poitrine", nom: "🚨 Douleur forte dans la poitrine", message: "URGENCE — Peut être cardiaque. Consulte immédiatement.", symptomes: ["douleur_thorax"] },
-  { id: "perte_conscience", nom: "🚨 Perte de conscience / malaise", message: "URGENCE — Appelle les secours immédiatement.", symptomes: ["confusion"] },
+  { id: "douleur_poitrine", nom: "🚨 Douleur de poitrine avec essoufflement", message: "URGENCE — Peut être cardiaque. Consulte immédiatement.", symptomes: ["douleur_thorax", "essoufflement"] },
+  { id: "perte_conscience", nom: "🚨 Confusion, malaise ou perte de conscience", message: "URGENCE — Appelle les secours immédiatement.", symptomes: ["confusion"] },
   { id: "raideur_cou_fievre", nom: "🚨 Raideur de la nuque avec fièvre", message: "URGENCE — Possible méningite. Consulte immédiatement.", symptomes: ["raideur_cou", "fievre"] },
-  { id: "sang_selles_urgence", nom: "🚨 Sang abondant dans les selles", message: "URGENCE — Consulte immédiatement.", symptomes: ["selles_sang"] },
-  { id: "vomissement_sang", nom: "🚨 Vomissement de sang", message: "URGENCE — Consulte immédiatement (risque hémorragie interne).", symptomes: ["sang_vomissements"] },
-  { id: "confusion_urgence", nom: "🚨 Confusion mentale soudaine", message: "URGENCE — Consulte immédiatement.", symptomes: ["confusion"] },
-  { id: "fievre_3jours", nom: "⚠️ Fièvre qui dure plus de 3 jours", message: "Consulte un médecin sans tarder.", symptomes: ["fievre"] },
-  { id: "dehydratation_signes", nom: "⚠️ Signes de déshydratation (bouche sèche, pas d'urine depuis 8h)", message: "Consulte rapidement un médecin.", symptomes: ["bouche_seche", "urines_diminuees"] },
-  { id: "fievre_bebe", nom: "🚨 Fièvre chez un bébé de moins de 3 mois", message: "URGENCE — Consulte immédiatement.", symptomes: ["fievre"] },
+  { id: "sang_selles_urgence", nom: "🚨 Sang dans les selles", message: "Consulte immédiatement un médecin.", symptomes: ["selles_sang"] },
+  { id: "vomissement_sang", nom: "🚨 Vomissement de sang", message: "URGENCE ABSOLUE — Hémorragie interne possible (surtout si consommation d'alcool). Urgences immédiates.", symptomes: ["sang_vomissements"] },
+  { id: "fievre_3jours", nom: "⚠️ Fièvre qui dure plus de 3 jours", message: "Si la fièvre dure depuis plus de 3 jours : consulte un médecin sans tarder.", symptomes: ["fievre"] },
+  { id: "dehydratation_signes", nom: "⚠️ Signes de déshydratation (bouche sèche, urines rares)", message: "Consulte rapidement un médecin.", symptomes: ["bouche_seche", "urines_diminuees"] },
+  { id: "fievre_bebe", nom: "🚨 Fièvre chez un bébé de moins de 3 mois", message: "URGENCE — Consulte immédiatement.", symptomes: ["fievre"], age_max: 0.25 },
   { id: "fievre_bassin_pertes", nom: "🚨 Fièvre + douleur du bas-ventre + pertes anormales", message: "URGENCE — Infection pelvienne possible. Consulte immédiatement.", symptomes: ["fievre", "douleur_bassin", "pertes_anormales"] },
-  { id: "douleur_testicule_brutale", nom: "🚨 Douleur testiculaire brutale et intense", message: "URGENCE — Torsion possible. Opération en quelques heures, sinon perte du testicule.", symptomes: ["douleur_testicule"] },
+  { id: "douleur_testicule_brutale", nom: "🚨 Douleur testiculaire brutale et intense", message: "Si la douleur est arrivée BRUTALEMENT et qu'elle est TRÈS intense : URGENCE — torsion possible. Opération en quelques heures, sinon perte du testicule.", symptomes: ["douleur_testicule"] },
   { id: "fievre_flanc_urines", nom: "🚨 Fièvre + douleur d'un seul côté du dos + brûlures urinaires", message: "URGENCE — Infection rénale possible. Consulte immédiatement.", symptomes: ["fievre", "douleur_flanc", "brulures_urines"] },
-  { id: "sang_vomissements_alcool", nom: "🚨 Vomissement de sang (surtout si consommation d'alcool)", message: "URGENCE ABSOLUE — Hémorragie interne possible. Urgences immédiates.", symptomes: ["sang_vomissements"] },
   { id: "confusion_jaunisse", nom: "🚨 Confusion mentale + jaunisse", message: "URGENCE — Atteinte hépatique grave. Urgences immédiates.", symptomes: ["confusion", "jaunisse"] }
 ];
 // ================= MALADIES =================
