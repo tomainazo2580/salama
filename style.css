@@ -530,6 +530,3 @@ body.sombre #navBas {
   font-size: 0.9rem;
   margin-top: 30px;
 }
-/* FIX bannière : .cache doit toujours gagner */
-.cache { display: none !important; }
-#banniere.cache { display: none !important; }
