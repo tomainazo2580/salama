@@ -581,6 +581,13 @@ function majAccueil() {
 // ================= BANNIÈRE INSTALLATION =================
 let evenementInstall = null;
 
+function estInstalle() {
+  return window.matchMedia('(display-mode: standalone)').matches
+      || window.matchMedia('(display-mode: fullscreen)').matches
+      || navigator.standalone === true
+      || lireCle('salama_installe', false);
+}
+
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   evenementInstall = e;
@@ -589,30 +596,18 @@ window.addEventListener('beforeinstallprompt', e => {
 
 window.addEventListener('appinstalled', () => {
   $('banniere').classList.add('cache');
+  ecrireCle('salama_installe', true);   // ← mémorisé pour toujours
   evenementInstall = null;
 });
 
 function afficherBanniere() {
-  if (window.matchMedia('(display-mode: standalone)').matches) return;
+  if (estInstalle()) {
+    $('banniere').classList.add('cache');
+    return;
+  }
   const fermee = lireCle('salama_banniere_fermee', 0);
   if (Date.now() - fermee < 7 * 24 * 60 * 60 * 1000) return;
   $('banniere').classList.remove('cache');
-}
-
-function initialiserBanniere() {
-  $('btnInstaller').addEventListener('click', () => {
-    if (evenementInstall) {
-      evenementInstall.prompt();
-      evenementInstall = null;
-    } else {
-      alert('Pour installer : menu ⋮ de Chrome → « Ajouter à l\u2019écran d\u2019accueil »');
-    }
-  });
-  $('btnFermerBanniere').addEventListener('click', () => {
-    $('banniere').classList.add('cache');
-    ecrireCle('salama_banniere_fermee', Date.now());
-  });
-  afficherBanniere();
 }
 
 // ================= DÉMARRAGE =================
