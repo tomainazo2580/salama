@@ -126,7 +126,6 @@ function afficherProfils() {
       '</div></div>';
   }).join('');
 }
-
 // ================= SYMPTÔMES =================
 function preparerSymptomes() {
   $('listeSymptomes').innerHTML = categoriesSymptomes.map(cat =>
@@ -210,7 +209,6 @@ function iconeMaladie(t) {
   if (['hepatite_alcoolique', 'cirrhose', 'alcoolisme'].includes(id)) return '🍺';
   return '🩺';
 }
-
 // ================= ANALYSE =================
 let derniereAnalyse = null;
 
@@ -351,7 +349,6 @@ function enregistrerAnalyse() {
   alert('Enregistré dans le journal ✅');
   aller('journal');
 }
-
 // ================= JOURNAL =================
 function afficherJournal() {
   const journal = lireCle('salama_journal', []);
@@ -448,7 +445,6 @@ function afficherZoneExport(texte) {
     texte + '</textarea>' +
     '<button class="btn-principal" onclick="afficherJournal()">← Retour au journal</button></div>';
 }
-
 // ================= POSOLOGIE TEXTE =================
 function posologiePourTexte(m) {
   const profil = profilActif();
@@ -534,7 +530,7 @@ function alertesProfilPour(m) {
     });
   }
   const age = ageDe(profil);
-  if (age !== null && m.age_min !== null && age < m.age_min) {
+  if (age !== null && m.age_min && age < m.age_min) {
     alertes.push({ texte: '⛔ Déconseillé avant ' + m.age_min + ' ans', grave: true });
   }
   return alertes;
@@ -585,13 +581,6 @@ function majAccueil() {
 // ================= BANNIÈRE INSTALLATION =================
 let evenementInstall = null;
 
-function estInstalle() {
-  return window.matchMedia('(display-mode: standalone)').matches
-      || window.matchMedia('(display-mode: fullscreen)').matches
-      || navigator.standalone === true
-      || lireCle('salama_installe', false);
-}
-
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   evenementInstall = e;
@@ -600,37 +589,21 @@ window.addEventListener('beforeinstallprompt', e => {
 
 window.addEventListener('appinstalled', () => {
   $('banniere').classList.add('cache');
-  ecrireCle('salama_installe', true);
   evenementInstall = null;
 });
 
 function afficherBanniere() {
-  // App déjà installée → jamais de bannière
-  if (estInstalle()) {
-    $('banniere').classList.add('cache');
-    return;
-  }
-  // Chrome n'a pas proposé l'installation (déjà installée ou non
-  // installable) → on n'affiche rien. C'est LE fix principal :
-  // Chrome arrête de proposer dès que l'app est installée.
-  if (!evenementInstall) return;
-  // Chrome n'a pas proposé d'installation réelle (appareil où l'app
-  // est déjà installée, ou vieux navigateur) → on n'insiste pas,
-  // on mémorise pour ne plus jamais afficher la bannière ici.
-  ecrireCle('salama_banniere_fermee', Date.now() + 365 * 24 * 60 * 60 * 1000);
-  return;
+  if (window.matchMedia('(display-mode: standalone)').matches) return;
+  const fermee = lireCle('salama_banniere_fermee', 0);
+  if (Date.now() - fermee < 7 * 24 * 60 * 60 * 1000) return;
+  $('banniere').classList.remove('cache');
+}
 
 function initialiserBanniere() {
   $('btnInstaller').addEventListener('click', () => {
     if (evenementInstall) {
       evenementInstall.prompt();
-      evenementInstall.userChoice.then(choix => {
-        if (choix.outcome === 'accepted') {
-          $('banniere').classList.add('cache');
-          ecrireCle('salama_installe', true);
-        }
-        evenementInstall = null;
-      });
+      evenementInstall = null;
     } else {
       alert('Pour installer : menu ⋮ de Chrome → « Ajouter à l\u2019écran d\u2019accueil »');
     }
@@ -644,15 +617,7 @@ function initialiserBanniere() {
 
 // ================= DÉMARRAGE =================
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' });
-  if (navigator.serviceWorker.controller) {
-    let dejaRecharge = false;
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (dejaRecharge) return;
-      dejaRecharge = true;
-      window.location.reload();
-    });
-  }
+  navigator.serviceWorker.register('sw.js');
 }
 
 window.addEventListener('scroll', majBoutonFlottant);
@@ -661,7 +626,4 @@ appliquerTheme();
 preparerSymptomes();
 initialiserBanniere();
 majHorsLigne();
-if (typeof SALAMA_VERSION !== 'undefined') {
-  $('numVersion').textContent = 'Salama v' + SALAMA_VERSION;
-}
 aller('accueil');
