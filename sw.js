@@ -1,5 +1,5 @@
-/* SALAMA — Service Worker (v0.25) */
-var CACHE = 'salama-v19';
+/* SALAMA — Service Worker (v0.26) */
+var CACHE = 'salama-v26';
 var FICHIERS = [
   './',
   'index.html',
