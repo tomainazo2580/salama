@@ -596,23 +596,58 @@ window.addEventListener('beforeinstallprompt', e => {
 
 window.addEventListener('appinstalled', () => {
   $('banniere').classList.add('cache');
-  ecrireCle('salama_installe', true);   // ← mémorisé pour toujours
+  ecrireCle('salama_installe', true);
   evenementInstall = null;
 });
 
 function afficherBanniere() {
+  // 1. App déjà installée → jamais de bannière
   if (estInstalle()) {
     $('banniere').classList.add('cache');
     return;
   }
+  // 2. ⭐ LE FIX PRINCIPAL : si Chrome n'a PAS proposé l'installation,
+  //    on n'affiche rien. (Quand l'app est déjà installée, Chrome
+  //    ne propose plus jamais l'installation → bannière absente.)
+  if (!evenementInstall) return;
+  // 3. Fermée récemment → on attend 7 jours
   const fermee = lireCle('salama_banniere_fermee', 0);
   if (Date.now() - fermee < 7 * 24 * 60 * 60 * 1000) return;
   $('banniere').classList.remove('cache');
 }
 
+function initialiserBanniere() {
+  $('btnInstaller').addEventListener('click', () => {
+    if (evenementInstall) {
+      evenementInstall.prompt();
+      evenementInstall.userChoice.then(choix => {
+        if (choix.outcome === 'accepted') {
+          $('banniere').classList.add('cache');
+          ecrireCle('salama_installe', true);
+        }
+        evenementInstall = null;
+      });
+    } else {
+      alert('Pour installer : menu ⋮ de Chrome → « Ajouter à l\u2019écran d\u2019accueil »');
+    }
+  });
+  $('btnFermerBanniere').addEventListener('click', () => {
+    $('banniere').classList.add('cache');
+    ecrireCle('salama_banniere_fermee', Date.now());
+  });
+  afficherBanniere();
+}
 // ================= DÉMARRAGE =================
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js');
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' });
+  if (navigator.serviceWorker.controller) {
+    let dejaRecharge = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (dejaRecharge) return;
+      dejaRecharge = true;
+      window.location.reload();
+    });
+  }
 }
 
 window.addEventListener('scroll', majBoutonFlottant);
@@ -621,4 +656,5 @@ appliquerTheme();
 preparerSymptomes();
 initialiserBanniere();
 majHorsLigne();
+$('numVersion').textContent = 'Salama v' + SALAMA_VERSION;
 aller('accueil');
