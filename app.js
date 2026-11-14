@@ -614,11 +614,11 @@ function afficherBanniere() {
   // installable) → on n'affiche rien. C'est LE fix principal :
   // Chrome arrête de proposer dès que l'app est installée.
   if (!evenementInstall) return;
-  // Fermée récemment → on attend 7 jours
-  const fermee = lireCle('salama_banniere_fermee', 0);
-  if (Date.now() - fermee < 7 * 24 * 60 * 60 * 1000) return;
-  $('banniere').classList.remove('cache');
-}
+  // Chrome n'a pas proposé d'installation réelle (appareil où l'app
+  // est déjà installée, ou vieux navigateur) → on n'insiste pas,
+  // on mémorise pour ne plus jamais afficher la bannière ici.
+  ecrireCle('salama_banniere_fermee', Date.now() + 365 * 24 * 60 * 60 * 1000);
+  return;
 
 function initialiserBanniere() {
   $('btnInstaller').addEventListener('click', () => {
