@@ -1,12 +1,14 @@
-/* SALAMA — Service Worker */
-/* ⚠️⚠️ INCRÉMENTE LA VERSION À CHAQUE MISE À JOUR DU SITE ⚠️⚠️ */
-var VERSION = 'v0.22';
-var CACHE = 'salama-' + VERSION;
+/* SALAMA — Service Worker
+   La version vient de version.js : rien à changer ici, jamais. */
+importScripts('version.js');
+
+var CACHE = 'salama-v' + SALAMA_VERSION;
 
 var FICHIERS = [
   './',
   'index.html',
   'style.css',
+  'version.js',
   'app.js',
   'data.js',
   'activation.js',
@@ -19,14 +21,9 @@ self.addEventListener('install', function (e) {
   e.waitUntil(
     caches.open(CACHE).then(function (c) {
       return Promise.all(FICHIERS.map(function (f) {
-        return c.add(f).catch(function (err) {
-          console.warn('[SW] Échec cache : ' + f, err);
-          return null;
-        });
+        return c.add(f).catch(function () { return null; });
       }));
-    }).then(function () {
-      return self.skipWaiting();
-    })
+    }).then(function () { return self.skipWaiting(); })
   );
 });
 
@@ -36,9 +33,7 @@ self.addEventListener('activate', function (e) {
       return Promise.all(cles.map(function (cle) {
         if (cle !== CACHE) return caches.delete(cle);
       }));
-    }).then(function () {
-      return self.clients.claim();
-    })
+    }).then(function () { return self.clients.claim(); })
   );
 });
 
@@ -48,7 +43,6 @@ self.addEventListener('fetch', function (e) {
     caches.match(e.request).then(function (rep) {
       if (rep) return rep;
       return fetch(e.request).then(function (reponse) {
-        // Met en cache à la volée toute nouvelle ressource
         if (reponse && reponse.status === 200) {
           var copie = reponse.clone();
           caches.open(CACHE).then(function (c) { c.put(e.request, copie); });
