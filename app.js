@@ -126,6 +126,7 @@ function afficherProfils() {
       '</div></div>';
   }).join('');
 }
+
 // ================= SYMPTÔMES =================
 function preparerSymptomes() {
   $('listeSymptomes').innerHTML = categoriesSymptomes.map(cat =>
@@ -209,6 +210,7 @@ function iconeMaladie(t) {
   if (['hepatite_alcoolique', 'cirrhose', 'alcoolisme'].includes(id)) return '🍺';
   return '🩺';
 }
+
 // ================= ANALYSE =================
 let derniereAnalyse = null;
 
@@ -349,6 +351,7 @@ function enregistrerAnalyse() {
   alert('Enregistré dans le journal ✅');
   aller('journal');
 }
+
 // ================= JOURNAL =================
 function afficherJournal() {
   const journal = lireCle('salama_journal', []);
@@ -445,6 +448,7 @@ function afficherZoneExport(texte) {
     texte + '</textarea>' +
     '<button class="btn-principal" onclick="afficherJournal()">← Retour au journal</button></div>';
 }
+
 // ================= POSOLOGIE TEXTE =================
 function posologiePourTexte(m) {
   const profil = profilActif();
@@ -530,7 +534,7 @@ function alertesProfilPour(m) {
     });
   }
   const age = ageDe(profil);
-  if (age !== null && m.age_min && age < m.age_min) {
+  if (age !== null && m.age_min !== null && age < m.age_min) {
     alertes.push({ texte: '⛔ Déconseillé avant ' + m.age_min + ' ans', grave: true });
   }
   return alertes;
@@ -601,16 +605,16 @@ window.addEventListener('appinstalled', () => {
 });
 
 function afficherBanniere() {
-  // 1. App déjà installée → jamais de bannière
+  // App déjà installée → jamais de bannière
   if (estInstalle()) {
     $('banniere').classList.add('cache');
     return;
   }
-  // 2. ⭐ LE FIX PRINCIPAL : si Chrome n'a PAS proposé l'installation,
-  //    on n'affiche rien. (Quand l'app est déjà installée, Chrome
-  //    ne propose plus jamais l'installation → bannière absente.)
+  // Chrome n'a pas proposé l'installation (déjà installée ou non
+  // installable) → on n'affiche rien. C'est LE fix principal :
+  // Chrome arrête de proposer dès que l'app est installée.
   if (!evenementInstall) return;
-  // 3. Fermée récemment → on attend 7 jours
+  // Fermée récemment → on attend 7 jours
   const fermee = lireCle('salama_banniere_fermee', 0);
   if (Date.now() - fermee < 7 * 24 * 60 * 60 * 1000) return;
   $('banniere').classList.remove('cache');
@@ -637,6 +641,7 @@ function initialiserBanniere() {
   });
   afficherBanniere();
 }
+
 // ================= DÉMARRAGE =================
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' });
@@ -656,5 +661,7 @@ appliquerTheme();
 preparerSymptomes();
 initialiserBanniere();
 majHorsLigne();
-$('numVersion').textContent = 'Salama v' + SALAMA_VERSION;
+if (typeof SALAMA_VERSION !== 'undefined') {
+  $('numVersion').textContent = 'Salama v' + SALAMA_VERSION;
+}
 aller('accueil');
