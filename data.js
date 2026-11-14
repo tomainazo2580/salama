@@ -141,10 +141,11 @@ const drapeauxRouges = [
   { id: "fievre_flanc_urines", nom: "🚨 Fièvre + douleur d'un seul côté du dos + brûlures urinaires", message: "URGENCE — Infection rénale possible. Consulte immédiatement.", symptomes: ["fievre", "douleur_flanc", "brulures_urines"] },
   { id: "confusion_jaunisse", nom: "🚨 Confusion mentale + jaunisse", message: "URGENCE — Atteinte hépatique grave. Urgences immédiates.", symptomes: ["confusion", "jaunisse"] }
 ];
+
 // ================= MALADIES =================
 const TROUBLES = [
   { id: 'rhume', nom: 'Rhume',
-    symptomes: { nez_coule: 3, nez_bouche: 3, eternuements: 2, mal_gorge: 2, toux_seche: 1, mal_tete: 1, fatigue: 1 },
+    symptomes: { nez_coule: 3, nez_bouche: 3, eternuements: 2, mal_gorge: 2, toux_seche: 1, mal_tete: 1, fatigue: 1, toux: 1 }, // ✔️ toux ajouté
     conseils: ["Repos et boire beaucoup d'eau", 'Lavage de nez au sérum physiologique', 'Se laver les mains régulièrement'],
     consulter: "Si fièvre au-delà de 3 jours, symptômes au-delà de 10 jours, ou aggravation.",
     medocs: ['paracetamol', 'serum'] },
@@ -158,6 +159,12 @@ const TROUBLES = [
     conseils: ['Faire un test si possible', "S'isoler des personnes fragiles", 'Repos et hydratation'],
     consulter: "Si difficulté à respirer, personne à risque, ou symptômes qui s'aggravent.",
     medocs: ['paracetamol'] },
+  // ✔️ NOUVEAU : paludisme (répare l'orphelin "sueurs_nocturnes")
+  { id: 'paludisme', nom: 'Paludisme (suspicion)',
+    symptomes: { fievre: 3, frissons: 3, sueurs_nocturnes: 2, sueurs: 2, mal_tete: 2, fatigue: 2, nausees: 1, vomissements: 1, douleurs_musculaires: 1 },
+    conseils: ["Va faire un test (TDR) au centre de santé dès que possible, même si la fièvre baisse", "Bois beaucoup d'eau", "Dors sous moustiquaire imprégnée"],
+    consulter: "TOUJOURS consulter rapidement : le paludisme peut devenir grave. URGENCE pour un enfant, une femme enceinte, confusion ou vomissements répétés.",
+    medocs: ['paracetamol'] },
   { id: 'gastro', nom: 'Gastro-entérite',
     symptomes: { nausees: 3, vomissements: 3, diarrhee: 3, mal_ventre: 2, perte_appetit: 2, fievre: 1, fatigue: 1 },
     conseils: ["Boire en petites gorgées très régulières (SRO)", 'Manger léger : riz, carottes, bananes', 'Bien se laver les mains (très contagieux)'],
@@ -168,13 +175,20 @@ const TROUBLES = [
     conseils: ['Se reposer dans le noir et le calme', 'Prendre le médicament dès le début de la crise', "Boire de l'eau"],
     consulter: "Mal de tête brutal et violent (coup de tonnerre) : URGENCE. Sinon si première crise ou changement inhabituel.",
     medocs: ['paracetamol', 'ibuprofene'] },
+  // ✔️ NOUVEAU : méningite (répare l'orphelin "raideur_cou")
+  { id: 'meningite', nom: 'Méningite (suspicion)',
+    symptomes: { raideur_cou: 3, fievre: 3, mal_tete: 2, sensibilite_lumiere: 2, nausees: 1, vomissements: 1, confusion: 1 },
+    conseils: ["⚠️ Ne prends AUCUN médicament, va directement à l'hôpital", "La méningite peut évoluer très vite, chaque heure compte"],
+    consulter: "URGENCE ABSOLUE — rends-toi immédiatement à l'hôpital.",
+    medocs: [] },
   { id: 'angine', nom: 'Angine',
     symptomes: { mal_gorge: 3, fievre: 2, mal_tete: 1, fatigue: 1, douleurs_musculaires: 1, voix_enrouee: 1, deglutition: 1 },
     conseils: ["Boire des boissons tièdes ou froides selon le soulagement", 'Pastilles ou miel pour adoucir la gorge'],
     consulter: "Consulter pour un test (TDR) : l'angine bactérienne nécessite des antibiotiques sur ordonnance.",
     medocs: ['paracetamol'] },
+  // ✔️ pression_visage ajouté à la sinusite
   { id: 'sinusite', nom: 'Sinusite',
-    symptomes: { nez_bouche: 2, nez_coule: 2, mal_tete: 2, fievre: 1, mal_gorge: 1, fatigue: 1 },
+    symptomes: { pression_visage: 3, nez_bouche: 2, nez_coule: 2, mal_tete: 2, fievre: 1, mal_gorge: 1, fatigue: 1 },
     conseils: ['Lavage de nez au sérum physiologique plusieurs fois par jour', "Inhalations de vapeur d'eau chaude", 'Bien hydrater'],
     consulter: "Si plus de 10 jours, fièvre persistante, ou douleur intense au visage.",
     medocs: ['paracetamol', 'serum'] },
@@ -210,8 +224,9 @@ const TROUBLES = [
     conseils: ["Boire en petites gorgées régulières (SRO)", 'Repas légers dès que possible'],
     consulter: "Sang dans les selles, déshydratation, fièvre élevée, ou symptômes au-delà de 2-3 jours.",
     medocs: ['sro', 'smecta'] },
+  // ✔️ toux ajouté à la bronchite
   { id: 'bronchite', nom: 'Bronchite',
-    symptomes: { toux_grasse: 3, toux_seche: 2, fatigue: 2, oppression: 1, fievre: 1 },
+    symptomes: { toux_grasse: 3, toux: 2, toux_seche: 2, fatigue: 2, oppression: 1, fievre: 1 },
     conseils: ['Repos et hydratation abondante', 'Ne pas fumer, éviter la fumée', "Air ambiant pas trop sec", "Miel (adultes et enfants > 1 an) pour adoucir la gorge"],
     consulter: "Toux au-delà de 3 semaines, sang dans les crachats, essoufflement ou fièvre persistante.",
     medocs: ['paracetamol'] },
@@ -220,8 +235,9 @@ const TROUBLES = [
     conseils: ["⛔ PAS d'ibuprofène ni d'aspirine : paracétamol uniquement", 'Ongles courts, ne pas gratter les boutons', "Éviter le contact avec femmes enceintes et nourrissons"],
     consulter: "Nourrisson, adulte, femme enceinte, personne immunodéprimée, ou boutons infectés.",
     medocs: ['paracetamol'] },
+  // ✔️ remontees_acides ajouté au RGO
   { id: 'rgo', nom: 'Reflux gastrique (brûlures)',
-    symptomes: { brulures_estomac: 3, ballonnements: 1, nausees: 1, toux_seche: 1 },
+    symptomes: { brulures_estomac: 3, remontees_acides: 3, ballonnements: 1, nausees: 1, toux_seche: 1 },
     conseils: ["Éviter repas gras, épicés, café et alcool", 'Ne pas se coucher juste après manger', 'Manger léger le soir'],
     consulter: "Si brûlures fréquentes (plusieurs fois par semaine) ou difficulté à avaler.",
     medocs: ['gaviscon'] },
@@ -235,8 +251,9 @@ const TROUBLES = [
     conseils: ["Se mettre au frais et à l'ombre immédiatement", "Boire de l'eau fraîche en petites gorgées", 'Humidifier la peau, ventiler'],
     consulter: "Confusion, perte de connaissance ou peau très chaude : appelez le 15 immédiatement.",
     medocs: ['sro'] },
+  // ✔️ ganglions_cou ajouté à l'angine bactérienne
   { id: 'angine_bacterienne', nom: 'Angine bactérienne',
-    symptomes: { mal_gorge: 3, fievre: 3, ganglions: 2, deglutition: 2, taches_blanches_gorge: 2, mal_tete: 1 },
+    symptomes: { mal_gorge: 3, fievre: 3, ganglions: 2, ganglions_cou: 2, deglutition: 2, taches_blanches_gorge: 2, mal_tete: 1 },
     conseils: ["Repos, boire des boissons tièdes", "Gargarisme d'eau salée tiède"],
     consulter: "TOUJOURS consulter : nécessite des antibiotiques sur ordonnance. Risque cardiaque si non traitée.",
     medocs: ['paracetamol'],
@@ -330,8 +347,9 @@ const TROUBLES = [
     conseils: ["Lavage de nez fréquent au sérum", "Fractionner les repas", "Aérer la chambre"],
     consulter: "URGENCE si le nourrisson respire très vite, se creuse sous les côtes, ou refuse de boire.",
     medocs: ['serum'] },
+  // ✔️ plaie_bouche ajouté à pieds-mains-bouche
   { id: 'pieds_mains_bouche', nom: 'Pieds-mains-bouche', age_max: 10,
-    symptomes: { eruption: 2, fievre: 2, mal_gorge: 2, deglutition: 1, perte_appetit: 1 },
+    symptomes: { eruption: 2, fievre: 2, mal_gorge: 2, plaie_bouche: 2, deglutition: 1, perte_appetit: 1 },
     conseils: ["Paracétamol pour la douleur", "Boissons froides, aliments doux", "Isoler (contagieux)"],
     consulter: "Consulter si l'enfant refuse de boire ou si forte fièvre persistante.",
     medocs: ['paracetamol'] },
@@ -350,7 +368,6 @@ const TROUBLES = [
     conseils: ["Noter la fréquence des urines et la soif", "Réduire les sucres rapides"],
     consulter: "Consulter pour une glycémie (prise de sang) : ces signes nécessitent un dépistage.",
     medocs: [] },
-    // ===== NOUVEAUX TROUBLES v0.20 =====
   { id: 'mycose_vaginale', nom: 'Mycose vaginale', sexe: 'f', age_min: 10, age_max: 55,
     symptomes: { pertes_anormales: 3, demangeaisons_intimes: 3 },
     conseils: ["Porte des sous-vêtements en coton", "Évite les savons agressifs", "Si fièvre ou douleur du bas-ventre : consulte rapidement"],
@@ -436,6 +453,7 @@ const TROUBLES = [
     medocs: [],
     antibio: "Sevrage encadré médicalement — dangereux de stopper seul si forte dépendance." }
 ];
+
 // ================= MÉDICAMENTS =================
 const MEDICAMENTS = [
   { id: 'paracetamol', nom: 'Paracétamol', dci: 'Doliprane, Efferalgan, Dafalgan...',
