@@ -2,7 +2,8 @@
    La version vient de version.js : rien à changer ici, jamais. */
 importScripts('version.js');
 
-var CACHE = 'salama-v' + SALAMA_VERSION;
+var VERSION = (typeof SALAMA_VERSION !== 'undefined') ? SALAMA_VERSION : '0.22';
+var CACHE = 'salama-v' + VERSION;
 
 var FICHIERS = [
   './',
