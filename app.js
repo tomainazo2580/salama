@@ -539,72 +539,64 @@ function majAccueil() {
 let evenementInstall = null;
 
 function estInstallee() {
-  // Mode standalone (PWA installée)
   if (window.matchMedia('(display-mode: standalone)').matches) return true;
   if (window.matchMedia('(display-mode: minimal-ui)').matches) return true;
-  // iOS Safari
   if (window.navigator.standalone === true) return true;
-  // Déjà installée (marquée dans localStorage)
   if (lireCle('salama_installee', false) === true) return true;
   return false;
 }
 
 function cacherBanniere() {
-  $('banniere').classList.add('cache');
+  const b = $('banniere');
+  if (b) b.classList.add('cache');
 }
 
 function afficherBanniere() {
-  // ❌ Ne pas afficher si l'app est déjà installée
+  const b = $('banniere');
+  if (!b) return;
   if (estInstallee()) {
     cacherBanniere();
     return;
   }
-  // ❌ Ne pas afficher si l'utilisateur a fermé la bannière il y a moins de 7 jours
   const fermee = lireCle('salama_banniere_fermee', 0);
   if (Date.now() - fermee < 7 * 24 * 60 * 60 * 1000) return;
-  // ✅ Sinon afficher
-  $('banniere').classList.remove('cache');
+  b.classList.remove('cache');
+}
+
+// ✅ Fonctions globales pour les onclick dans le HTML
+function fermerBanniere() {
+  cacherBanniere();
+  ecrireCle('salama_banniere_fermee', Date.now());
+}
+
+function installerApp() {
+  if (evenementInstall) {
+    evenementInstall.prompt();
+    evenementInstall.userChoice.then(choix => {
+      if (choix.outcome === 'accepted') {
+        ecrireCle('salama_installee', true);
+        cacherBanniere();
+      }
+      evenementInstall = null;
+    });
+  } else {
+    alert('Pour installer : menu ⋮ de Chrome → « Ajouter à l\u2019écran d\u2019accueil »');
+  }
 }
 
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   evenementInstall = e;
-  // Afficher seulement si PAS installée
   if (!estInstallee()) {
     $('banniere').classList.remove('cache');
   }
 });
 
 window.addEventListener('appinstalled', () => {
-  // ✅ Mémoriser que l'installation est faite
   ecrireCle('salama_installee', true);
   cacherBanniere();
   evenementInstall = null;
 });
-
-function initialiserBanniere() {
-  $('btnInstaller').addEventListener('click', () => {
-    if (evenementInstall) {
-      evenementInstall.prompt();
-      evenementInstall.userChoice.then(choix => {
-        if (choix.outcome === 'accepted') {
-          ecrireCle('salama_installee', true);
-          cacherBanniere();
-        }
-        evenementInstall = null;
-      });
-    } else {
-      alert('Pour installer : menu ⋮ de Chrome → « Ajouter à l\u2019écran d\u2019accueil »');
-    }
-  });
-
-  $('btnFermerBanniere').addEventListener('click', () => {
-    cacherBanniere();
-    ecrireCle('salama_banniere_fermee', Date.now());
-  });
-
-  afficherBanniere();
-}
 
 // ================= DÉMARRAGE =================
 if ('serviceWorker' in navigator) {
@@ -613,6 +605,6 @@ if ('serviceWorker' in navigator) {
 window.addEventListener('scroll', majBoutonFlottant);
 appliquerTheme();
 preparerSymptomes();
-initialiserBanniere();
+afficherBanniere();
 majHorsLigne();
 aller('accueil');
