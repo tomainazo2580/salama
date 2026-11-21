@@ -1,13 +1,11 @@
 // ================= OUTILS =================
 function $(id) { return document.getElementById(id); }
-
 function lireCle(cle, defaut) {
   try {
     const v = localStorage.getItem(cle);
     return v ? JSON.parse(v) : defaut;
   } catch (e) { return defaut; }
 }
-
 function ecrireCle(cle, valeur) {
   localStorage.setItem(cle, JSON.stringify(valeur));
 }
@@ -18,7 +16,6 @@ function basculerTheme() {
   ecrireCle('salama_theme', sombre ? 'sombre' : 'clair');
   $('btnTheme').textContent = sombre ? '☀️' : '🌙';
 }
-
 function appliquerTheme() {
   if (lireCle('salama_theme', 'clair') === 'sombre') {
     document.body.classList.add('sombre');
@@ -34,29 +31,24 @@ function majHorsLigne() {
     $('horsLigne').classList.remove('cache');
   }
 }
-
 window.addEventListener('online', majHorsLigne);
 window.addEventListener('offline', majHorsLigne);
 
 // ================= PROFILS =================
 function profils() { return lireCle('salama_profils', []); }
-
 function profilActif() {
   const liste = profils();
   const id = lireCle('salama_profil_actif', null);
   return liste.find(p => p.id === id) || null;
 }
-
 function ageDe(profil) {
   if (!profil || !profil.naissance) return null;
   return new Date().getFullYear() - profil.naissance;
 }
-
 function nouveauProfil() {
   $('formProfil').classList.remove('cache');
   $('btnNouveauProfil').classList.add('cache');
 }
-
 function enregistrerProfil() {
   const prenom = $('pPrenom').value.trim();
   const sexe = $('pSexe').value;
@@ -85,13 +77,11 @@ function enregistrerProfil() {
   afficherProfils();
   preparerSymptomes();
 }
-
 function activerProfil(id) {
   ecrireCle('salama_profil_actif', id);
   afficherProfils();
   preparerSymptomes();
 }
-
 function supprimerProfil(id) {
   if (!confirm('Supprimer ce profil ?')) return;
   const liste = profils().filter(p => p.id !== id);
@@ -102,7 +92,6 @@ function supprimerProfil(id) {
   afficherProfils();
   preparerSymptomes();
 }
-
 function afficherProfils() {
   const liste = profils();
   const actif = profilActif();
@@ -117,15 +106,16 @@ function afficherProfils() {
     const iconeSexe = p.sexe === 'femme' ? ' ♀' : p.sexe === 'homme' ? ' ♂' : '';
     return '<div class="item-liste">' +
       '<strong>' + p.prenom + iconeSexe + '</strong>' + (estActif ? '<span class="mini-badge">actif</span>' : '') +
-      '<br>' + (age !== null ? age + ' ans · ' : '') + p.poids + ' kg' +
-      (p.allergies ? '<br>Allergies : ' + p.allergies : '') +
-      (p.traitements ? '<br>Traitements : ' + p.traitements : '') +
+      '\n' + (age !== null ? age + ' ans · ' : '') + p.poids + ' kg' +
+      (p.allergies ? '\nAllergies : ' + p.allergies : '') +
+      (p.traitements ? '\nTraitements : ' + p.traitements : '') +
       '<div class="ligne-btns">' +
       (estActif ? '' : '<button class="btn-petit" onclick="activerProfil(' + p.id + ')">Activer</button>') +
       '<button class="btn-petit danger" onclick="supprimerProfil(' + p.id + ')">Supprimer</button>' +
       '</div></div>';
   }).join('');
 }
+
 // ================= SYMPTÔMES =================
 function preparerSymptomes() {
   $('listeSymptomes').innerHTML = categoriesSymptomes.map(cat =>
@@ -136,8 +126,6 @@ function preparerSymptomes() {
     ).join('') +
     '</div></div>'
   ).join('');
-
-  // Masque les symptômes intimes réservés à l'autre sexe selon le profil actif
   const profil = profilActif();
   const sx = profil && profil.sexe ? profil.sexe.charAt(0) : null;
   if (sx) {
@@ -150,17 +138,14 @@ function preparerSymptomes() {
     });
   }
 }
-
 function basculerChip(ligne) {
   ligne.classList.toggle('on');
   majBoutonFlottant();
 }
-
 function toutDecocher() {
   document.querySelectorAll('.sym-ligne.on').forEach(l => l.classList.remove('on'));
   majBoutonFlottant();
 }
-
 function majBoutonFlottant() {
   const n = symptomesCoches().length;
   const btn = $('btnFlottant');
@@ -178,11 +163,9 @@ function majBoutonFlottant() {
     else btnR.classList.add('cache');
   }
 }
-
 function symptomesCoches() {
   return Array.from(document.querySelectorAll('.sym-ligne.on')).map(c => c.dataset.id);
 }
-
 function nomSymptome(id) {
   for (const cat of categoriesSymptomes) {
     const s = cat.symptomes.find(i => i.id === id);
@@ -209,9 +192,9 @@ function iconeMaladie(t) {
   if (['hepatite_alcoolique', 'cirrhose', 'alcoolisme'].includes(id)) return '🍺';
   return '🩺';
 }
+
 // ================= ANALYSE =================
 let derniereAnalyse = null;
-
 function analyser() {
   const coches = symptomesCoches();
   const zone = $('resultats');
@@ -219,19 +202,15 @@ function analyser() {
     zone.innerHTML = '<div class="carte"><p>Coche au moins un symptôme pour lancer l\u2019analyse.</p></div>';
     return;
   }
-
   const profil = profilActif();
   const age = ageDe(profil);
   const fragile = age !== null && (age < 3 || age > 65);
-
   let html = '';
-
   html += '<p style="font-size:0.85rem;color:var(--texte-doux);margin-bottom:10px">' +
     (profil
       ? '👤 Analyse pour : <strong>' + profil.prenom + '</strong> (' + age + ' ans, ' + profil.poids + ' kg)'
       : '👤 Aucun profil actif — doses adulte standard affichées') +
     '</p>';
-
   const alertes = drapeauxRouges.filter(d => {
     if (!d.symptomes || !d.symptomes.length) return false;
     if (!d.symptomes.every(s => coches.includes(s))) return false;
@@ -244,7 +223,6 @@ function analyser() {
       '<div class="carte danger"><h3>🚨 URGENCE</h3><p>' + a.message + '</p></div>'
     ).join('');
   }
-
   const ecartees = [];
   const resultats = TROUBLES.map(t => {
     const ids = Object.keys(t.symptomes);
@@ -263,7 +241,6 @@ function analyser() {
     if (pct > 95) pct = 95;
     return { trouble: t, pct: pct };
   }).filter(r => r && r.pct >= 20).sort((a, b) => b.pct - a.pct);
-
   if (!resultats.length) {
     html += '<div class="carte"><h3>🤔 Aucune piste claire</h3>' +
       '<p>Ces symptômes ne correspondent à rien dans la base actuelle. Surveille l\u2019évolution et consulte si ça persiste ou s\u2019aggrave.</p></div>';
@@ -272,17 +249,15 @@ function analyser() {
       const badge = r.pct >= 60 ? '<span class="badge b-vert">🟢 forte probabilité</span>'
                   : r.pct >= 40 ? '<span class="badge b-jaune">🟡 possible</span>'
                   : '<span class="badge b-gris">⚪ piste faible</span>';
-
       let blocAntibio = '';
       if (r.trouble.antibio) {
         blocAntibio = '<div class="box-antibio">💊 <strong>Traitement habituel :</strong> ' + r.trouble.antibio + '</div>';
       }
-
       let blocMedocs = '';
       if (r.trouble.medocs && r.trouble.medocs.length) {
         blocMedocs = '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--bordure)">' +
           '<strong>💊 Pour soulager les symptômes :</strong>' +
-          '<br><span style="font-size:0.78rem;color:var(--texte-doux)">Ça soulage, ça ne guérit pas la cause. Lis bien « Consulter si ».</span>' +
+          '\n<span style="font-size:0.78rem;color:var(--texte-doux)">Ça soulage, ça ne guérit pas la cause. Lis bien « Consulter si ».</span>' +
           r.trouble.medocs.map(id => {
             const m = MEDICAMENTS.find(x => x.id === id);
             if (!m) return '';
@@ -292,13 +267,12 @@ function analyser() {
             return '<div style="margin-top:6px;padding:8px;background:var(--accent-clair);border-radius:8px;font-size:0.88rem;box-shadow:var(--ombre)">' +
               '<strong>' + m.nom + '</strong>' +
               (interdit ? ' <span class="badge b-rouge">⛔ déconseillé</span>' : '') +
-              '<br><span style="font-size:0.8rem;color:var(--texte-doux)">' + m.indication + '</span>' +
-              (doseTexte ? '<br>' + doseTexte : '') +
-              (alertes.length && !interdit ? '<br><span style="color:#8a6100">' + alertes.map(a => a.texte).join('<br>') + '</span>' : '') +
+              '\n<span style="font-size:0.8rem;color:var(--texte-doux)">' + m.indication + '</span>' +
+              (doseTexte ? '\n' + doseTexte : '') +
+              (alertes.length && !interdit ? '\n<span style="color:#8a6100">' + alertes.map(a => a.texte).join('\n') + '</span>' : '') +
               '</div>';
           }).join('') + '</div>';
       }
-
       html += '<div class="carte"><h3>' + iconeMaladie(r.trouble) + ' ' + r.trouble.nom + ' — ' + r.pct + ' %</h3>' + badge +
         '<p style="margin-top:8px"><strong>Conseils :</strong></p><ul>' +
         r.trouble.conseils.map(c => '<li>' + c + '</li>').join('') + '</ul>' +
@@ -306,17 +280,14 @@ function analyser() {
         blocAntibio + blocMedocs + '</div>';
     });
   }
-
   if (ecartees.length) {
     html += '<div class="carte"><p style="font-size:0.88rem">🧬 <strong>Écartées selon le profil (âge ou sexe) :</strong> ' +
       ecartees.join(', ') + '</p></div>';
   }
-
   if (fragile) {
     html += '<div class="carte danger"><p>⚠️ <strong>' + profil.prenom + ' a ' + age +
       ' ans (profil fragile)</strong> : consulte un médecin plus rapidement qu\u2019un adulte en bonne santé.</p></div>';
   }
-
   const connus = new Set();
   TROUBLES.forEach(t => Object.keys(t.symptomes).forEach(id => connus.add(id)));
   const inconnus = coches.filter(id => !connus.has(id));
@@ -324,7 +295,6 @@ function analyser() {
     html += '<div class="carte"><p>ℹ️ <strong>Non reconnus par la base :</strong> ' +
       inconnus.map(nomSymptome).join(', ') + '</p></div>';
   }
-
   derniereAnalyse = {
     date: new Date().toISOString(),
     profil: profil ? profil.prenom : 'Sans profil',
@@ -333,14 +303,11 @@ function analyser() {
     duree: $('duree').value,
     intensite: $('intensite').value
   };
-
   html += '<button class="btn-principal" onclick="enregistrerAnalyse()">📓 Enregistrer dans le journal</button>';
   zone.innerHTML = html;
-
   toutDecocher();
   zone.scrollIntoView({ behavior: 'smooth' });
 }
-
 function enregistrerAnalyse() {
   if (!derniereAnalyse) return;
   const journal = lireCle('salama_journal', []);
@@ -349,12 +316,12 @@ function enregistrerAnalyse() {
   alert('Enregistré dans le journal ✅');
   aller('journal');
 }
+
 // ================= JOURNAL =================
 function afficherJournal() {
   const journal = lireCle('salama_journal', []);
   const zone = $('listeJournal');
   const recherche = ($('rechercheJournal') ? $('rechercheJournal').value : '').toLowerCase().trim();
-
   let journalFiltre = journal;
   if (recherche) {
     journalFiltre = journal.filter(e => {
@@ -363,14 +330,12 @@ function afficherJournal() {
       return texte.includes(recherche);
     });
   }
-
   if (!journalFiltre.length) {
     zone.innerHTML = recherche
       ? '<p class="vide">Aucun résultat pour « ' + recherche + ' »</p>'
       : '<p class="vide">Journal vide. Lance une analyse pour commencer.</p>';
     return;
   }
-
   zone.innerHTML = journalFiltre.map((e, i) => {
     const d = new Date(e.date);
     const dateStr = d.toLocaleDateString('fr-FR') + ' ' +
@@ -378,26 +343,23 @@ function afficherJournal() {
     const hypoStr = (e.hypotheses || []).map(h => h.nom + ' (' + h.pct + '%)').join(', ');
     return '<div class="item-liste">' +
       '<div class="date">' + dateStr + ' · ' + e.profil + ' · ' + e.duree + ' · intensité ' + e.intensite + '</div>' +
-      '<strong>Symptômes :</strong> ' + e.symptomes.map(nomSymptome).join(', ') + '<br>' +
+      '<strong>Symptômes :</strong> ' + e.symptomes.map(nomSymptome).join(', ') + '\n' +
       '<strong>Pistes :</strong> ' + (hypoStr || 'aucune') +
       '<div class="ligne-btns"><button class="btn-petit danger" onclick="supprimerEntree(' + journal.indexOf(e) + ')">Supprimer</button></div>' +
       '</div>';
   }).join('');
 }
-
 function supprimerEntree(i) {
   const journal = lireCle('salama_journal', []);
   journal.splice(i, 1);
   ecrireCle('salama_journal', journal);
   afficherJournal();
 }
-
 function effacerJournal() {
   if (!confirm('Effacer TOUT le journal ? Cette action est irréversible.')) return;
   ecrireCle('salama_journal', []);
   afficherJournal();
 }
-
 function exporterJournal() {
   const journal = lireCle('salama_journal', []);
   if (!journal.length) {
@@ -417,7 +379,6 @@ function exporterJournal() {
     }
     texte += '⏱️ Durée : ' + e.duree + ' | Intensité : ' + e.intensite + '\n\n';
   });
-
   if (navigator.share) {
     navigator.share({ title: 'Journal de santé Salama', text: texte })
       .catch(() => copierTexte(texte));
@@ -425,7 +386,6 @@ function exporterJournal() {
     copierTexte(texte);
   }
 }
-
 function copierTexte(texte) {
   if (navigator.clipboard) {
     navigator.clipboard.writeText(texte).then(() => {
@@ -437,7 +397,6 @@ function copierTexte(texte) {
     afficherZoneExport(texte);
   }
 }
-
 function afficherZoneExport(texte) {
   const zone = $('listeJournal');
   zone.innerHTML = '<div class="carte"><p><strong>📋 Copie ce texte :</strong></p>' +
@@ -445,6 +404,7 @@ function afficherZoneExport(texte) {
     texte + '</textarea>' +
     '<button class="btn-principal" onclick="afficherJournal()">← Retour au journal</button></div>';
 }
+
 // ================= POSOLOGIE TEXTE =================
 function posologiePourTexte(m) {
   const profil = profilActif();
@@ -481,16 +441,15 @@ function preparerMedocs() {
                 : alertes.length ? ' <span class="badge b-jaune">⚠️ prudence</span>' : '';
     return '<div class="item-liste" onclick="ficheMedoc(\'' + m.id + '\')" style="cursor:pointer">' +
       '<strong>' + m.nom + '</strong>' + badge +
-      '<br><span style="color:var(--texte-doux);font-size:0.82rem">' + m.indication + '</span></div>';
+      '\n<span style="color:var(--texte-doux);font-size:0.82rem">' + m.indication + '</span></div>';
   }).join('');
 }
-
 function posologiePour(m) {
   const profil = profilActif();
   const age = ageDe(profil);
   const poids = profil ? profil.poids : null;
   let html = '<p style="margin-top:6px"><strong>Adulte :</strong> ' + m.adulte +
-    '<br><strong>Maximum :</strong> ' + m.max + '</p>';
+    '\n<strong>Maximum :</strong> ' + m.max + '</p>';
   if (age !== null && poids) {
     if (m.age_min !== null && age < m.age_min) {
       html += '<div class="alerte-ligne interdit">⛔ Déconseillé avant ' + m.age_min +
@@ -508,7 +467,6 @@ function posologiePour(m) {
   }
   return html;
 }
-
 function alertesProfilPour(m) {
   const profil = profilActif();
   const alertes = [];
@@ -535,7 +493,6 @@ function alertesProfilPour(m) {
   }
   return alertes;
 }
-
 function ficheMedoc(id) {
   const m = MEDICAMENTS.find(x => x.id === id);
   const alertes = alertesProfilPour(m);
@@ -566,7 +523,6 @@ function aller(page) {
   if (page === 'accueil') majAccueil();
   if (page === 'symptomes') majBoutonFlottant();
 }
-
 function majAccueil() {
   const p = profilActif();
   $('profilActifAccueil').textContent = p
@@ -579,39 +535,74 @@ function majAccueil() {
 }
 
 // ================= BANNIÈRE INSTALLATION =================
+// ✅ CORRIGÉ : la bannière disparaît après installation
 let evenementInstall = null;
+
+function estInstallee() {
+  // Mode standalone (PWA installée)
+  if (window.matchMedia('(display-mode: standalone)').matches) return true;
+  if (window.matchMedia('(display-mode: minimal-ui)').matches) return true;
+  // iOS Safari
+  if (window.navigator.standalone === true) return true;
+  // Déjà installée (marquée dans localStorage)
+  if (lireCle('salama_installee', false) === true) return true;
+  return false;
+}
+
+function cacherBanniere() {
+  $('banniere').classList.add('cache');
+}
+
+function afficherBanniere() {
+  // ❌ Ne pas afficher si l'app est déjà installée
+  if (estInstallee()) {
+    cacherBanniere();
+    return;
+  }
+  // ❌ Ne pas afficher si l'utilisateur a fermé la bannière il y a moins de 7 jours
+  const fermee = lireCle('salama_banniere_fermee', 0);
+  if (Date.now() - fermee < 7 * 24 * 60 * 60 * 1000) return;
+  // ✅ Sinon afficher
+  $('banniere').classList.remove('cache');
+}
 
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   evenementInstall = e;
-  afficherBanniere();
+  // Afficher seulement si PAS installée
+  if (!estInstallee()) {
+    $('banniere').classList.remove('cache');
+  }
 });
 
 window.addEventListener('appinstalled', () => {
-  $('banniere').classList.add('cache');
+  // ✅ Mémoriser que l'installation est faite
+  ecrireCle('salama_installee', true);
+  cacherBanniere();
   evenementInstall = null;
 });
-
-function afficherBanniere() {
-  if (window.matchMedia('(display-mode: standalone)').matches) return;
-  const fermee = lireCle('salama_banniere_fermee', 0);
-  if (Date.now() - fermee < 7 * 24 * 60 * 60 * 1000) return;
-  $('banniere').classList.remove('cache');
-}
 
 function initialiserBanniere() {
   $('btnInstaller').addEventListener('click', () => {
     if (evenementInstall) {
       evenementInstall.prompt();
-      evenementInstall = null;
+      evenementInstall.userChoice.then(choix => {
+        if (choix.outcome === 'accepted') {
+          ecrireCle('salama_installee', true);
+          cacherBanniere();
+        }
+        evenementInstall = null;
+      });
     } else {
       alert('Pour installer : menu ⋮ de Chrome → « Ajouter à l\u2019écran d\u2019accueil »');
     }
   });
+
   $('btnFermerBanniere').addEventListener('click', () => {
-    $('banniere').classList.add('cache');
+    cacherBanniere();
     ecrireCle('salama_banniere_fermee', Date.now());
   });
+
   afficherBanniere();
 }
 
@@ -619,9 +610,7 @@ function initialiserBanniere() {
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js');
 }
-
 window.addEventListener('scroll', majBoutonFlottant);
-
 appliquerTheme();
 preparerSymptomes();
 initialiserBanniere();
