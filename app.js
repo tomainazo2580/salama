@@ -9,7 +9,6 @@ function lireCle(cle, defaut) {
 function ecrireCle(cle, valeur) {
   localStorage.setItem(cle, JSON.stringify(valeur));
 }
-
 // ================= THÈME =================
 function basculerTheme() {
   const sombre = document.body.classList.toggle('sombre');
@@ -22,7 +21,6 @@ function appliquerTheme() {
     $('btnTheme').textContent = '☀️';
   }
 }
-
 // ================= DÉTECTION HORS-LIGNE =================
 function majHorsLigne() {
   if (navigator.onLine) {
@@ -33,7 +31,6 @@ function majHorsLigne() {
 }
 window.addEventListener('online', majHorsLigne);
 window.addEventListener('offline', majHorsLigne);
-
 // ================= PROFILS =================
 function profils() { return lireCle('salama_profils', []); }
 function profilActif() {
@@ -106,16 +103,18 @@ function afficherProfils() {
     const iconeSexe = p.sexe === 'femme' ? ' ♀' : p.sexe === 'homme' ? ' ♂' : '';
     return '<div class="item-liste">' +
       '<strong>' + p.prenom + iconeSexe + '</strong>' + (estActif ? '<span class="mini-badge">actif</span>' : '') +
-      '\n' + (age !== null ? age + ' ans · ' : '') + p.poids + ' kg' +
-      (p.allergies ? '\nAllergies : ' + p.allergies : '') +
-      (p.traitements ? '\nTraitements : ' + p.traitements : '') +
+      '
+' + (age !== null ? age + ' ans · ' : '') + p.poids + ' kg' +
+      (p.allergies ? '
+Allergies : ' + p.allergies : '') +
+      (p.traitements ? '
+Traitements : ' + p.traitements : '') +
       '<div class="ligne-btns">' +
       (estActif ? '' : '<button class="btn-petit" onclick="activerProfil(' + p.id + ')">Activer</button>') +
       '<button class="btn-petit danger" onclick="supprimerProfil(' + p.id + ')">Supprimer</button>' +
       '</div></div>';
   }).join('');
 }
-
 // ================= SYMPTÔMES =================
 function preparerSymptomes() {
   $('listeSymptomes').innerHTML = categoriesSymptomes.map(cat =>
@@ -126,6 +125,7 @@ function preparerSymptomes() {
     ).join('') +
     '</div></div>'
   ).join('');
+  // Masque les symptômes intimes réservés à l'autre sexe selon le profil actif
   const profil = profilActif();
   const sx = profil && profil.sexe ? profil.sexe.charAt(0) : null;
   if (sx) {
@@ -173,7 +173,6 @@ function nomSymptome(id) {
   }
   return id;
 }
-
 // ================= ICÔNE MALADIE =================
 function iconeMaladie(t) {
   const id = t.id;
@@ -192,7 +191,6 @@ function iconeMaladie(t) {
   if (['hepatite_alcoolique', 'cirrhose', 'alcoolisme'].includes(id)) return '🍺';
   return '🩺';
 }
-
 // ================= ANALYSE =================
 let derniereAnalyse = null;
 function analyser() {
@@ -257,7 +255,8 @@ function analyser() {
       if (r.trouble.medocs && r.trouble.medocs.length) {
         blocMedocs = '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--bordure)">' +
           '<strong>💊 Pour soulager les symptômes :</strong>' +
-          '\n<span style="font-size:0.78rem;color:var(--texte-doux)">Ça soulage, ça ne guérit pas la cause. Lis bien « Consulter si ».</span>' +
+          '
+<span style="font-size:0.78rem;color:var(--texte-doux)">Ça soulage, ça ne guérit pas la cause. Lis bien « Consulter si ».</span>' +
           r.trouble.medocs.map(id => {
             const m = MEDICAMENTS.find(x => x.id === id);
             if (!m) return '';
@@ -267,9 +266,13 @@ function analyser() {
             return '<div style="margin-top:6px;padding:8px;background:var(--accent-clair);border-radius:8px;font-size:0.88rem;box-shadow:var(--ombre)">' +
               '<strong>' + m.nom + '</strong>' +
               (interdit ? ' <span class="badge b-rouge">⛔ déconseillé</span>' : '') +
-              '\n<span style="font-size:0.8rem;color:var(--texte-doux)">' + m.indication + '</span>' +
-              (doseTexte ? '\n' + doseTexte : '') +
-              (alertes.length && !interdit ? '\n<span style="color:#8a6100">' + alertes.map(a => a.texte).join('\n') + '</span>' : '') +
+              '
+<span style="font-size:0.8rem;color:var(--texte-doux)">' + m.indication + '</span>' +
+              (doseTexte ? '
+' + doseTexte : '') +
+              (alertes.length && !interdit ? '
+<span style="color:#8a6100">' + alertes.map(a => a.texte).join('
+') + '</span>' : '') +
               '</div>';
           }).join('') + '</div>';
       }
@@ -316,7 +319,6 @@ function enregistrerAnalyse() {
   alert('Enregistré dans le journal ✅');
   aller('journal');
 }
-
 // ================= JOURNAL =================
 function afficherJournal() {
   const journal = lireCle('salama_journal', []);
@@ -343,7 +345,8 @@ function afficherJournal() {
     const hypoStr = (e.hypotheses || []).map(h => h.nom + ' (' + h.pct + '%)').join(', ');
     return '<div class="item-liste">' +
       '<div class="date">' + dateStr + ' · ' + e.profil + ' · ' + e.duree + ' · intensité ' + e.intensite + '</div>' +
-      '<strong>Symptômes :</strong> ' + e.symptomes.map(nomSymptome).join(', ') + '\n' +
+      '<strong>Symptômes :</strong> ' + e.symptomes.map(nomSymptome).join(', ') + '
+' +
       '<strong>Pistes :</strong> ' + (hypoStr || 'aucune') +
       '<div class="ligne-btns"><button class="btn-petit danger" onclick="supprimerEntree(' + journal.indexOf(e) + ')">Supprimer</button></div>' +
       '</div>';
@@ -404,7 +407,6 @@ function afficherZoneExport(texte) {
     texte + '</textarea>' +
     '<button class="btn-principal" onclick="afficherJournal()">← Retour au journal</button></div>';
 }
-
 // ================= POSOLOGIE TEXTE =================
 function posologiePourTexte(m) {
   const profil = profilActif();
@@ -426,7 +428,6 @@ function posologiePourTexte(m) {
   }
   return m.adulte;
 }
-
 // ================= MÉDICAMENTS =================
 function preparerMedocs() {
   const profil = profilActif();
@@ -441,7 +442,8 @@ function preparerMedocs() {
                 : alertes.length ? ' <span class="badge b-jaune">⚠️ prudence</span>' : '';
     return '<div class="item-liste" onclick="ficheMedoc(\'' + m.id + '\')" style="cursor:pointer">' +
       '<strong>' + m.nom + '</strong>' + badge +
-      '\n<span style="color:var(--texte-doux);font-size:0.82rem">' + m.indication + '</span></div>';
+      '
+<span style="color:var(--texte-doux);font-size:0.82rem">' + m.indication + '</span></div>';
   }).join('');
 }
 function posologiePour(m) {
@@ -449,7 +451,8 @@ function posologiePour(m) {
   const age = ageDe(profil);
   const poids = profil ? profil.poids : null;
   let html = '<p style="margin-top:6px"><strong>Adulte :</strong> ' + m.adulte +
-    '\n<strong>Maximum :</strong> ' + m.max + '</p>';
+    '
+<strong>Maximum :</strong> ' + m.max + '</p>';
   if (age !== null && poids) {
     if (m.age_min !== null && age < m.age_min) {
       html += '<div class="alerte-ligne interdit">⛔ Déconseillé avant ' + m.age_min +
@@ -507,7 +510,6 @@ function ficheMedoc(id) {
   $('ficheMedoc').classList.remove('cache');
   window.scrollTo(0, 0);
 }
-
 // ================= NAVIGATION =================
 function aller(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.add('cache'));
@@ -533,71 +535,38 @@ function majAccueil() {
   const mois = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
   $('dateJour').textContent = jours[d.getDay()] + ' ' + d.getDate() + ' ' + mois[d.getMonth()] + ' ' + d.getFullYear();
 }
-
 // ================= BANNIÈRE INSTALLATION =================
-// ✅ CORRIGÉ : la bannière disparaît après installation
 let evenementInstall = null;
-
-function estInstallee() {
-  if (window.matchMedia('(display-mode: standalone)').matches) return true;
-  if (window.matchMedia('(display-mode: minimal-ui)').matches) return true;
-  if (window.navigator.standalone === true) return true;
-  if (lireCle('salama_installee', false) === true) return true;
-  return false;
-}
-
-function cacherBanniere() {
-  const b = $('banniere');
-  if (b) b.classList.add('cache');
-}
-
-function afficherBanniere() {
-  const b = $('banniere');
-  if (!b) return;
-  if (estInstallee()) {
-    cacherBanniere();
-    return;
-  }
-  const fermee = lireCle('salama_banniere_fermee', 0);
-  if (Date.now() - fermee < 7 * 24 * 60 * 60 * 1000) return;
-  b.classList.remove('cache');
-}
-
-// ✅ Fonctions globales pour les onclick dans le HTML
-function fermerBanniere() {
-  cacherBanniere();
-  ecrireCle('salama_banniere_fermee', Date.now());
-}
-
-function installerApp() {
-  if (evenementInstall) {
-    evenementInstall.prompt();
-    evenementInstall.userChoice.then(choix => {
-      if (choix.outcome === 'accepted') {
-        ecrireCle('salama_installee', true);
-        cacherBanniere();
-      }
-      evenementInstall = null;
-    });
-  } else {
-    alert('Pour installer : menu ⋮ de Chrome → « Ajouter à l\u2019écran d\u2019accueil »');
-  }
-}
-
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   evenementInstall = e;
-  if (!estInstallee()) {
-    $('banniere').classList.remove('cache');
-  }
+  afficherBanniere();
 });
-
 window.addEventListener('appinstalled', () => {
-  ecrireCle('salama_installee', true);
-  cacherBanniere();
+  $('banniere').classList.add('cache');
   evenementInstall = null;
 });
-
+function afficherBanniere() {
+  if (window.matchMedia('(display-mode: standalone)').matches) return;
+  const fermee = lireCle('salama_banniere_fermee', 0);
+  if (Date.now() - fermee < 7 * 24 * 60 * 60 * 1000) return;
+  $('banniere').classList.remove('cache');
+}
+function initialiserBanniere() {
+  $('btnInstaller').addEventListener('click', () => {
+    if (evenementInstall) {
+      evenementInstall.prompt();
+      evenementInstall = null;
+    } else {
+      alert('Pour installer : menu ⋮ de Chrome → « Ajouter à l\u2019écran d\u2019accueil »');
+    }
+  });
+  $('btnFermerBanniere').addEventListener('click', () => {
+    $('banniere').classList.add('cache');
+    ecrireCle('salama_banniere_fermee', Date.now());
+  });
+  afficherBanniere();
+}
 // ================= DÉMARRAGE =================
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js');
@@ -605,6 +574,6 @@ if ('serviceWorker' in navigator) {
 window.addEventListener('scroll', majBoutonFlottant);
 appliquerTheme();
 preparerSymptomes();
-afficherBanniere();
+initialiserBanniere();
 majHorsLigne();
 aller('accueil');
