@@ -11,40 +11,32 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
 <header id="entete">
   <h1>🛡️ Salama</h1>
   <button id="btnTheme" onclick="basculerTheme()">🌙</button>
 </header>
-
 <div id="horsLigne" class="cache">📴 Mode hors-ligne actif</div>
-
 <main>
-
   <!-- ACCUEIL -->
   <section id="page-accueil" class="page">
     <div id="banniere" class="cache">
       <span>📲 Installe Salama sur ton téléphone</span>
       <div class="banniere-btns">
-        <button id="btnInstaller">Installer</button>
-        <button id="btnFermerBanniere">✕</button>
+        <button id="btnInstaller" onclick="installerApp()">Installer</button>
+        <button id="btnFermerBanniere" onclick="fermerBanniere()">✕</button>
       </div>
     </div>
-
     <p id="dateJour" class="date-jour"></p>
     <p id="profilActifAccueil" class="profil-actif"></p>
-
     <div class="grille">
       <button class="tuile t-vert" onclick="aller('symptomes')">🩺<span>Symptômes</span></button>
       <button class="tuile t-bleu" onclick="aller('medocs')">💊<span>Médicaments</span></button>
       <button class="tuile t-violet" onclick="aller('journal')">📓<span>Journal</span></button>
       <button class="tuile t-orange" onclick="aller('profils')">👤<span>Profils</span></button>
     </div>
-
     <p style="text-align:center;font-size:11px;opacity:.6;font-style:italic;line-height:1.5;padding:12px 24px 2px;">⚠️ Outil familial d'orientation — ne remplace pas l'avis d'un médecin. En cas de doute, consultez un professionnel de santé.</p>
 <p style="text-align:center;font-size:11px;opacity:.5;padding:6px 0 14px;">Salama v0.21</p>
   </section>
-
   <!-- SYMPTÔMES -->
   <section id="page-symptomes" class="page cache">
     <h2>Que ressens-tu ?</h2>
@@ -74,7 +66,6 @@
     <div id="listeMedocs"></div>
     <div id="ficheMedoc" class="cache"></div>
   </section>
-
   <!-- JOURNAL -->
   <section id="page-journal" class="page cache">
     <h2>Journal de santé</h2>
@@ -85,7 +76,6 @@
     </div>
     <div id="listeJournal"></div>
   </section>
-
   <!-- PROFILS -->
   <section id="page-profils" class="page cache">
     <h2>Profils</h2>
@@ -105,11 +95,8 @@
       <button class="btn-principal" onclick="enregistrerProfil()">Enregistrer</button>
     </div>
   </section>
-
 </main>
-
 <button id="btnFlottant" class="cache" onclick="analyser()">🔍 Analyser</button>
-
 <nav id="navBas">
   <button onclick="aller('accueil')">🏠<span>Accueil</span></button>
   <button onclick="aller('symptomes')">🩺<span>Symptômes</span></button>
@@ -117,7 +104,6 @@
   <button onclick="aller('journal')">📓<span>Journal</span></button>
   <button onclick="aller('profils')">👤<span>Profils</span></button>
 </nav>
-
 <script src="data.js"></script>
 <button id="btnRemonter" class="cache" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="position:fixed;bottom:100px;right:16px;z-index:999;background:#0e7a5f;color:#fff;border:none;border-radius:50%;width:48px;height:48px;font-size:20px;box-shadow:0 4px 12px rgba(0,0,0,.3);cursor:pointer;">⬆️</button>
 <script src="activation.js"></script>
