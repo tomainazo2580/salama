@@ -1,532 +1,377 @@
+/* ==============================================
+   SALAMA — style.css v1.0
+   Design B « Chaleur malgache »
+   vert #0e7a5f · ambre #d9822b · terre cuite #b05a36
+   vert rizière #7a9d54 · fond crème #faf6ee
+   Filigrane retiré — ombres ajoutées
+   ============================================== */
+
+/* ---------- Couleurs (mode clair) ---------- */
 :root {
-  --fond: #f4f7f6;
+  --fond: #faf6ee;
   --carte: #ffffff;
-  --texte: #22312b;
-  --texte-doux: #5f726c;
+  --champ: #ffffff;
+  --texte: #2b2620;
+  --texte2: #6e6455;
+  --bord: #e6ddc9;
   --accent: #0e7a5f;
-  --accent-clair: #e6f3ef;
-  --danger: #c0392b;
-  --danger-clair: #fdecea;
-  --bordure: #dde5e2;
-  --ombre: 0 2px 8px rgba(20, 40, 35, 0.08);
-  --ombre-forte: 0 4px 16px rgba(20, 40, 35, 0.12);
-  --ombre-bouton: 0 3px 10px rgba(14, 122, 95, 0.25);
+  --accent-fonce: #0c6b53;
+  --ambre: #d9822b;
+  --terre: #b05a36;
+  --riziere: #7a9d54;
+  --ombre: 0 2px 6px rgba(60, 48, 28, 0.10), 0 6px 18px rgba(60, 48, 28, 0.08);
+  --ombre-forte: 0 8px 24px rgba(60, 48, 28, 0.22);
+  --voile: rgba(255, 255, 255, 0.22);
+  color-scheme: light;
 }
 
-body.sombre {
-  --fond: #131a1c;
-  --carte: #1c2426;
-  --texte: #e8efec;
-  --texte-doux: #9db0a9;
-  --accent: #2fbf9a;
-  --accent-clair: #1d3a33;
-  --danger: #ff6b5e;
-  --danger-clair: #3d2220;
-  --bordure: #2c3a3d;
-  --ombre: 0 2px 8px rgba(0, 0, 0, 0.25);
-  --ombre-forte: 0 4px 16px rgba(0, 0, 0, 0.35);
-  --ombre-bouton: 0 3px 10px rgba(47, 191, 154, 0.3);
+/* ---------- Couleurs (mode sombre, harmonisé) ---------- */
+body.sombre, html.sombre, body.dark, html.dark,
+body[data-theme="sombre"], html[data-theme="sombre"],
+body[data-theme="dark"], html[data-theme="dark"] {
+  --fond: #211d17;
+  --carte: #2b261f;
+  --champ: #353026;
+  --texte: #f2ead9;
+  --texte2: #b3a891;
+  --bord: #47402f;
+  --accent: #149077;
+  --accent-fonce: #0e7a5f;
+  --ambre: #e8963c;
+  --terre: #d0704a;
+  --riziere: #8fb36a;
+  --ombre: 0 2px 8px rgba(0, 0, 0, 0.40), 0 6px 20px rgba(0, 0, 0, 0.30);
+  --ombre-forte: 0 8px 26px rgba(0, 0, 0, 0.55);
+  --voile: rgba(255, 255, 255, 0.12);
+  color-scheme: dark;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
+/* ---------- Base ---------- */
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body {
-  font-family: 'Segoe UI', Roboto, sans-serif;
+  margin: 0;
   background: var(--fond);
   color: var(--texte);
-  min-height: 100vh;
-  padding-bottom: 90px;
+  font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+  transition: background 0.3s, color 0.3s;
 }
+[hidden] { display: none !important; }
+h1, h2, h3 { line-height: 1.25; }
+h2 { font-size: 1.15rem; margin: 20px 0 10px; }
+h3 { font-size: 1.05rem; margin: 0 0 8px; }
+p { margin: 8px 0; }
+small, .petit { color: var(--texte2); font-size: 0.82rem; }
+hr { border: none; border-top: 1px solid var(--bord); margin: 16px 0; }
+a { color: var(--accent); }
 
-/* GRANDE CROIX MÉDICALE EN FILIGRANE — plus contrastée */
-body::before {
-  content: '';
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect x='70' y='18' width='60' height='164' rx='14' fill='%23c0392b'/%3E%3Crect x='18' y='70' width='164' height='60' rx='14' fill='%23c0392b'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: center 38%;
-  background-size: 72vmin;
-  opacity: 0.13;
-  pointer-events: none;
-  z-index: 1;
-}
-body.sombre::before {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect x='70' y='18' width='60' height='164' rx='14' fill='%23e74c3c'/%3E%3Crect x='18' y='70' width='164' height='60' rx='14' fill='%23e74c3c'/%3E%3C/svg%3E");
-  opacity: 0.18;
-}
-
-/* BANDEAU HORS-LIGNE */
-#horsLigne {
-  background: var(--danger);
-  color: #fff;
-  text-align: center;
-  padding: 8px;
-  font-size: 0.85rem;
+/* ---------- Boutons (général) ---------- */
+button {
+  font-family: inherit;
+  font-size: 1rem;
   font-weight: 600;
-  position: sticky;
-  top: 72px;
-  z-index: 9;
-}
-
-/* EN-TÊTE */
-#entete {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  background: linear-gradient(135deg, #0e7a5f, #0b5f4a);
-  border-bottom: none;
-  box-shadow: 0 3px 12px rgba(11, 95, 74, 0.35);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-#entete h1 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  letter-spacing: 0.3px;
+  border: none;
+  border-radius: 14px;
+  padding: 12px 18px;
+  background: var(--accent);
   color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(14, 122, 95, 0.28);
+  transition: transform 0.12s;
 }
+button:active { transform: scale(0.97); }
+button:disabled { opacity: 0.5; box-shadow: none; }
+button:focus-visible { outline: 3px solid var(--ambre); outline-offset: 2px; }
+
+/* ---------- Champs de formulaire ---------- */
+input, select, textarea {
+  font-family: inherit;
+  font-size: 1rem;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--bord);
+  border-radius: 12px;
+  background: var(--champ);
+  color: var(--texte);
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(14, 122, 95, 0.15);
+}
+label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--texte2);
+  margin: 12px 0 6px;
+}
+input[type="checkbox"], input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+textarea { min-height: 80px; resize: vertical; }
+
+/* ---------- En-tête ---------- */
+header {
+  position: relative;
+  background: linear-gradient(135deg, #0e7a5f 0%, #128266 45%, #d9822b 120%);
+  color: #ffffff;
+  padding: 20px 16px 24px;
+  border-radius: 0 0 22px 22px;
+  box-shadow: 0 4px 16px rgba(14, 122, 95, 0.30);
+}
+header h1 { margin: 0; font-size: 1.5rem; letter-spacing: 0.5px; }
+header p { margin: 4px 0 0; font-size: 0.9rem; opacity: 0.92; }
 
 #btnTheme {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  font-size: 1.05rem;
-  cursor: pointer;
-  color: #ffffff;
-}
-
-/* PAGES */
-.page { padding: 18px 16px; }
-.page.cache, .cache { display: none; }
-
-h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 14px; }
-/* DATE DU JOUR */
-.date-jour {
-  font-size: 0.8rem;
-  color: var(--texte-doux);
-  text-transform: capitalize;
-  margin-bottom: 4px;
-}
-
-/* BANNIÈRE INSTALLATION */
-#banniere {
-  margin: 0 0 14px;
-  padding: 12px 14px;
-  background: var(--accent-clair);
-  border-radius: 12px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 0.88rem;
-  box-shadow: var(--ombre);
-}
-
-.banniere-btns { display: flex; gap: 8px; }
-
-#btnInstaller {
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 14px;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: var(--ombre-bouton);
-}
-
-#btnFermerBanniere {
-  background: none;
-  border: none;
-  font-size: 1.1rem;
-  cursor: pointer;
-  color: var(--texte-doux);
-  padding: 4px 8px;
-}
-
-/* PROFIL ACTIF */
-.profil-actif {
-  font-size: 0.85rem;
-  color: var(--texte-doux);
-  margin-bottom: 12px;
-}
-
-/* GRILLE D'ACCUEIL */
-.grille {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-top: 8px;
-}
-
-.tuile {
-  border: none;
-  border-radius: 16px;
-  padding: 26px 10px;
-  font-size: 1.6rem;
-  color: #fff;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  box-shadow: var(--ombre-forte);
-  transition: transform 0.15s, box-shadow 0.15s;
-}
-
-.tuile:active {
-  transform: scale(0.97);
-  box-shadow: var(--ombre);
-}
-
-.tuile span { font-size: 0.92rem; font-weight: 600; }
-.t-vert   { background: #0e7a5f; }
-.t-bleu   { background: #35617e; }
-.t-violet { background: #5f5390; }
-.t-orange { background: #b0601f; }
-
-.version {
-  text-align: center;
-  font-size: 0.72rem;
-  color: var(--texte-doux);
-  margin-top: 26px;
-  letter-spacing: 0.5px;
-}
-
-/* CHAMPS */
-.champs-ligne {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-
-.champs-ligne label {
-  flex: 1;
-  font-size: 0.82rem;
-  color: var(--texte-doux);
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-select, input {
-  width: 100%;
-  padding: 11px;
-  border: 1px solid var(--bordure);
-  border-radius: 10px;
-  background: var(--carte);
-  color: var(--texte);
-  font-size: 0.95rem;
-  box-shadow: var(--ombre);
-}
-
-/* PETIT BOUTON LIEN */
-.btn-lien {
-  background: none;
-  border: none;
-  color: var(--accent);
-  font-size: 0.84rem;
-  padding: 2px 0 10px;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-/* SYMPTÔMES — liste avec cercles */
-.categorie { margin-bottom: 18px; }
-
-.categorie h3 {
-  font-size: 0.78rem;
-  color: var(--texte-doux);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.sym-liste {
-  background: var(--carte);
-  border: 1px solid var(--bordure);
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: var(--ombre);
-}
-
-.sym-ligne {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  cursor: pointer;
-  border-bottom: 1px solid var(--bordure);
-  font-size: 0.93rem;
-  -webkit-tap-highlight-color: transparent;
-  transition: background 0.15s;
-}
-
-.sym-ligne:last-child { border-bottom: none; }
-.sym-ligne:active { background: var(--accent-clair); }
-
-.sym-cercle {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: 2px solid #b7c4bf;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.7rem;
-  color: transparent;
-  flex-shrink: 0;
-  transition: all 0.15s;
-}
-
-body.sombre .sym-cercle { border-color: #46565a; }
-
-.sym-ligne.on {
-  color: var(--accent);
-  font-weight: 600;
-  background: var(--accent-clair);
-}
-
-.sym-ligne.on .sym-cercle {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
-  box-shadow: 0 0 0 3px var(--accent-clair);
-}
-
-/* BOUTON ANALYSER FLOTTANT */
-#btnFlottant {
-  position: fixed;
-  left: 14px;
+  position: absolute;
+  top: 16px;
   right: 14px;
-  bottom: 78px;
-  z-index: 30;
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: 30px;
-  padding: 15px;
-  font-size: 1rem;
-  font-weight: 700;
-  box-shadow: 0 6px 24px rgba(14, 122, 95, 0.4);
-  cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 1.15rem;
+  background: var(--voile);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.20);
 }
 
-#btnFlottant:active {
-  transform: scale(0.97);
-  box-shadow: 0 3px 12px rgba(14, 122, 95, 0.3);
-}
-
-/* BOUTON PRINCIPAL */
-.btn-principal {
-  width: 100%;
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  padding: 14px;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  margin: 14px 0;
-  box-shadow: var(--ombre-bouton);
-  transition: transform 0.15s, box-shadow 0.15s;
-}
-
-.btn-principal:active {
-  transform: scale(0.98);
-  box-shadow: var(--ombre);
-}
-/* CARTES */
-.carte {
-  background: var(--carte);
-  border: 1px solid var(--bordure);
-  border-radius: 14px;
-  padding: 15px;
-  margin-bottom: 12px;
-  box-shadow: var(--ombre-forte);
-}
-
-.carte.danger {
-  background: var(--danger-clair);
-  border-color: var(--danger);
-  box-shadow: 0 4px 16px rgba(192, 57, 43, 0.2);
-}
-
-.carte h3 { font-size: 1rem; margin-bottom: 6px; }
-.carte p, .carte li { font-size: 0.9rem; line-height: 1.55; }
-.carte ul { padding-left: 20px; }
-
-.badge {
-  display: inline-block;
-  padding: 2px 10px;
-  border-radius: 12px;
-  font-size: 0.78rem;
-  font-weight: 600;
-}
-
-.b-vert { background: #d4f0e4; color: #0b6b45; }
-.b-jaune { background: #fdf0d3; color: #8a6100; }
-.b-gris { background: var(--bordure); color: var(--texte-doux); }
-.b-rouge { background: var(--danger-clair); color: var(--danger); }
-
-body.sombre .b-vert { background: #14352a; color: #5fd3a5; }
-body.sombre .b-jaune { background: #38301f; color: #e6c07a; }
-body.sombre .b-gris { background: #2c3a3d; color: #9db0a9; }
-
-/* BLOC ANTIBIO-INFO */
-.box-antibio {
-  margin-top: 8px;
-  padding: 9px 10px;
-  background: #fdf3d8;
-  border-radius: 10px;
-  font-size: 0.85rem;
-  line-height: 1.45;
-  box-shadow: var(--ombre);
-}
-body.sombre .box-antibio { background: #38301f; }
-
-/* FICHE MÉDOC */
-.alerte-ligne {
-  padding: 8px 10px;
-  border-radius: 10px;
-  margin-bottom: 6px;
-  font-size: 0.88rem;
-  background: #fdf0d3;
-  box-shadow: var(--ombre);
-}
-
-body.sombre .alerte-ligne { background: #38301f; }
-
-.alerte-ligne.interdit {
-  background: var(--danger-clair);
-  color: var(--danger);
-  font-weight: 700;
-}
-
-/* PROFILS */
-.mini-badge {
-  display: inline-block;
-  background: var(--accent);
-  color: #fff;
-  font-size: 0.7rem;
-  border-radius: 10px;
-  padding: 2px 8px;
-  margin-left: 6px;
-  vertical-align: middle;
-  box-shadow: var(--ombre);
-}
-
-.ligne-btns { display: flex; gap: 8px; margin-top: 8px; }
-
-.btn-petit {
-  flex: 1;
-  border: 1px solid var(--bordure);
-  background: var(--carte);
-  color: var(--texte);
-  border-radius: 8px;
-  padding: 8px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  box-shadow: var(--ombre);
-  transition: transform 0.15s;
-}
-
-.btn-petit:active { transform: scale(0.96); }
-.btn-petit.danger { color: var(--danger); border-color: var(--danger); }
-
-#formProfil { display: flex; flex-direction: column; gap: 10px; }
-/* JOURNAL — barre d'actions */
-.journal-actions {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-
-.journal-actions input {
-  flex: 1;
-}
-
-.journal-actions .btn-petit {
-  flex: 0 0 auto;
-  width: auto;
-  padding: 8px 12px;
-  white-space: nowrap;
-}
-
-/* NAV BAS */
-#navBas {
+/* ---------- Menu du bas ---------- */
+nav {
   position: fixed;
-  bottom: 0;
   left: 0;
   right: 0;
+  bottom: 0;
+  z-index: 50;
   display: flex;
+  gap: 2px;
   background: var(--carte);
-  border-top: 1px solid var(--bordure);
-  z-index: 10;
-  box-shadow: 0 -2px 12px rgba(20, 40, 35, 0.1);
+  padding: 6px 6px calc(8px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -3px 14px rgba(0, 0, 0, 0.12);
 }
-
-body.sombre #navBas {
-  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.3);
-}
-
-#navBas button {
+nav button {
   flex: 1;
-  background: none;
-  border: none;
-  padding: 8px 0 10px;
-  font-size: 1.2rem;
-  color: var(--texte-doux);
-  cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  position: relative;
-}
-
-#navBas button span { font-size: 0.65rem; }
-#navBas button.actif { color: var(--accent); font-weight: 700; }
-
-#navBas button.actif::after {
-  content: '';
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--accent);
-  margin-top: -3px;
-}
-
-/* LISTES GÉNÉRIQUES */
-.item-liste {
-  background: var(--carte);
-  border: 1px solid var(--bordure);
+  padding: 6px 2px;
   border-radius: 12px;
+  background: none;
+  box-shadow: none;
+  font-size: 0.75rem;
+  color: var(--texte2);
+}
+nav button span:first-child { font-size: 1.3rem; line-height: 1; }
+nav button.active, nav button.actif {
+  color: var(--accent);
+  background: rgba(14, 122, 95, 0.12);
+}
+
+/* ---------- Pages ---------- */
+.page, [id^="page-"] {
+  display: none;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 16px 14px calc(96px + env(safe-area-inset-bottom, 0px));
+}
+.page.active, .page.actif, .page.visible,
+[id^="page-"].active, [id^="page-"].actif, [id^="page-"].visible { display: block; }
+
+/* ---------- Tuiles de l'accueil ---------- */
+.tuiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 16px 0;
+}
+.tuile {
+  border: none;
+  border-radius: 18px;
+  padding: 20px 14px;
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-align: center;
+  box-shadow: var(--ombre);
+}
+.tuile:nth-child(1) { background: #0e7a5f; box-shadow: 0 4px 14px rgba(14, 122, 95, 0.35); }
+.tuile:nth-child(2) { background: #d9822b; box-shadow: 0 4px 14px rgba(217, 130, 43, 0.35); }
+.tuile:nth-child(3) { background: #b05a36; box-shadow: 0 4px 14px rgba(176, 90, 54, 0.35); }
+.tuile:nth-child(4) { background: #7a9d54; box-shadow: 0 4px 14px rgba(122, 157, 84, 0.35); }
+.tuile:active { transform: scale(0.97); }
+
+/* ---------- Accueil : profil actif + ses médicaments ---------- */
+#profilActifAccueil {
+  background: var(--carte);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  box-shadow: var(--ombre);
+  font-weight: 600;
+}
+#medocsProfil > * {
+  background: var(--carte);
+  border-radius: 14px;
   padding: 12px 14px;
   margin-bottom: 10px;
-  font-size: 0.92rem;
   box-shadow: var(--ombre);
 }
 
-.item-liste .date {
+/* ---------- Cartes (listes et résultats) ---------- */
+.carte, #listeJournal > *, #listeMedocs > *, #listeProfils > *, #resultats > * {
+  background: var(--carte);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--ombre);
+}
+#resultats > * { border-left: 5px solid var(--accent); }
+#resultats .grave, #resultats .alerte, #resultats .danger { border-left-color: var(--terre); }
+#resultats .modere, #resultats .prudence { border-left-color: var(--ambre); }
+#resultats .ok, #resultats .info { border-left-color: var(--riziere); }
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
   font-size: 0.75rem;
-  color: var(--texte-doux);
-  margin-bottom: 4px;
+  font-weight: 700;
+}
+.badge-rouge, .badge-grave { background: var(--terre); color: #ffffff; }
+.badge-orange, .badge-prudence { background: var(--ambre); color: #ffffff; }
+.badge-vert, .badge-ok { background: var(--riziere); color: #ffffff; }
+
+/* ---------- Symptômes ---------- */
+#rechercheSymptomes, #rechercheJournal { margin-bottom: 12px; background: var(--carte); }
+#listeSymptomes h3 { margin: 18px 0 8px; font-size: 0.95rem; color: var(--accent); }
+#listeSymptomes label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--carte);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--texte);
+  box-shadow: var(--ombre);
+  cursor: pointer;
+}
+#aucunSymptome {
+  display: none;
+  text-align: center;
+  color: var(--texte2);
+  padding: 24px 10px;
+  font-size: 0.95rem;
+}
+#aucunSymptome.visible, #aucunSymptome.actif, #aucunSymptome.show { display: block; }
+
+/* ---------- Profils ---------- */
+#formProfil {
+  background: var(--carte);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: var(--ombre);
+}
+#groupeGrossesse { display: flex; gap: 8px; margin-bottom: 6px; }
+#groupeGrossesse button {
+  flex: 1;
+  background: var(--champ);
+  color: var(--texte2);
+  border: 1.5px solid var(--bord);
+  box-shadow: none;
+}
+#groupeGrossesse button.actif, #groupeGrossesse button.active,
+#groupeGrossesse button.selected, #groupeGrossesse button.choisi {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+}
+#listeProfils button { font-size: 0.85rem; padding: 8px 14px; }
+
+/* ---------- Journal ---------- */
+#dateJour { font-weight: 700; margin-bottom: 10px; }
+
+/* ---------- Fiche médicament ---------- */
+#ficheMedoc {
+  background: var(--carte);
+  border-radius: 14px;
+  padding: 16px;
+  margin-top: 12px;
+  box-shadow: var(--ombre);
 }
 
-.vide {
+/* ---------- Bannière d'installation ---------- */
+#banniere {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  z-index: 60;
+  display: none;
+  background: var(--carte);
+  border-radius: 16px;
+  border-top: 4px solid var(--ambre);
+  padding: 16px;
+  box-shadow: var(--ombre-forte);
+}
+#banniere.visible, #banniere.show, #banniere.montree, #banniere.active { display: block; }
+#banniere h3 { margin: 0 0 4px; }
+#banniere p { margin: 0 0 12px; font-size: 0.9rem; color: var(--texte2); }
+#btnFermerBanniere {
+  background: none;
+  color: var(--texte2);
+  box-shadow: none;
+}
+
+/* ---------- Boutons flottants ---------- */
+#btnFlottant {
+  position: fixed;
+  right: 16px;
+  bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+  width: 58px;
+  height: 58px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 1.7rem;
+  line-height: 1;
+  z-index: 45;
+  box-shadow: 0 6px 18px rgba(14, 122, 95, 0.45);
+}
+#btnRemonter {
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  box-shadow: var(--ombre-forte);
+}
+
+/* ---------- Bandeau hors ligne ---------- */
+#horsLigne {
+  display: none;
+  background: var(--terre);
+  color: #ffffff;
   text-align: center;
-  color: var(--texte-doux);
-  font-size: 0.9rem;
-  margin-top: 30px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+#horsLigne.visible, #horsLigne.show, #horsLigne.actif { display: block; }
+
+/* ---------- Mentions / avertissement médical ---------- */
+footer, .disclaimer, #disclaimer {
+  background: rgba(217, 130, 43, 0.12);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 0.8rem;
+  color: var(--texte2);
+  margin-top: 18px;
 }
