@@ -2,137 +2,129 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#0e7a5f">
   <title>Salama</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="stylesheet" href="style.css">
-  <style>
-    .aide-champ { font-size: 0.72rem; color: var(--texte-doux); margin-top: 4px; line-height: 1.4; }
-    .case-ligne {
-      display: flex; align-items: center; gap: 10px;
-      background: var(--carte); border: 1px solid var(--bordure);
-      border-radius: 10px; padding: 11px; font-size: 0.92rem;
-      box-shadow: var(--ombre); cursor: pointer;
-    }
-    .case-ligne input[type="checkbox"] { width: 20px; height: 20px; box-shadow: none; flex-shrink: 0; }
-  </style>
 </head>
 <body>
-<header id="entete">
-  <h1>🛡️ Salama</h1>
-  <button id="btnTheme" onclick="basculerTheme()">🌙</button>
-</header>
-<div id="horsLigne" class="cache">📴 Mode hors-ligne actif</div>
-<main>
-  <!-- ACCUEIL -->
-  <section id="page-accueil" class="page">
-    <div id="banniere" class="cache">
-      <span>📲 Installe Salama sur ton téléphone</span>
-      <div class="banniere-btns">
-        <button id="btnInstaller">Installer</button>
-        <button id="btnFermerBanniere">✕</button>
+
+  <div id="horsLigne">📴 Pas de connexion — Salama continue de fonctionner normalement</div>
+
+  <header>
+    <h1>Salama</h1>
+    <p>Outil familial de santé</p>
+    <button id="btnTheme" data-action="basculerTheme" aria-label="Changer de thème">🌙</button>
+  </header>
+
+  <main>
+
+    <section id="page-accueil" class="page active">
+      <div id="profilActifAccueil"></div>
+      <div class="tuiles">
+        <button class="tuile" data-page="symptomes"><div style="font-size:1.9rem;">🩺</div><div>Symptômes</div></button>
+        <button class="tuile" data-page="medocs"><div style="font-size:1.9rem;">💊</div><div>Médicaments</div></button>
+        <button class="tuile" data-page="journal"><div style="font-size:1.9rem;">📔</div><div>Journal</div></button>
+        <button class="tuile" data-page="profils"><div style="font-size:1.9rem;">👥</div><div>Profils</div></button>
       </div>
-    </div>
-    <p id="dateJour" class="date-jour"></p>
-    <p id="profilActifAccueil" class="profil-actif"></p>
-    <div class="grille">
-      <button class="tuile t-vert" onclick="aller('symptomes')">🩺<span>Symptômes</span></button>
-      <button class="tuile t-bleu" onclick="aller('medocs')">💊<span>Médicaments</span></button>
-      <button class="tuile t-violet" onclick="aller('journal')">📓<span>Journal</span></button>
-      <button class="tuile t-orange" onclick="aller('profils')">👤<span>Profils</span></button>
-    </div>
-    <p style="text-align:center;font-size:11px;opacity:.6;font-style:italic;line-height:1.5;padding:12px 24px 2px;">⚠️ Outil familial d'orientation — ne remplace pas l'avis d'un médecin. En cas de doute, consultez un professionnel de santé.</p>
-    <p style="text-align:center;font-size:11px;opacity:.5;padding:6px 0 14px;">Salama v0.22</p>
-  </section>
+      <h2>Trousse familiale</h2>
+      <div id="medocsProfil"></div>
+      <div class="disclaimer">
+        ⚠️ <b>Salama ne remplace pas un médecin.</b> C'est une aide d'orientation : en cas de symptômes graves, durables ou qui inquiètent, consulte toujours un centre de santé.
+        <small style="display:block;margin-top:6px;">Salama v1.0</small>
+      </div>
+    </section>
 
-  <!-- SYMPTÔMES -->
-  <section id="page-symptomes" class="page cache">
-    <h2>Que ressens-tu ?</h2>
-    <div class="champs-ligne">
-      <label>Depuis
-        <select id="duree">
-          <option value="aujourd'hui">Aujourd'hui</option>
-          <option value="2-3 jours">2-3 jours</option>
-          <option value="1 semaine ou +">1 semaine ou +</option>
-        </select>
-      </label>
-      <label>Intensité
-        <select id="intensite">
-          <option value="légère">Légère</option>
-          <option value="modérée">Modérée</option>
-          <option value="forte">Forte</option>
-        </select>
-      </label>
-    </div>
-    <div id="listeSymptomes"></div>
-    <div id="resultats"></div>
-  </section>
-
-  <!-- MÉDICAMENTS -->
-  <section id="page-medocs" class="page cache">
-    <h2>Médicaments</h2>
-    <p id="medocsProfil" class="profil-actif"></p>
-    <div id="listeMedocs"></div>
-    <div id="ficheMedoc" class="cache"></div>
-  </section>
-
-  <!-- JOURNAL -->
-  <section id="page-journal" class="page cache">
-    <h2>Journal de santé</h2>
-    <div class="journal-actions">
-      <input type="text" id="rechercheJournal" placeholder="🔍 Rechercher..." oninput="afficherJournal()">
-      <button class="btn-petit" onclick="exporterJournal()">📤 Partager</button>
-      <button class="btn-petit danger" onclick="effacerJournal()">🗑️</button>
-    </div>
-    <div id="listeJournal"></div>
-  </section>
-
-  <!-- PROFILS -->
-  <section id="page-profils" class="page cache">
-    <h2>Profils</h2>
-    <div id="listeProfils"></div>
-    <button id="btnNouveauProfil" class="btn-principal" onclick="nouveauProfil()">＋ Nouveau profil</button>
-    <div id="formProfil" class="cache">
-      <input id="pPrenom" placeholder="Prénom">
-      <select id="pSexe" onchange="majChampGrossesse()">
-        <option value="">Sexe...</option>
-        <option value="femme">Femme</option>
-        <option value="homme">Homme</option>
+    <section id="page-symptomes" class="page">
+      <input id="rechercheSymptomes" type="search" placeholder="🔎 Rechercher un symptôme…">
+      <label for="dureeSymptomes">Depuis combien de temps ?</label>
+      <select id="dureeSymptomes">
+        <option value="aujourdhui">Depuis aujourd'hui</option>
+        <option value="jours23">Depuis 2 ou 3 jours</option>
+        <option value="plus3">Depuis plus de 3 jours</option>
       </select>
-      <input id="pNaissance" type="number" inputmode="numeric" placeholder="Année de naissance (ex : 1990)">
-      <input id="pNaissancePrecise" type="date" aria-label="Date de naissance précise (facultatif)">
-      <p class="aide-champ">Date complète facultative — utile pour les bébés et jeunes enfants : les dosages et alertes d'âge deviennent précis au mois près.</p>
-      <label id="groupeGrossesse" class="case-ligne cache">
-        <input type="checkbox" id="pGrossesse">
-        <span>🤰 Grossesse en cours</span>
-      </label>
-      <input id="pPoids" type="number" inputmode="decimal" placeholder="Poids en kg (ex : 70)">
-      <input id="pAllergies" placeholder="Allergies (ex : ibuprofène, aspirine)">
-      <input id="pTraitements" placeholder="Traitements en cours (ex : cortisone)">
-      <button class="btn-principal" onclick="enregistrerProfil()">Enregistrer</button>
+      <div id="compteurSymptomes" class="petit" style="margin:8px 0;"></div>
+      <div id="listeSymptomes"></div>
+      <div id="aucunSymptome">Aucun symptôme ne correspond à ta recherche.</div>
+      <button id="btnToutDecocher" data-action="toutDecocher" style="background:var(--champ);color:var(--texte2);border:1.5px solid var(--bord);box-shadow:none;margin-top:8px;">Tout décocher</button>
+      <div id="resultats" style="margin-top:16px;"></div>
+      <div class="disclaimer">⚠️ Salama ne remplace pas un médecin : en cas d'urgence, va directement au centre de santé.</div>
+    </section>
+
+    <section id="page-medocs" class="page">
+      <div id="listeMedocs"></div>
+      <div id="ficheMedoc" hidden></div>
+    </section>
+
+    <section id="page-journal" class="page">
+      <div id="dateJour"></div>
+      <textarea id="texteJournal" placeholder="Ce qui s'est passé aujourd'hui : symptômes, température, médicaments donnés…" style="min-height:110px;"></textarea>
+      <button id="btnAjouterJournal" data-action="ajouterJournal" style="margin-top:10px;">➕ Ajouter au journal</button>
+      <input id="rechercheJournal" type="search" placeholder="🔎 Rechercher dans le journal…" style="margin-top:16px;">
+      <div id="listeJournal"></div>
+    </section>
+
+    <section id="page-profils" class="page">
+      <h2>Profils de la famille</h2>
+      <div id="listeProfils"></div>
+      <h2 style="margin-top:24px;">Nouveau profil</h2>
+      <form id="formProfil">
+        <label for="pNom">Nom</label>
+        <input id="pNom" maxlength="30" placeholder="Prénom" autocomplete="off">
+        <label for="pSexe">Sexe</label>
+        <select id="pSexe">
+          <option value="h">Garçon / Homme</option>
+          <option value="f">Fille / Femme</option>
+        </select>
+        <div id="blocGrossesse" hidden>
+          <label>Grossesse en cours ?</label>
+          <div id="groupeGrossesse">
+            <button type="button" data-action="choisirGrossesse" data-val="oui">Oui</button>
+            <button type="button" data-action="choisirGrossesse" data-val="non">Non</button>
+          </div>
+        </div>
+        <label for="pNaissance">Année de naissance</label>
+        <input id="pNaissance" type="number" inputmode="numeric" placeholder="Exemple : 1995" min="1900">
+        <label for="pNaissancePrecise">Date de naissance exacte (optionnel — utile pour un bébé)</label>
+        <input id="pNaissancePrecise" type="date">
+        <label for="pPoids">Poids en kg (optionnel — sert à calculer les doses enfant)</label>
+        <input id="pPoids" type="number" inputmode="decimal" step="0.1" placeholder="Exemple : 12.5" min="1" max="300">
+        <div id="erreurProfil" hidden style="color:var(--terre);font-size:0.9rem;margin-top:8px;"></div>
+        <button type="submit" style="margin-top:14px;">💾 Enregistrer le profil</button>
+      </form>
+    </section>
+
+  </main>
+
+  <button id="btnFlottant" data-action="analyser" aria-label="Analyser les symptômes" hidden>🔍</button>
+  <button id="btnRemonter" data-action="remonter" aria-label="Remonter en haut" style="position:fixed;right:16px;bottom:152px;display:none;z-index:44;">⬆️</button>
+
+  <div id="banniere">
+    <h3>📲 Installer Salama</h3>
+    <p>Ajoute l'application à ton écran d'accueil : ouvre le menu du navigateur <b>⋮</b> (les trois points, en haut à droite) puis choisis <b>« Installer l'application »</b> ou <b>« Ajouter à l'écran d'accueil »</b>.</p>
+    <div style="display:flex;gap:8px;">
+      <button id="btnInstaller" data-action="installer">Installer</button>
+      <button id="btnFermerBanniere" data-action="fermerBanniere" style="border:1.5px solid var(--bord);">✕ Fermer</button>
     </div>
-  </section>
-</main>
-<button id="btnFlottant" class="cache" onclick="analyser()">🔍 Analyser</button>
-<button id="btnRemonter" class="cache" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="position:fixed;bottom:100px;right:16px;z-index:999;background:#0e7a5f;color:#fff;border:none;border-radius:50%;width:48px;height:48px;font-size:20px;box-shadow:0 4px 12px rgba(0,0,0,.3);cursor:pointer;">⬆️</button>
-<nav id="navBas">
-  <button onclick="aller('accueil')">🏠<span>Accueil</span></button>
-  <button onclick="aller('symptomes')">🩺<span>Symptômes</span></button>
-  <button onclick="aller('medocs')">💊<span>Médocs</span></button>
-  <button onclick="aller('journal')">📓<span>Journal</span></button>
-  <button onclick="aller('profils')">👤<span>Profils</span></button>
-</nav>
-<script>
-/* Rapporteur d'erreurs : affiche un message clair si un problème survient */
-window.addEventListener('error', function (e) {
-  alert('Salama — problème détecté :\n' + e.message + '\n(ligne ' + e.lineno + ')');
-});
-</script>
-<script src="data.js"></script>
-<script src="activation.js"></script>
-<script src="app.js"></script>
+  </div>
+
+  <nav>
+    <button data-page="accueil" class="active"><span>🏠</span><span>Accueil</span></button>
+    <button data-page="symptomes"><span>🩺</span><span>Symptômes</span></button>
+    <button data-page="medocs"><span>💊</span><span>Médicaments</span></button>
+    <button data-page="journal"><span>📔</span><span>Journal</span></button>
+    <button data-page="profils"><span>👥</span><span>Profils</span></button>
+  </nav>
+
+  <script>
+    /* Rapporteur d'erreurs : affiche un message clair si le code plante */
+    window.addEventListener('error', function (e) { alert('Salama — problème détecté :\n' + e.message + '\n(ligne ' + e.lineno + ')'); });
+  </script>
+  <script src="data.js"></script>
+  <script src="activation.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
