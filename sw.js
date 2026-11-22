@@ -1,5 +1,5 @@
-/* SALAMA — Service Worker (v0.26) */
-var CACHE = 'salama-v26';
+/* SALAMA — Service Worker (v0.22) */
+var CACHE = 'salama-v27';
 var FICHIERS = [
   './',
   'index.html',
@@ -34,10 +34,21 @@ self.addEventListener('activate', function (e) {
   self.clients.claim();
 });
 
+/* Stratégie : cache d'abord, puis mise à jour silencieuse en arrière-plan.
+   L'app s'ouvre instantanément (même hors-ligne) et se met à jour
+   toute seule dès qu'une connexion est disponible. */
 self.addEventListener('fetch', function (e) {
+  if (e.request.method !== 'GET') return;
   e.respondWith(
-    caches.match(e.request).then(function (rep) {
-      return rep || fetch(e.request);
+    caches.match(e.request).then(function (depuisCache) {
+      var depuisReseau = fetch(e.request).then(function (rep) {
+        if (rep && rep.ok) {
+          var copie = rep.clone();
+          caches.open(CACHE).then(function (c) { c.put(e.request, copie); });
+        }
+        return rep;
+      }).catch(function () { return depuisCache; });
+      return depuisCache || depuisReseau;
     })
   );
 });
