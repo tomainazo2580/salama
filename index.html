@@ -10,7 +10,6 @@
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="stylesheet" href="style.css">
   <style>
-    /* Champs ajoutés v0.22 */
     .aide-champ { font-size: 0.72rem; color: var(--texte-doux); margin-top: 4px; line-height: 1.4; }
     .case-ligne {
       display: flex; align-items: center; gap: 10px;
@@ -126,6 +125,12 @@
   <button onclick="aller('journal')">📓<span>Journal</span></button>
   <button onclick="aller('profils')">👤<span>Profils</span></button>
 </nav>
+<script>
+/* Rapporteur d'erreurs : affiche un message clair si un problème survient */
+window.addEventListener('error', function (e) {
+  alert('Salama — problème détecté :\n' + e.message + '\n(ligne ' + e.lineno + ')');
+});
+</script>
 <script src="data.js"></script>
 <script src="activation.js"></script>
 <script src="app.js"></script>
