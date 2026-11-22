@@ -1,13 +1,16 @@
 /* ============================================================
-   SALAMA — activation.js (v0.18)
+   SALAMA — activation.js (v0.19)
    Verrou d'activation : 1 clé unique par appareil.
    Fichier autonome : il s'injecte tout seul dans la page.
    ============================================================ */
-
 (function () {
-
-  /* ⚠️ cleAttendue() doit rester IDENTIQUE dans generateur.html */
-
+  /* ✔️ v0.19 : demande au navigateur de préserver le stockage.
+     Réduit fortement le risque que l'ID et l'activation soient
+     effacés quand le stockage de l'appareil est plein. */
+  if (navigator.storage && navigator.storage.persist) {
+    try { navigator.storage.persist(); } catch (e) {}
+  }
+  /* ⚠️ cleAttendue() doit rester IDENTIQUE dans generateur.html (hors ligne) */
   function normaliserId(id) {
     var brut = (id || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
     if (brut.length === 11 && brut.indexOf('SLM') === 0) {
@@ -15,7 +18,6 @@
     }
     return null;
   }
-
   function cleAttendue(id) {
     var h = 7;
     for (var i = 0; i < id.length; i++) {
@@ -26,7 +28,6 @@
     n = n.slice(n.length - 6);
     return n.slice(0, 3) + '-' + n.slice(3);
   }
-
   function genererIdAppareil() {
     var lettres = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
     var id = 'SLM-';
@@ -35,7 +36,6 @@
     for (var j = 0; j < 4; j++) id += lettres.charAt(Math.floor(Math.random() * lettres.length));
     return id;
   }
-
   function idAppareil() {
     var id = null;
     try { id = localStorage.getItem('salama_appareil_id'); } catch (e) {}
@@ -45,13 +45,11 @@
     }
     return id;
   }
-     /* Déjà activé sur cet appareil ? Alors on ne fait rien. */
+  /* Déjà activé sur cet appareil ? Alors on ne fait rien. */
   var dejaActif = false;
   try { dejaActif = (localStorage.getItem('salama_active') === 'oui'); } catch (e) {}
   if (dejaActif) return;
-
   var monId = idAppareil();
-
   var ecran = document.createElement('div');
   ecran.id = 'ecranActivation';
   ecran.setAttribute('style',
@@ -59,14 +57,13 @@
     'background:linear-gradient(135deg,#0e7a5f,#0b5f4a);' +
     'display:flex;align-items:center;justify-content:center;' +
     'padding:20px;font-family:-apple-system,Roboto,Arial,sans-serif;');
-
   ecran.innerHTML =
     '<div style="background:#ffffff;border-radius:18px;padding:28px 22px;max-width:360px;width:100%;' +
     'box-shadow:0 10px 30px rgba(0,0,0,.35);text-align:center;color:#222;">' +
     '<div style="font-size:44px;color:#c0392b;line-height:1;">✚</div>' +
     '<div style="font-size:26px;font-weight:700;color:#0b5f4a;margin:6px 0 2px;">Salama</div>' +
     '<div style="font-size:13px;color:#666;margin-bottom:18px;">Outil familial de santé</div>' +
-    '<div style="font-size:14px;color:#444;margin-bottom:10px;">Cet appareil n\'est pas encore activé.<br>' +
+    '<div style="font-size:14px;color:#444;margin-bottom:10px;">Cet appareil n\'est pas encore activé. ' +
     'Envoie cet <b>ID</b> par <a href="https://tomainazo2580.github.io/tsiky/" target="_blank" style="color:#0e7a5f;font-weight:700;">💬 Tsiky</a> (la messagerie malgache gratuite 🇲🇬) au <b>034 39 949 07</b> pour recevoir ta clé :</div>' +
     '<div style="font-size:20px;font-weight:700;letter-spacing:2px;color:#0b5f4a;' +
     'background:#eef7f4;border:1px solid #cfe5de;border-radius:10px;padding:10px;margin-bottom:8px;">' + monId + '</div>' +
@@ -78,25 +75,21 @@
     '<button id="actiBouton" style="width:100%;background:#0e7a5f;color:#fff;border:none;border-radius:10px;' +
     'padding:13px;font-size:16px;font-weight:700;cursor:pointer;">🔓 Activer</button>' +
     '<div id="actiErreur" style="display:none;color:#c0392b;font-size:13px;margin-top:10px;">❌ Clé incorrecte pour cet appareil.</div>' +
+    '<div style="font-size:11px;color:#888;margin-top:12px;line-height:1.5;">⚠️ Si cet appareil était déjà activé et s\'est re-verrouillé, ce nouvel ID nécessite une nouvelle clé — renvoie-le moi.</div>' +
     '</div>';
-     function demarrer() {
+  function demarrer() {
     document.body.appendChild(ecran);
-
     var champ = document.getElementById('actiCle');
     var erreur = document.getElementById('actiErreur');
-
     champ.addEventListener('input', function () {
       var v = champ.value.replace(/[^0-9]/g, '').slice(0, 6);
       champ.value = (v.length > 3) ? v.slice(0, 3) + '-' + v.slice(3) : v;
       erreur.style.display = 'none';
     });
-
     champ.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') essayer();
     });
-
     document.getElementById('actiBouton').addEventListener('click', essayer);
-
     function essayer() {
       var saisie = champ.value.replace(/[^0-9]/g, '');
       var bonne = cleAttendue(monId).replace(/[^0-9]/g, '');
@@ -113,7 +106,6 @@
         champ.focus();
       }
     }
-
     document.getElementById('actiCopier').addEventListener('click', function () {
       var btn = this;
       function ok() {
@@ -133,8 +125,6 @@
       }
     });
   }
-
   if (document.body) demarrer();
   else document.addEventListener('DOMContentLoaded', demarrer);
-
 })();
