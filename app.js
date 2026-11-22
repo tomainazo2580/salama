@@ -1,693 +1,652 @@
-// ================= OUTILS =================
+/* ============================================================
+   SALAMA — app.js (v1.0)
+   Rebuild propre — Design B « Chaleur malgache »
+   data.js et activation.js restent inchangés.
+   ============================================================ */
+
+/* ================= Aides génériques ================= */
 function $(id) { return document.getElementById(id); }
-function lireCle(cle, defaut) {
-  try {
-    const v = localStorage.getItem(cle);
-    return v ? JSON.parse(v) : defaut;
-  } catch (e) { return defaut; }
-}
-function ecrireCle(cle, valeur) {
-  try { localStorage.setItem(cle, JSON.stringify(valeur)); } catch (e) {}
-}
-function echapper(s) {
-  return String(s == null ? '' : s)
+
+function echapper(t) {
+  return String(t == null ? '' : t)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
-function sansAccents(s) {
-  return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+function sansAccents(t) {
+  return String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
-// ================= THÈME =================
+
+function lireCle(cle, defaut) {
+  try { var v = localStorage.getItem(cle); return (v === null || v === undefined) ? defaut : v; }
+  catch (e) { return defaut; }
+}
+function ecrireCle(cle, val) { try { localStorage.setItem(cle, String(val)); } catch (e) {} }
+
+function dateLisible(iso) {
+  var d = new Date(iso);
+  if (isNaN(d.getTime())) return echapper(iso);
+  return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+/* ================= Règles grossesse ================= */
+var AINS_GROSSESSE = ['ibuprofene', 'aspirine'];        /* ⛔ interdits */
+var OK_GROSSESSE = ['serum', 'sro', 'antiseptique'];    /* ✅ sans souci */
+
+/* ================= Profils ================= */
+function lireProfils() {
+  try {
+    var v = JSON.parse(lireCle('salama_profils', '[]'));
+    return Array.isArray(v) ? v : [];
+  } catch (e) { return []; }
+}
+function ecrireProfils(liste) { ecrireCle('salama_profils', JSON.stringify(liste)); }
+
+function profilActif() {
+  var nom = lireCle('salama_profil_actif', '');
+  if (!nom) return null;
+  var liste = lireProfils();
+  for (var i = 0; i < liste.length; i++) {
+    if (liste[i] && liste[i].nom === nom) return liste[i];
+  }
+  return null;
+}
+
+function sexeCode(s) {
+  var v = String(s || '').toLowerCase();
+  if (v === 'h' || v === 'm' || v === 'homme' || v === 'masculin') return 'm';
+  if (v === 'f' || v === 'femme' || v === 'féminin' || v === 'feminin') return 'f';
+  return '';
+}
+
+function ageDe(p) {
+  if (!p) return null;
+  if (p.naissancePrecise) {
+    var d = new Date(p.naissancePrecise);
+    if (!isNaN(d.getTime())) {
+      var ans = (Date.now() - d.getTime()) / (365.25 * 24 * 3600 * 1000);
+      if (ans >= 0) return ans;
+    }
+  }
+  if (p.naissance) {
+    var annee = parseInt(p.naissance, 10);
+    var actuelle = new Date().getFullYear();
+    if (annee > 1900 && annee <= actuelle) return actuelle - annee;
+  }
+  return null;
+}
+
+function ageTexte(p) {
+  var a = ageDe(p);
+  if (a === null) return '';
+  if (a < 2) {
+    var mois = Math.round(a * 12);
+    return mois === 0 ? 'nouveau-né' : mois + ' mois';
+  }
+  var n = Math.floor(a);
+  return n + (n > 1 ? ' ans' : ' an');
+}
+
+/* ================= Symptômes ================= */
+var coches = new Set();
+var dureeSymptomes = 'aujourdhui';
+
+function construireListeSymptomes() {
+  var q = sansAccents($('rechercheSymptomes').value);
+  var mots = q.split(/\s+/).filter(Boolean);
+  var html = '';
+  var total = 0;
+  categoriesSymptomes.forEach(function (cat) {
+    var titreCible = sansAccents(cat.nom);
+    var catMatch = mots.every(function (m) { return titreCible.indexOf(m) !== -1; });
+    var visibles = cat.symptomes.filter(function (s) {
+      if (catMatch) return true;
+      var cible = sansAccents(s.nom);
+      return mots.every(function (m) { return cible.indexOf(m) !== -1; });
+    });
+    if (!visibles.length) return;
+    total += visibles.length;
+    html += '<h3>' + cat.nom + '</h3>';
+    visibles.forEach(function (s) {
+      var coche = coches.has(s.id) ? ' checked' : '';
+      html += '<label><input type="checkbox" data-sym="' + s.id + '"' + coche + '> ' + s.nom + '</label>';
+    });
+  });
+  $('listeSymptomes').innerHTML = html;
+  $('aucunSymptome').classList.toggle('visible', total === 0);
+  majCompteur();
+}
+
+function majCompteur() {
+  var n = coches.size;
+  $('compteurSymptomes').textContent = n === 0 ? '' : n + ' symptôme' + (n > 1 ? 's' : '') + ' coché' + (n > 1 ? 's' : '');
+}
+
+function toutDecocher() {
+  coches.clear();
+  construireListeSymptomes();
+  $('resultats').innerHTML = '';
+}
+
+/* ================= Analyse ================= */
+function analyser() {
+  var res = $('resultats');
+  var ids = Array.from(coches);
+  if (!ids.length) {
+    res.innerHTML = '<div class="carte info"><p>Coche au moins un symptôme, puis tape sur la loupe 🔍 en bas à droite.</p></div>';
+    return;
+  }
+  var p = profilActif();
+  var age = ageDe(p);
+  var html = '';
+
+  /* 1. Drapeaux rouges (priorité absolue) */
+  var draps = drapeauxRouges.filter(function (d) {
+    if (d.id === 'fievre_3jours' && dureeSymptomes !== 'plus3') return false;
+    if (d.age_max !== undefined && (age === null || age > d.age_max)) return false;
+    return d.symptomes.every(function (s) { return ids.indexOf(s) !== -1; });
+  });
+  draps.forEach(function (d) {
+    html += '<div class="carte grave"><h3>' + d.nom + '</h3><p>' + d.message + '</p></div>';
+  });
+
+  /* 2. Score de chaque maladie : 65 % couverture + 35 % spécificité, plafond 95 % */
+  var poidsMax = {};
+  TROUBLES.forEach(function (t) {
+    for (var sid in t.symptomes) {
+      if (t.symptomes[sid] > (poidsMax[sid] || 0)) poidsMax[sid] = t.symptomes[sid];
+    }
+  });
+  var totalCoches = 0;
+  ids.forEach(function (id) { totalCoches += poidsMax[id] || 0; });
+
+  var scores = [];
+  TROUBLES.forEach(function (t) {
+    if (t.sexe && (!p || sexeCode(p.sexe) !== t.sexe)) return;
+    if (age !== null) {
+      if (t.age_min !== undefined && age < t.age_min) return;
+      if (t.age_max !== undefined && age > t.age_max) return;
+    }
+    var obtenu = 0, total = 0;
+    for (var sid in t.symptomes) {
+      total += t.symptomes[sid];
+      if (ids.indexOf(sid) !== -1) obtenu += t.symptomes[sid];
+    }
+    if (!total) return;
+    var couverture = obtenu / total;
+    var specificite = totalCoches ? obtenu / totalCoches : 0;
+    var pct = Math.min(0.65 * couverture + 0.35 * specificite, 0.95);
+    pct = Math.round(pct * 100);
+    if (pct >= 20) scores.push({ t: t, pct: pct });
+  });
+  scores.sort(function (a, b) { return b.pct - a.pct; });
+  var top = scores.slice(0, 4);
+
+  if (!top.length && !draps.length) {
+    html += '<div class="carte info"><p>Pas de piste assez nette avec ces symptômes. Ajoute d\'autres symptômes ou consulte un centre de santé.</p></div>';
+  }
+  top.forEach(function (s) {
+    html += '<div class="carte"><h3>' + echapper(s.t.nom) + ' <span class="badge badge-vert">' + s.pct + '%</span></h3>';
+    if (s.t.conseils && s.t.conseils.length) {
+      html += '<ul>' + s.t.conseils.map(function (c) { return '<li>' + c + '</li>'; }).join('') + '</ul>';
+    }
+    html += '<p class="petit">👁 ' + s.t.consulter + '</p>';
+    if (s.t.medocs && s.t.medocs.length) {
+      html += s.t.medocs.map(function (id) { return ligneMedoc(id, p); }).join('');
+    }
+    html += '</div>';
+  });
+  res.innerHTML = html;
+  res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function ligneMedoc(id, p) {
+  var m = null;
+  for (var i = 0; i < MEDICAMENTS.length; i++) {
+    if (MEDICAMENTS[i].id === id) { m = MEDICAMENTS[i]; break; }
+  }
+  if (!m) return '';
+  var extra = '';
+  if (p && p.grossesse) {
+    if (AINS_GROSSESSE.indexOf(id) !== -1) extra += ' <span class="badge badge-rouge">⛔ Grossesse</span>';
+    else if (OK_GROSSESSE.indexOf(id) === -1) extra += ' <span class="badge badge-orange">Prudence grossesse</span>';
+  }
+  var age = ageDe(p);
+  if (m.age_min > 0 && age !== null && age < m.age_min) {
+    extra += ' <span class="badge badge-orange">Déconseillé avant ' + m.age_min + (m.age_min > 1 ? ' ans' : ' an') + '</span>';
+  }
+  return '<p style="margin:6px 0;">💊 <b>' + m.nom + '</b>' + extra + '</p>';
+}
+
+/* ================= Médicaments ================= */
+function rendreMedocs() {
+  $('listeMedocs').innerHTML = MEDICAMENTS.map(function (m) {
+    return '<div class="carte" data-medoc="' + m.id + '" style="cursor:pointer;"><b>💊 ' + m.nom + '</b><p class="petit" style="margin:4px 0 0;">' + m.indication + '</p></div>';
+  }).join('');
+}
+
+function ouvrirFiche(id) {
+  var m = null;
+  for (var i = 0; i < MEDICAMENTS.length; i++) {
+    if (MEDICAMENTS[i].id === id) { m = MEDICAMENTS[i]; break; }
+  }
+  if (!m) return;
+  var p = profilActif();
+  var html = '<button data-action="retourMedocs" style="background:var(--champ);color:var(--texte2);border:1.5px solid var(--bord);box-shadow:none;padding:8px 14px;font-size:0.85rem;">← Retour à la liste</button>';
+  html += '<h3 style="margin-top:14px;">💊 ' + m.nom + '</h3>';
+  html += '<p class="petit">' + m.dci + '</p>';
+  html += '<p><b>À quoi ça sert :</b> ' + m.indication + '</p>';
+  html += '<p><b>Adulte :</b> ' + m.adulte + '</p>';
+  html += '<p><b>Maximum :</b> ' + m.max + '</p>';
+  if (m.enfant_mgkg && p && p.poids) {
+    var dose = Math.round(m.enfant_mgkg * parseFloat(p.poids));
+    html += '<p><b>Dose enfant pour ' + echapper(p.nom) + ' (' + p.poids + ' kg) :</b> environ ' + dose + ' mg par prise (' + m.enfant_mgkg + ' mg/kg)</p>';
+  } else if (m.enfant_fixe) {
+    html += '<p><b>Enfant :</b> ' + m.enfant_fixe + '</p>';
+  }
+  if (m.bebe) html += '<p><b>Bébé :</b> ' + m.bebe + '</p>';
+  if (m.alertes && m.alertes.length) {
+    html += '<ul>' + m.alertes.map(function (a) { return '<li>⚠️ ' + a + '</li>'; }).join('') + '</ul>';
+  }
+  if (m.interactions && m.interactions.length) {
+    html += '<p class="petit">⚠️ Prudence si tu prends déjà : ' + m.interactions.join(', ') + '</p>';
+  }
+  if (p && p.grossesse) {
+    if (AINS_GROSSESSE.indexOf(id) !== -1) html += '<p><span class="badge badge-rouge">⛔ DANGER pendant la grossesse</span></p>';
+    else if (OK_GROSSESSE.indexOf(id) !== -1) html += '<p><span class="badge badge-vert">✅ Sans danger connu pendant la grossesse</span></p>';
+    else html += '<p><span class="badge badge-orange">Prudence pendant la grossesse : demande un avis médical</span></p>';
+  }
+  $('ficheMedoc').innerHTML = html;
+  $('ficheMedoc').hidden = false;
+  $('listeMedocs').hidden = true;
+  window.scrollTo(0, 0);
+}
+
+function retourMedocs() {
+  $('ficheMedoc').hidden = true;
+  $('listeMedocs').hidden = false;
+}
+
+/* ================= Journal ================= */
+function lireJournal() {
+  try {
+    var v = JSON.parse(lireCle('salama_journal', '[]'));
+    if (!Array.isArray(v)) return [];
+    return v.filter(function (x) { return x && typeof x === 'object'; });
+  } catch (e) { return []; }
+}
+function ecrireJournal(liste) { ecrireCle('salama_journal', JSON.stringify(liste)); }
+
+function ajouterJournal() {
+  var zone = $('texteJournal');
+  var texte = zone.value.trim();
+  if (!texte) return;
+  var p = profilActif();
+  var liste = lireJournal();
+  liste.push({
+    date: new Date().toISOString().slice(0, 10),
+    profil: p ? p.nom : '',
+    texte: texte
+  });
+  ecrireJournal(liste);
+  zone.value = '';
+  rendreJournal();
+}
+
+function supprimerJournal(idx) {
+  var liste = lireJournal();
+  if (idx >= 0 && idx < liste.length) {
+    if (!confirm('Supprimer cette note ?')) return;
+    liste.splice(idx, 1);
+    ecrireJournal(liste);
+    rendreJournal();
+  }
+}
+
+function rendreJournal() {
+  var mots = sansAccents($('rechercheJournal').value).split(/\s+/).filter(Boolean);
+  var tous = lireJournal();
+  var paires = tous.map(function (en, i) { return { en: en, i: i }; }).reverse();
+  var visibles = paires.filter(function (pa) {
+    if (!mots.length) return true;
+    var cible = sansAccents(pa.en.date + ' ' + (pa.en.profil || '') + ' ' + (pa.en.texte || ''));
+    return mots.every(function (m) { return cible.indexOf(m) !== -1; });
+  });
+  var c = $('listeJournal');
+  if (!visibles.length) {
+    c.innerHTML = '<p class="petit">' + (mots.length ? 'Aucune note trouvée.' : 'Aucune note pour l\'instant.') + '</p>';
+    return;
+  }
+  c.innerHTML = visibles.map(function (pa) {
+    var en = pa.en;
+    return '<div class="carte"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">'
+      + '<div><b>📅 ' + dateLisible(en.date) + '</b>' + (en.profil ? ' <span class="petit">· 👤 ' + echapper(en.profil) + '</span>' : '')
+      + '<p style="margin:6px 0 0;white-space:pre-wrap;">' + echapper(en.texte) + '</p></div>'
+      + '<button data-action="supprimerJournal" data-idx="' + pa.i + '" aria-label="Supprimer" style="background:var(--terre);padding:8px 10px;font-size:0.9rem;flex-shrink:0;">🗑</button>'
+      + '</div></div>';
+  }).join('');
+}
+
+/* ================= Profils ================= */
+var indexEdite = null;
+var grossesseChoisie = false;
+
+function utiliserProfil(idx) {
+  var profs = lireProfils();
+  if (profs[idx]) {
+    ecrireCle('salama_profil_actif', profs[idx].nom);
+    rendreProfils();
+    rendreAccueil();
+  }
+}
+
+function modifierProfil(idx) {
+  var profs = lireProfils();
+  var p = profs[idx];
+  if (!p) return;
+  indexEdite = idx;
+  $('pNom').value = p.nom || '';
+  $('pSexe').value = sexeCode(p.sexe) === 'f' ? 'f' : 'h';
+  $('pNaissance').value = p.naissance || '';
+  $('pNaissancePrecise').value = p.naissancePrecise || '';
+  $('pPoids').value = p.poids || '';
+  grossesseChoisie = !!p.grossesse;
+  majBlocGrossesse();
+  $('formProfil').scrollIntoView({ behavior: 'smooth' });
+}
+
+function supprimerProfil(idx) {
+  var profs = lireProfils();
+  var p = profs[idx];
+  if (!p) return;
+  if (!confirm('Supprimer le profil « ' + p.nom + ' » ?')) return;
+  profs.splice(idx, 1);
+  ecrireProfils(profs);
+  if (lireCle('salama_profil_actif', '') === p.nom) ecrireCle('salama_profil_actif', '');
+  rendreProfils();
+  rendreAccueil();
+}
+
+function majBlocGrossesse() {
+  var f = $('pSexe').value === 'f';
+  $('blocGrossesse').hidden = !f;
+  if (!f) grossesseChoisie = false;
+  marquerGrossesse();
+}
+
+function marquerGrossesse() {
+  document.querySelectorAll('#groupeGrossesse button').forEach(function (b) {
+    b.classList.toggle('actif', (b.dataset.val === 'oui') === grossesseChoisie);
+  });
+}
+
+function choisirGrossesse(v) { grossesseChoisie = v; marquerGrossesse(); }
+
+function enregistrerProfil(e) {
+  e.preventDefault();
+  var erreur = $('erreurProfil');
+  function refuser(msg) { erreur.textContent = msg; erreur.hidden = false; }
+
+  var nom = $('pNom').value.trim();
+  if (!nom) { refuser('Donne un nom au profil.'); return; }
+
+  var anneeMax = new Date().getFullYear();
+  var naissance = '';
+  var sAnnee = $('pNaissance').value.trim();
+  if (sAnnee) {
+    var a = parseInt(sAnnee, 10);
+    if (isNaN(a) || a < 1900 || a > anneeMax) {
+      refuser('Année de naissance invalide (entre 1900 et ' + anneeMax + ').');
+      return;
+    }
+    naissance = a;
+  }
+
+  var poids = '';
+  var sPoids = $('pPoids').value.trim();
+  if (sPoids) {
+    var w = parseFloat(sPoids.replace(',', '.'));
+    if (isNaN(w) || w < 1 || w > 300) {
+      refuser('Le poids doit être entre 1 et 300 kg.');
+      return;
+    }
+    poids = w;
+  }
+
+  var profil = {
+    nom: nom,
+    sexe: $('pSexe').value,
+    naissance: naissance,
+    naissancePrecise: $('pNaissancePrecise').value || '',
+    grossesse: $('pSexe').value === 'f' ? grossesseChoisie : false,
+    poids: poids
+  };
+
+  var profs = lireProfils();
+  if (indexEdite !== null && indexEdite < profs.length) {
+    profs[indexEdite] = profil;
+  } else {
+    profs.push(profil);
+    ecrireCle('salama_profil_actif', nom);
+  }
+  ecrireProfils(profs);
+
+  indexEdite = null;
+  $('formProfil').reset();
+  grossesseChoisie = false;
+  majBlocGrossesse();
+  erreur.hidden = true;
+  rendreProfils();
+  rendreAccueil();
+}
+
+function rendreProfils() {
+  var profs = lireProfils();
+  var actif = lireCle('salama_profil_actif', '');
+  var c = $('listeProfils');
+  if (!profs.length) {
+    c.innerHTML = '<p class="petit">Aucun profil pour l\'instant — crée le premier ci-dessous 👇</p>';
+    return;
+  }
+  c.innerHTML = profs.map(function (p, i) {
+    var estActif = p.nom === actif;
+    var h = '<div class="carte"><b>' + (estActif ? '⭐ ' : '👤 ') + echapper(p.nom) + '</b>';
+    var infos = [];
+    if (ageTexte(p)) infos.push(ageTexte(p));
+    if (p.grossesse) infos.push('🤰 grossesse');
+    if (p.poids) infos.push(p.poids + ' kg');
+    if (infos.length) h += ' <span class="petit">· ' + infos.join(' · ') + '</span>';
+    h += '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">';
+    if (!estActif) h += '<button data-action="utiliserProfil" data-idx="' + i + '" style="background:var(--riziere);padding:8px 12px;font-size:0.85rem;">⭐ Utiliser</button>';
+    h += '<button data-action="modifierProfil" data-idx="' + i + '" style="background:var(--champ);color:var(--texte2);border:1.5px solid var(--bord);box-shadow:none;padding:8px 12px;font-size:0.85rem;">✏️ Modifier</button>';
+    h += '<button data-action="supprimerProfil" data-idx="' + i + '" style="background:var(--terre);padding:8px 12px;font-size:0.85rem;">🗑</button>';
+    h += '</div></div>';
+    return h;
+  }).join('');
+}
+
+/* ================= Accueil ================= */
+function rendreAccueil() {
+  var p = profilActif();
+  var c = $('profilActifAccueil');
+  if (p) {
+    var h = '👤 Profil actif : <b>' + echapper(p.nom) + '</b>';
+    if (ageTexte(p)) h += ' · ' + ageTexte(p);
+    if (p.grossesse) h += ' · 🤰';
+    h += ' <button data-page="profils" style="padding:6px 12px;font-size:0.8rem;margin-left:8px;">Changer</button>';
+    c.innerHTML = h;
+  } else {
+    c.innerHTML = '👤 Aucun profil actif <button data-page="profils" style="padding:6px 12px;font-size:0.8rem;margin-left:8px;">Créer un profil</button>';
+  }
+  var base = ['paracetamol', 'serum', 'sro', 'antiseptique'];
+  $('medocsProfil').innerHTML = base.map(function (id) {
+    var m = null;
+    for (var i = 0; i < MEDICAMENTS.length; i++) {
+      if (MEDICAMENTS[i].id === id) { m = MEDICAMENTS[i]; break; }
+    }
+    if (!m) return '';
+    return '<div data-medoc="' + id + '" style="cursor:pointer;"><b>💊 ' + m.nom + '</b><p class="petit" style="margin:4px 0 0;">' + m.indication + '</p></div>';
+  }).join('');
+}
+
+/* ================= Navigation ================= */
+function allerA(page) {
+  document.querySelectorAll('.page').forEach(function (s) { s.classList.remove('active'); });
+  var cible = $('page-' + page);
+  if (cible) cible.classList.add('active');
+  document.querySelectorAll('nav button').forEach(function (b) {
+    b.classList.toggle('active', b.dataset.page === page);
+  });
+  $('btnFlottant').hidden = (page !== 'symptomes');
+  window.scrollTo(0, 0);
+  if (page === 'accueil') rendreAccueil();
+  if (page === 'profils') rendreProfils();
+  if (page === 'journal') rendreJournal();
+  if (page === 'medocs') { $('ficheMedoc').hidden = true; $('listeMedocs').hidden = false; }
+}
+
+/* ================= Thème ================= */
 function basculerTheme() {
-  const sombre = document.body.classList.toggle('sombre');
-  ecrireCle('salama_theme', sombre ? 'sombre' : 'clair');
-  $('btnTheme').textContent = sombre ? '☀️' : '🌙';
+  ecrireCle('salama_theme', lireCle('salama_theme', 'clair') === 'sombre' ? 'clair' : 'sombre');
+  appliquerTheme();
 }
 function appliquerTheme() {
-  if (lireCle('salama_theme', 'clair') === 'sombre') {
-    document.body.classList.add('sombre');
-    $('btnTheme').textContent = '☀️';
-  }
+  var sombre = lireCle('salama_theme', 'clair') === 'sombre';
+  document.body.classList.toggle('sombre', sombre);
+  var b = $('btnTheme');
+  if (b) b.textContent = sombre ? '☀️' : '🌙';
+  var meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', sombre ? '#211d17' : '#0e7a5f');
 }
-// ================= HORS-LIGNE =================
-function majHorsLigne() {
-  if (navigator.onLine) $('horsLigne').classList.add('cache');
-  else $('horsLigne').classList.remove('cache');
-}
-window.addEventListener('online', majHorsLigne);
-window.addEventListener('offline', majHorsLigne);
-// ================= PROFILS =================
-function profils() { return lireCle('salama_profils', []); }
-function profilActif() {
-  const liste = profils();
-  const id = lireCle('salama_profil_actif', null);
-  return liste.find(p => p.id === id) || null;
-}
-function sexeCode(profil) {
-  if (!profil || !profil.sexe) return null;
-  return profil.sexe === 'femme' ? 'f' : 'm';
-}
-function ageDe(profil) {
-  if (!profil || !profil.naissance) return null;
-  let n;
-  if (profil.naissancePrecise) {
-    n = new Date(profil.naissancePrecise + 'T12:00:00');
-  } else {
-    n = new Date(profil.naissance, 6, 1);
-  }
-  if (isNaN(n.getTime())) return null;
-  return (Date.now() - n.getTime()) / (365.25 * 24 * 3600 * 1000);
-}
-function ageTexte(profil) {
-  const a = ageDe(profil);
-  if (a === null || a < 0) return '';
-  if (a < 2) return Math.floor(a * 12) + ' mois';
-  return Math.floor(a) + ' ans';
-}
-function nouveauProfil() {
-  $('formProfil').classList.remove('cache');
-  $('btnNouveauProfil').classList.add('cache');
-}
-function majChampGrossesse() {
-  const femme = $('pSexe').value === 'femme';
-  $('groupeGrossesse').classList.toggle('cache', !femme);
-  if (!femme) $('pGrossesse').checked = false;
-}
-function enregistrerProfil() {
-  const prenom = $('pPrenom').value.trim();
-  const sexe = $('pSexe').value;
-  const datePrecise = $('pNaissancePrecise').value;
-  let naissance = parseInt($('pNaissance').value, 10);
-  const poids = parseFloat($('pPoids').value);
-  const anneeCourante = new Date().getFullYear();
-  if (!prenom || !sexe || !poids) {
-    alert('Remplis au moins le prénom, le sexe, la naissance et le poids.');
-    return;
-  }
-  if (datePrecise) {
-    const d = new Date(datePrecise + 'T12:00:00');
-    if (isNaN(d.getTime()) || d.getTime() > Date.now()) {
-      alert('La date de naissance est invalide (elle ne peut pas être dans le futur).');
-      return;
-    }
-    const anDate = d.getFullYear();
-    if (naissance && naissance !== anDate) {
-      alert("L'année et la date complète ne correspondent pas.");
-      return;
-    }
-    naissance = anDate;
-  }
-  if (!naissance) { alert('Indique l\u2019année de naissance (ou la date complète).'); return; }
-  if (naissance < anneeCourante - 120 || naissance > anneeCourante) {
-    alert('Année de naissance irréaliste. Vérifie le champ.');
-    return;
-  }
-  if (poids <= 0 || poids > 300) {
-    alert('Poids invalide : entre 1 et 300 kg.');
-    return;
-  }
-  const liste = profils();
-  const profil = {
-    id: Date.now(),
-    prenom: prenom,
-    sexe: sexe,
-    naissance: naissance,
-    naissancePrecise: datePrecise || null,
-    poids: poids,
-    grossesse: sexe === 'femme' && $('pGrossesse').checked,
-    allergies: $('pAllergies').value.trim().toLowerCase(),
-    traitements: $('pTraitements').value.trim().toLowerCase()
-  };
-  liste.push(profil);
-  ecrireCle('salama_profils', liste);
-  if (!profilActif()) ecrireCle('salama_profil_actif', profil.id);
-  ['pPrenom', 'pSexe', 'pNaissance', 'pNaissancePrecise', 'pPoids', 'pAllergies', 'pTraitements'].forEach(id => { $(id).value = ''; });
-  $('pGrossesse').checked = false;
-  majChampGrossesse();
-  $('formProfil').classList.add('cache');
-  $('btnNouveauProfil').classList.remove('cache');
-  afficherProfils();
-  preparerSymptomes();
-}
-function activerProfil(id) {
-  ecrireCle('salama_profil_actif', id);
-  afficherProfils();
-  preparerSymptomes();
-}
-function supprimerProfil(id) {
-  if (!confirm('Supprimer ce profil ?')) return;
-  const liste = profils().filter(p => p.id !== id);
-  ecrireCle('salama_profils', liste);
-  if (lireCle('salama_profil_actif', null) === id) {
-    ecrireCle('salama_profil_actif', liste.length ? liste[0].id : null);
-  }
-  afficherProfils();
-  preparerSymptomes();
-}
-function afficherProfils() {
-  const liste = profils();
-  const actif = profilActif();
-  const zone = $('listeProfils');
-  if (!liste.length) {
-    zone.innerHTML = '<p class="vide">Aucun profil. Crée le premier !</p>';
-    return;
-  }
-  zone.innerHTML = liste.map(p => {
-    const ageTxt = ageTexte(p);
-    const estActif = actif && actif.id === p.id;
-    const iconeSexe = p.sexe === 'femme' ? ' ♀' : p.sexe === 'homme' ? ' ♂' : '';
-    return '<div class="item-liste">' +
-      '<strong>' + echapper(p.prenom) + iconeSexe + '</strong>' + (p.grossesse ? ' 🤰' : '') + (estActif ? '<span class="mini-badge">actif</span>' : '') +
-      '<br>' + (ageTxt ? ageTxt + ' · ' : '') + p.poids + ' kg' +
-      (p.allergies ? '<br>Allergies : ' + echapper(p.allergies) : '') +
-      (p.traitements ? '<br>Traitements : ' + echapper(p.traitements) : '') +
-      '<div class="ligne-btns">' +
-      (estActif ? '' : '<button class="btn-petit" onclick="activerProfil(' + p.id + ')">Activer</button>') +
-      '<button class="btn-petit danger" onclick="supprimerProfil(' + p.id + ')">Supprimer</button>' +
-      '</div></div>';
-  }).join('');
-}
-// ================= SYMPTÔMES =================
-function preparerSymptomes() {
-  $('listeSymptomes').innerHTML = categoriesSymptomes.map(cat =>
-    '<div class="categorie"><h3>' + cat.nom + '</h3><div class="sym-liste">' +
-    cat.symptomes.map(s =>
-      '<div class="sym-ligne" data-id="' + s.id + '" onclick="basculerChip(this)">' +
-      '<span class="sym-cercle">✓</span>' + s.nom + '</div>'
-    ).join('') +
-    '</div></div>'
-  ).join('');
-  const profil = profilActif();
-  const sx = sexeCode(profil);
-  if (sx) {
-    const symptomesF = ['pertes_anormales'];
-    const symptomesH = ['ecoulement_uretral', 'douleur_testicule', 'gonflement_testicule'];
-    document.querySelectorAll('.sym-ligne').forEach(ligne => {
-      const id = ligne.dataset.id;
-      if (sx === 'f' && symptomesH.indexOf(id) !== -1) ligne.classList.add('cache');
-      if (sx === 'm' && symptomesF.indexOf(id) !== -1) ligne.classList.add('cache');
-    });
-  }
-  if ($('rechercheSymptomes') && $('rechercheSymptomes').value) filtrerSymptomes();
-}
-function installerRechercheSymptomes() {
-  if (!$('listeSymptomes') || $('rechercheSymptomes')) return;
-  const bloc = document.createElement('div');
-  bloc.style.cssText = 'display:flex;flex-direction:column;gap:8px;margin-bottom:14px;';
-  bloc.innerHTML =
-    '<input type="text" id="rechercheSymptomes" placeholder="🔍 Rechercher un symptôme (ex : gorge, tête, ventre...)" autocomplete="off">' +
-    '<button class="btn-lien" style="align-self:flex-start;padding:2px 0 0" onclick="toutDecocher()">✕ Tout décocher</button>';
-  $('listeSymptomes').parentNode.insertBefore(bloc, $('listeSymptomes'));
-  $('rechercheSymptomes').addEventListener('input', filtrerSymptomes);
-}
-function filtrerSymptomes() {
-  const champ = $('rechercheSymptomes');
-  if (!champ) return;
-  const mots = sansAccents(champ.value).trim().split(/\s+/).filter(Boolean);
-  let totalVisible = 0;
-  document.querySelectorAll('#listeSymptomes .categorie').forEach(cat => {
-    const titre = sansAccents(cat.querySelector('h3').textContent);
-    let visibles = 0;
-    cat.querySelectorAll('.sym-ligne').forEach(ligne => {
-      const masqueSexe = ligne.classList.contains('cache');
-      const texte = sansAccents(ligne.textContent);
-      const ok = !masqueSexe && mots.every(m => texte.includes(m) || titre.includes(m));
-      ligne.style.display = ok ? '' : 'none';
-      if (ok) visibles++;
-    });
-    cat.classList.toggle('cache', visibles === 0);
-    totalVisible += visibles;
-  });
-  let vide = $('aucunSymptome');
-  if (!vide) {
-    vide = document.createElement('p');
-    vide.id = 'aucunSymptome';
-    vide.className = 'vide';
-    $('listeSymptomes').parentNode.insertBefore(vide, $('listeSymptomes'));
-  }
-  vide.textContent = 'Aucun symptôme trouvé pour cette recherche.';
-  vide.style.display = (mots.length && totalVisible === 0) ? '' : 'none';
-}
-function basculerChip(ligne) {
-  ligne.classList.toggle('on');
-  majBoutonFlottant();
-}
-function toutDecocher() {
-  document.querySelectorAll('.sym-ligne.on').forEach(l => l.classList.remove('on'));
-  majBoutonFlottant();
-}
-function majBoutonFlottant() {
-  const pageVisible = !$('page-symptomes').classList.contains('cache');
-  const n = symptomesCoches().length;
-  const btn = $('btnFlottant');
-  if (btn) {
-    if (n > 0 && pageVisible) {
-      btn.classList.remove('cache');
-      btn.textContent = '🔍 Analyser (' + n + ')';
-    } else {
-      btn.classList.add('cache');
-    }
-  }
-  const btnR = $('btnRemonter');
-  if (btnR) {
-    if (window.scrollY > 300) btnR.classList.remove('cache');
-    else btnR.classList.add('cache');
-  }
-}
-function symptomesCoches() {
-  return Array.from(document.querySelectorAll('.sym-ligne.on')).map(c => c.dataset.id);
-}
-function nomSymptome(id) {
-  for (const cat of categoriesSymptomes) {
-    const s = cat.symptomes.find(i => i.id === id);
-    if (s) return s.nom;
-  }
-  return id;
-}
-// ================= ICÔNE MALADIE =================
-function iconeMaladie(t) {
-  const id = t.id;
-  if (['grippe', 'covid', 'rhume', 'angine', 'angine_bacterienne', 'sinusite', 'bronchite', 'bronchite_chronique', 'pneumonie', 'asthme', 'covid_long', 'coqueluche', 'bronchiolite', 'tuberculose'].includes(id)) return '🫁';
-  if (['dengue'].includes(id)) return '🦟';
-  if (['typhoide', 'amibiase'].includes(id)) return '🦠';
-  if (['bilharziose'].includes(id)) return '💧';
-  if (['malnutrition'].includes(id)) return '🍲';
-  if (['infection_peau'].includes(id)) return '🩹';
-  if (['gastro', 'intoxication', 'rgo', 'constipation_t', 'appendicite', 'hemorroides'].includes(id)) return '🍽️';
-  if (['migraine', 'coup_chaleur'].includes(id)) return '🤕';
-  if (['cystite', 'pyelonephrite', 'colique_nephretique', 'insuffisance_renale'].includes(id)) return '🚽';
-  if (['lombalgie', 'sciatique', 'tendinite', 'entorse'].includes(id)) return '🦴';
-  if (['varicelle', 'rougeole', 'oreillons', 'scarlatine', 'roseole', 'pieds_mains_bouche'].includes(id)) return '🧒';
-  if (['allergie', 'conjonctivite'].includes(id)) return '🤧';
-  if (['otite'].includes(id)) return '👂';
-  if (['infection_dentaire'].includes(id)) return '🦷';
-  if (['deshydratation', 'anemie', 'diabete_depistage'].includes(id)) return '🩸';
-  if (['dysmenorrhee', 'mycose_vaginale', 'vaginose', 'infection_pelvienne', 'herpes_genital_f', 'trichomonase'].includes(id)) return '♀️';
-  if (['uretrite', 'herpes_genital_h', 'epididymite'].includes(id)) return '♂️';
-  if (['hepatite_alcoolique', 'cirrhose', 'alcoolisme'].includes(id)) return '🍺';
-  return '🩺';
-}
-// ================= ANALYSE =================
-let derniereAnalyse = null;
-function analyser() {
-  const coches = symptomesCoches();
-  const zone = $('resultats');
-  if (!coches.length) {
-    zone.innerHTML = '<div class="carte"><p>Coche au moins un symptôme pour lancer l\u2019analyse.</p></div>';
-    return;
-  }
-  const profil = profilActif();
-  const age = ageDe(profil);
-  const ageTxt = profil ? (ageTexte(profil) || 'âge inconnu') : null;
-  const fragile = age !== null && (age < 3 || age > 65);
-  const duree = $('duree').value;
-  const anneeCourante = new Date().getFullYear();
-  const bebeAnneeSeule = profil && !profil.naissancePrecise && profil.naissance === anneeCourante;
-  let html = '';
-  html += '<p style="font-size:0.85rem;color:var(--texte-doux);margin-bottom:10px">' +
-    (profil
-      ? '👤 Analyse pour : <strong>' + echapper(profil.prenom) + '</strong> (' + ageTxt + ', ' + profil.poids + ' kg' + (profil.grossesse ? ' · 🤰 grossesse' : '') + ')'
-      : '👤 Aucun profil actif — doses adulte standard affichées') +
-    '</p>';
-  const alertes = drapeauxRouges.filter(d => {
-    if (!d.symptomes || !d.symptomes.length) return false;
-    if (!d.symptomes.every(s => coches.includes(s))) return false;
-    if (age !== null && d.age_max !== undefined && age > d.age_max) {
-      if (!(d.id === 'fievre_bebe' && bebeAnneeSeule)) return false;
-    }
-    if (age !== null && d.age_min !== undefined && age < d.age_min) return false;
-    if (d.id === 'fievre_3jours' && duree === "aujourd'hui") return false;
-    return true;
-  });
-  if (alertes.length) {
-    html += alertes.map(a =>
-      '<div class="carte danger"><h3>🚨 URGENCE</h3><p>' + a.message + '</p></div>'
-    ).join('');
-  }
-  const ecartees = [];
-  const resultats = TROUBLES.map(t => {
-    const ids = Object.keys(t.symptomes);
-    const trouves = ids.filter(id => coches.includes(id));
-    if (!trouves.length) return null;
-    if (age !== null) {
-      if (t.age_min !== undefined && t.age_min !== null && age < t.age_min) { ecartees.push(t.nom); return null; }
-      if (t.age_max !== undefined && t.age_max !== null && age > t.age_max) { ecartees.push(t.nom); return null; }
-    }
-    if (t.sexe && profil && sexeCode(profil) !== t.sexe) { ecartees.push(t.nom); return null; }
-    const poidsTotal = ids.reduce((s, id) => s + t.symptomes[id], 0);
-    const poidsTrouve = trouves.reduce((s, id) => s + t.symptomes[id], 0);
-    const couverture = poidsTrouve / poidsTotal;
-    const specificite = trouves.length / coches.length;
-    let pct = Math.round(100 * (0.65 * couverture + 0.35 * specificite));
-    if (pct > 95) pct = 95;
-    return { trouble: t, pct: pct };
-  }).filter(r => r && r.pct >= 20).sort((a, b) => b.pct - a.pct);
-  if (!resultats.length) {
-    html += '<div class="carte"><h3>🤔 Aucune piste claire</h3>' +
-      '<p>Ces symptômes ne correspondent à rien dans la base actuelle de Salama. Cela ne veut pas dire que rien ne va : la base est volontairement simple.</p>' +
-      '<p><strong>En attendant :</strong> repose-toi, bois de l\u2019eau régulièrement, surveille l\u2019évolution et note les changements dans le journal.</p>' +
-      '<p><strong>Consulte sans tarder si :</strong> un symptôme s\u2019aggrave, de nouveaux apparaissent, ou si rien ne s\u2019améliore d\u2019ici 2-3 jours.</p></div>';
-  } else {
-    resultats.slice(0, 4).forEach(r => {
-      const badge = r.pct >= 60 ? '<span class="badge b-vert">🟢 forte probabilité</span>'
-                  : r.pct >= 40 ? '<span class="badge b-jaune">🟡 possible</span>'
-                  : '<span class="badge b-gris">⚪ piste faible</span>';
-      let blocAntibio = '';
-      if (r.trouble.antibio) {
-        blocAntibio = '<div class="box-antibio">💊 <strong>Traitement habituel :</strong> ' + r.trouble.antibio + '</div>';
-      }
-      let blocMedocs = '';
-      if (r.trouble.medocs && r.trouble.medocs.length) {
-        blocMedocs = '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--bordure)">' +
-          '<strong>💊 Pour soulager les symptômes :</strong>' +
-          '<br><span style="font-size:0.78rem;color:var(--texte-doux)">Ça soulage, ça ne guérit pas la cause. Lis bien « Consulter si ».</span>' +
-          r.trouble.medocs.map(id => {
-            const m = MEDICAMENTS.find(x => x.id === id);
-            if (!m) return '';
-            const al = alertesProfilPour(m);
-            const interdit = al.some(a => a.grave);
-            const doseTexte = interdit ? '' : posologiePourTexte(m);
-            return '<div style="margin-top:6px;padding:8px;background:var(--accent-clair);border-radius:8px;font-size:0.88rem;box-shadow:var(--ombre)">' +
-              '<strong>' + m.nom + '</strong>' +
-              (interdit ? ' <span class="badge b-rouge">⛔ déconseillé</span>' : '') +
-              '<br><span style="font-size:0.8rem;color:var(--texte-doux)">' + m.indication + '</span>' +
-              (doseTexte ? '<br>' + doseTexte : '') +
-              (al.length && !interdit ? '<br><span style="color:#8a6100">' + al.map(a => a.texte).join('<br>') + '</span>' : '') +
-              '</div>';
-          }).join('') + '</div>';
-      }
-      html += '<div class="carte"><h3>' + iconeMaladie(r.trouble) + ' ' + r.trouble.nom + ' — ' + r.pct + ' %</h3>' + badge +
-        '<p style="margin-top:8px"><strong>Conseils :</strong></p><ul>' +
-        r.trouble.conseils.map(c => '<li>' + c + '</li>').join('') + '</ul>' +
-        '<p style="margin-top:6px"><strong>Consulter si :</strong> ' + r.trouble.consulter + '</p>' +
-        blocAntibio + blocMedocs + '</div>';
-    });
-  }
-  if (profil && !profil.naissancePrecise && age !== null && age < 5) {
-    html += '<div class="carte"><p style="font-size:0.88rem">💡 Astuce : ajoute la <strong>date de naissance complète</strong> de ' +
-      echapper(profil.prenom) + ' dans l\u2019onglet Profils — chez le jeune enfant, les alertes d\u2019âge deviennent précises au mois près.</p></div>';
-  }
-  if (ecartees.length) {
-    html += '<div class="carte"><p style="font-size:0.88rem">🧬 <strong>Écartées selon le profil (âge ou sexe) :</strong> ' +
-      ecartees.join(', ') + '</p></div>';
-  }
-  if (fragile) {
-    html += '<div class="carte danger"><p>⚠️ <strong>' + echapper(profil.prenom) + ' a ' + ageTxt +
-      ' (profil fragile)</strong> : consulte un médecin plus rapidement qu\u2019un adulte en bonne santé.</p></div>';
-  }
-  const connus = new Set();
-  TROUBLES.forEach(t => Object.keys(t.symptomes).forEach(id => connus.add(id)));
-  const inconnus = coches.filter(id => !connus.has(id));
-  if (inconnus.length) {
-    html += '<div class="carte"><p>ℹ️ <strong>Non reconnus par la base :</strong> ' +
-      inconnus.map(nomSymptome).join(', ') + '</p></div>';
-  }
-  derniereAnalyse = {
-    date: new Date().toISOString(),
-    profil: profil ? profil.prenom : 'Sans profil',
-    symptomes: coches,
-    hypotheses: resultats.slice(0, 3).map(r => ({ nom: r.trouble.nom, pct: r.pct })),
-    duree: $('duree').value,
-    intensite: $('intensite').value
-  };
-  html += '<button class="btn-principal" onclick="enregistrerAnalyse()">📓 Enregistrer dans le journal</button>';
-  zone.innerHTML = html;
-  toutDecocher();
-  zone.scrollIntoView({ behavior: 'smooth' });
-}
-function enregistrerAnalyse() {
-  if (!derniereAnalyse) return;
-  const journal = lireCle('salama_journal', []);
-  journal.unshift(derniereAnalyse);
-  ecrireCle('salama_journal', journal);
-  alert('Enregistré dans le journal ✅');
-  aller('journal');
-}
-// ================= JOURNAL =================
-function afficherJournal() {
-  const journal = lireCle('salama_journal', []);
-  const zone = $('listeJournal');
-  const recherche = ($('rechercheJournal') ? $('rechercheJournal').value : '').toLowerCase().trim();
-  let journalFiltre = journal;
-  if (recherche) {
-    journalFiltre = journal.filter(e => {
-      const texte = (e.profil + ' ' + e.symptomes.map(nomSymptome).join(' ') + ' ' +
-        (e.hypotheses || []).map(h => h.nom).join(' ')).toLowerCase();
-      return texte.includes(recherche);
-    });
-  }
-  if (!journalFiltre.length) {
-    zone.innerHTML = recherche
-      ? '<p class="vide">Aucun résultat pour « ' + echapper(recherche) + ' »</p>'
-      : '<p class="vide">Journal vide. Lance une analyse pour commencer.</p>';
-    return;
-  }
-  zone.innerHTML = journalFiltre.map(e => {
-    const d = new Date(e.date);
-    const dateStr = d.toLocaleDateString('fr-FR') + ' ' +
-      d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-    const hypoStr = (e.hypotheses || []).map(h => h.nom + ' (' + h.pct + '%)').join(', ');
-    return '<div class="item-liste">' +
-      '<div class="date">' + dateStr + ' · ' + echapper(e.profil) + ' · ' + e.duree + ' · intensité ' + e.intensite + '</div>' +
-      '<strong>Symptômes :</strong> ' + e.symptomes.map(nomSymptome).join(', ') + '<br>' +
-      '<strong>Pistes :</strong> ' + (hypoStr || 'aucune') +
-      '<div class="ligne-btns"><button class="btn-petit danger" onclick="supprimerEntree(' + journal.indexOf(e) + ')">Supprimer</button></div>' +
-      '</div>';
-  }).join('');
-}
-function supprimerEntree(i) {
-  const journal = lireCle('salama_journal', []);
-  journal.splice(i, 1);
-  ecrireCle('salama_journal', journal);
-  afficherJournal();
-}
-function effacerJournal() {
-  if (!confirm('Effacer TOUT le journal ? Cette action est irréversible.')) return;
-  ecrireCle('salama_journal', []);
-  afficherJournal();
-}
-function exporterJournal() {
-  const journal = lireCle('salama_journal', []);
-  if (!journal.length) {
-    alert('Journal vide : rien à exporter.');
-    return;
-  }
-  let texte = '📋 JOURNAL DE SANTÉ SALAMA\n';
-  texte += 'Exporté le ' + new Date().toLocaleDateString('fr-FR') + '\n';
-  texte += '━━━━━━━━━━━━━━━━━━━━\n\n';
-  journal.forEach(e => {
-    const d = new Date(e.date);
-    texte += '📅 ' + d.toLocaleDateString('fr-FR') + ' ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) + '\n';
-    texte += '👤 ' + e.profil + '\n';
-    texte += '🩺 Symptômes : ' + e.symptomes.map(nomSymptome).join(', ') + '\n';
-    if (e.hypotheses && e.hypotheses.length) {
-      texte += '💡 Pistes : ' + e.hypotheses.map(h => h.nom + ' (' + h.pct + '%)').join(', ') + '\n';
-    }
-    texte += '⏱️ Durée : ' + e.duree + ' | Intensité : ' + e.intensite + '\n\n';
-  });
-  if (navigator.share) {
-    navigator.share({ title: 'Journal de santé Salama', text: texte })
-      .catch(() => copierTexte(texte));
-  } else {
-    copierTexte(texte);
-  }
-}
-function copierTexte(texte) {
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(texte).then(() => {
-      alert('📋 Journal copié ! Colle-le où tu veux (SMS, WhatsApp, email...).');
-    }).catch(() => {
-      afficherZoneExport(texte);
-    });
-  } else {
-    afficherZoneExport(texte);
-  }
-}
-function afficherZoneExport(texte) {
-  const zone = $('listeJournal');
-  zone.innerHTML = '<div class="carte"><p><strong>📋 Copie ce texte :</strong></p>' +
-    '<textarea style="width:100%;height:200px;font-size:0.85rem;padding:10px;border:1px solid var(--bordure);border-radius:10px;background:var(--fond);color:var(--texte)" readonly>' +
-    echapper(texte) + '</textarea>' +
-    '<button class="btn-principal" onclick="afficherJournal()">← Retour au journal</button></div>';
-}
-// ================= POSOLOGIE =================
-function posologiePourTexte(m) {
-  const profil = profilActif();
-  if (!profil) return m.adulte + ' (dose adulte)';
-  const age = ageDe(profil);
-  const poids = profil.poids;
-  if (m.age_min !== null && age < m.age_min) {
-    return '⛔ Déconseillé avant ' + m.age_min + ' ans';
-  }
-  if (age >= 15 || poids >= 50) {
-    return m.adulte + ' — ' + m.max;
-  }
-  if (m.enfant_mgkg) {
-    const dose = Math.round(m.enfant_mgkg * poids / 10) * 10;
-    return dose + ' mg par prise (' + m.enfant_mgkg + ' mg/kg) — ' + m.max;
-  }
-  if (m.enfant_fixe) {
-    return m.enfant_fixe + ' — ' + m.max;
-  }
-  return m.adulte;
-}
-// ================= MÉDICAMENTS =================
-const AINS_GROSSESSE = ['ibuprofene', 'aspirine'];
-const OK_GROSSESSE = ['serum', 'sro', 'antiseptique'];
-function preparerMedocs() {
-  const profil = profilActif();
-  $('medocsProfil').textContent = profil
-    ? 'Dosages calculés pour : ' + profil.prenom + ' (' + (ageTexte(profil) || '?') + ', ' + profil.poids + ' kg' + (profil.grossesse ? ' · 🤰' : '') + ')'
-    : 'Aucun profil actif : dosages adulte standard affichés.';
-  $('ficheMedoc').classList.add('cache');
-  $('listeMedocs').classList.remove('cache');
-  $('listeMedocs').innerHTML = MEDICAMENTS.map(m => {
-    const alertes = alertesProfilPour(m);
-    const badge = alertes.some(a => a.grave) ? ' <span class="badge b-rouge">⛔ déconseillé</span>'
-                : alertes.length ? ' <span class="badge b-jaune">⚠️ prudence</span>' : '';
-    return '<div class="item-liste" onclick="ficheMedoc(\'' + m.id + '\')" style="cursor:pointer">' +
-      '<strong>' + m.nom + '</strong>' + badge +
-      '<br><span style="color:var(--texte-doux);font-size:0.82rem">' + m.indication + '</span></div>';
-  }).join('');
-}
-function posologiePour(m) {
-  const profil = profilActif();
-  const age = ageDe(profil);
-  const poids = profil ? profil.poids : null;
-  let html = '<p style="margin-top:6px"><strong>Adulte :</strong> ' + m.adulte +
-    '<br><strong>Maximum :</strong> ' + m.max + '</p>';
-  if (age !== null && poids) {
-    if (m.age_min !== null && age < m.age_min) {
-      html += '<div class="alerte-ligne interdit">⛔ Déconseillé avant ' + m.age_min +
-        ' ans — ' + echapper(profil.prenom) + ' a ' + (ageTexte(profil) || '?') + '.</div>';
-    } else if (age >= 15 || poids >= 50) {
-      html += '<p style="margin-top:6px"><strong>' + echapper(profil.prenom) + ' (' + (ageTexte(profil) || '?') + ') :</strong> dose adulte.</p>';
-    } else if (m.enfant_mgkg) {
-      const dose = Math.round(m.enfant_mgkg * poids / 10) * 10;
-      html += '<p style="margin-top:6px"><strong>' + echapper(profil.prenom) + ' (' + (ageTexte(profil) || '?') + ', ' + poids + ' kg) :</strong> ' +
-        dose + ' mg par prise (' + m.enfant_mgkg + ' mg/kg), sans dépasser la dose adulte.</p>';
-    } else if (m.enfant_fixe) {
-      html += '<p style="margin-top:6px"><strong>' + echapper(profil.prenom) + ' :</strong> ' + m.enfant_fixe + '</p>';
-    }
-    if (age < 3 && m.bebe) html += '<p style="margin-top:6px"><em>🍼 ' + m.bebe + '</em></p>';
-  }
-  return html;
-}
-function alertesProfilPour(m) {
-  const profil = profilActif();
-  const alertes = [];
-  if (!profil) return alertes;
-  if (profil.allergies) {
-    const mots = profil.allergies.split(/[,\s]+/).filter(Boolean);
-    m.allergie_mots.forEach(am => {
-      if (mots.some(mot => am.indexOf(mot) !== -1 || mot.indexOf(am) !== -1)) {
-        alertes.push({ texte: '🚫 NE PAS PRENDRE : allergie connue (' + am + ')', grave: true });
-      }
-    });
-  }
-  if (profil.traitements) {
-    const mots = profil.traitements.split(/[,\s]+/).filter(Boolean);
-    m.interactions.forEach(int => {
-      if (mots.some(mot => int.indexOf(mot) !== -1 || mot.indexOf(int) !== -1)) {
-        alertes.push({ texte: '⚠️ Interaction possible avec ton traitement (' + int + ') : demande conseil à un pharmacien.', grave: false });
-      }
-    });
-  }
-  const age = ageDe(profil);
-  if (age !== null && m.age_min && age < m.age_min) {
-    alertes.push({ texte: '⛔ Déconseillé avant ' + m.age_min + ' ans', grave: true });
-  }
-  if (profil.grossesse) {
-    if (AINS_GROSSESSE.indexOf(m.id) !== -1) {
-      alertes.push({ texte: '⛔ NE PAS PRENDRE pendant la grossesse — risque pour le bébé. Paracétamol uniquement (sauf avis médical).', grave: true });
-    } else if (OK_GROSSESSE.indexOf(m.id) === -1) {
-      alertes.push({ texte: '🤰 Grossesse : demande l\u2019avis d\u2019un pharmacien ou d\u2019un médecin avant de prendre ce médicament.', grave: false });
-    }
-  }
-  return alertes;
-}
-function ficheMedoc(id) {
-  const m = MEDICAMENTS.find(x => x.id === id);
-  const alertes = alertesProfilPour(m);
-  $('ficheMedoc').innerHTML = '<div class="carte"><h3>💊 ' + m.nom + '</h3>' +
-    '<p style="color:var(--texte-doux);font-size:0.82rem">' + m.dci + '</p>' +
-    '<p style="margin-top:8px"><strong>Indication :</strong> ' + m.indication + '</p>' +
-    posologiePour(m) +
-    alertes.map(a => '<div class="alerte-ligne' + (a.grave ? ' interdit' : '') + '">' + a.texte + '</div>').join('') +
-    m.alertes.map(a => '<div class="alerte-ligne">⚠️ ' + a + '</div>').join('') +
-    '<button class="btn-petit" style="margin-top:10px" onclick="preparerMedocs()">← Retour à la liste</button></div>';
-  $('listeMedocs').classList.add('cache');
-  $('ficheMedoc').classList.remove('cache');
-  window.scrollTo(0, 0);
-}
-// ================= NAVIGATION =================
-function aller(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.add('cache'));
-  $('page-' + page).classList.remove('cache');
-  const idx = ['accueil', 'symptomes', 'medocs', 'journal', 'profils'].indexOf(page);
-  const btns = document.querySelectorAll('#navBas button');
-  btns.forEach(b => b.classList.remove('actif'));
-  if (idx >= 0 && btns[idx]) btns[idx].classList.add('actif');
-  window.scrollTo(0, 0);
-  if (page !== 'symptomes' && $('btnFlottant')) $('btnFlottant').classList.add('cache');
-  if (page === 'journal') afficherJournal();
-  if (page === 'profils') afficherProfils();
-  if (page === 'medocs') preparerMedocs();
-  if (page === 'accueil') majAccueil();
-  if (page === 'symptomes') majBoutonFlottant();
-}
-function majAccueil() {
-  const p = profilActif();
-  $('profilActifAccueil').textContent = p
-    ? '👤 Profil actif : ' + p.prenom
-    : '👤 Aucun profil — crée-en un dans l\u2019onglet Profils';
-  const d = new Date();
-  const jours = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-  const mois = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
-  $('dateJour').textContent = jours[d.getDay()] + ' ' + d.getDate() + ' ' + mois[d.getMonth()] + ' ' + d.getFullYear();
-}
-// ================= BANNIÈRE INSTALLATION =================
-let evenementInstall = null;
-window.addEventListener('beforeinstallprompt', e => {
+
+/* ================= Bannière d'installation ================= */
+var promptInstall = null;
+
+window.addEventListener('beforeinstallprompt', function (e) {
   e.preventDefault();
-  evenementInstall = e;
-  afficherBanniere();
+  promptInstall = e;
+  var b = $('btnInstaller');
+  if (b && $('banniere').classList.contains('visible')) b.hidden = false;
 });
-window.addEventListener('appinstalled', () => {
-  ecrireCle('salama_installe', true);
-  $('banniere').classList.add('cache');
-  evenementInstall = null;
+window.addEventListener('appinstalled', function () {
+  ecrireCle('salama_installe', 'oui');
+  cacherBanniere();
 });
-function afficherBanniere() {
-  if (window.matchMedia('(display-mode: standalone)').matches) return;
-  if (lireCle('salama_installe', false)) return;
-  const fermee = lireCle('salama_banniere_fermee', 0);
-  if (Date.now() - fermee < 7 * 24 * 60 * 60 * 1000) return;
-  $('banniere').classList.remove('cache');
+
+function verifierDejaInstallee() {
+  if (!navigator.getInstalledRelatedApps) return Promise.resolve(false);
+  return navigator.getInstalledRelatedApps().then(function (apps) {
+    if (apps && apps.length) { ecrireCle('salama_installe', 'oui'); return true; }
+    return false;
+  }).catch(function () { return false; });
 }
-function initialiserBanniere() {
-  $('btnInstaller').addEventListener('click', () => {
-    if (evenementInstall) {
-      evenementInstall.prompt();
-      evenementInstall = null;
-    } else {
-      alert('Pour installer : menu ⋮ de Chrome → « Ajouter à l\u2019écran d\u2019accueil »');
-    }
+
+function montrerBanniere() {
+  var b = $('banniere');
+  if (!b) return;
+  $('btnInstaller').hidden = !promptInstall;
+  b.classList.add('visible');
+}
+function cacherBanniere() {
+  var b = $('banniere');
+  if (b) b.classList.remove('visible');
+}
+function installerApp() {
+  if (promptInstall) {
+    promptInstall.prompt();
+    promptInstall.userChoice.then(function () { promptInstall = null; cacherBanniere(); });
+  } else {
+    $('btnInstaller').hidden = true;
+  }
+}
+function fermerBanniere() {
+  ecrireCle('salama_banniere_fermee', 'oui');
+  cacherBanniere();
+}
+function initBanniere() {
+  verifierDejaInstallee().then(function (deja) {
+    if (deja) return;
+    if (lireCle('salama_banniere_fermee', '') === 'oui') return;
+    if (lireCle('salama_installe', '') === 'oui') return;
+    setTimeout(montrerBanniere, 1500);
   });
-  $('btnFermerBanniere').addEventListener('click', () => {
-    $('banniere').classList.add('cache');
-    ecrireCle('salama_banniere_fermee', Date.now());
-  });
-  afficherBanniere();
 }
-// ================= DÉMARRAGE =================
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js');
+
+/* ================= Hors ligne + remonter ================= */
+function majHorsLigne() {
+  var h = $('horsLigne');
+  if (!h) return;
+  function maj() { h.classList.toggle('visible', !navigator.onLine); }
+  window.addEventListener('online', maj);
+  window.addEventListener('offline', maj);
+  maj();
 }
-window.addEventListener('scroll', majBoutonFlottant);
-appliquerTheme();
-installerRechercheSymptomes();
-preparerSymptomes();
-initialiserBanniere();
-majHorsLigne();
-aller('accueil');
+
+window.addEventListener('scroll', function () {
+  $('btnRemonter').style.display = (window.scrollY > 400) ? 'block' : 'none';
+});
+
+/* ================= Délégation : un seul écouteur pour tout ================= */
+document.addEventListener('click', function (e) {
+  var el = e.target.closest('[data-page],[data-medoc],[data-action]');
+  if (!el) return;
+  if (el.dataset.page) { allerA(el.dataset.page); return; }
+  if (el.dataset.medoc) { ouvrirFiche(el.dataset.medoc); return; }
+  var action = el.dataset.action;
+  if (action === 'analyser') analyser();
+  else if (action === 'basculerTheme') basculerTheme();
+  else if (action === 'toutDecocher') toutDecocher();
+  else if (action === 'ajouterJournal') ajouterJournal();
+  else if (action === 'supprimerJournal') supprimerJournal(parseInt(el.dataset.idx, 10));
+  else if (action === 'utiliserProfil') utiliserProfil(parseInt(el.dataset.idx, 10));
+  else if (action === 'modifierProfil') modifierProfil(parseInt(el.dataset.idx, 10));
+  else if (action === 'supprimerProfil') supprimerProfil(parseInt(el.dataset.idx, 10));
+  else if (action === 'choisirGrossesse') choisirGrossesse(el.dataset.val === 'oui');
+  else if (action === 'retourMedocs') retourMedocs();
+  else if (action === 'installer') installerApp();
+  else if (action === 'fermerBanniere') fermerBanniere();
+  else if (action === 'remonter') window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+document.addEventListener('change', function (e) {
+  var t = e.target;
+  if (t.matches('[data-sym]')) {
+    if (t.checked) coches.add(t.dataset.sym); else coches.delete(t.dataset.sym);
+    majCompteur();
+  } else if (t.id === 'dureeSymptomes') {
+    dureeSymptomes = t.value;
+  } else if (t.id === 'pSexe') {
+    majBlocGrossesse();
+  }
+});
+
+document.addEventListener('input', function (e) {
+  if (e.target.id === 'rechercheSymptomes') construireListeSymptomes();
+  if (e.target.id === 'rechercheJournal') rendreJournal();
+});
+
+/* ================= Démarrage ================= */
+function demarrer() {
+  appliquerTheme();
+  $('dateJour').textContent = '📅 ' + dateLisible(new Date().toISOString().slice(0, 10));
+  construireListeSymptomes();
+  rendreAccueil();
+  rendreMedocs();
+  rendreJournal();
+  rendreProfils();
+  majBlocGrossesse();
+  majHorsLigne();
+  $('formProfil').addEventListener('submit', enregistrerProfil);
+  /* Une fois pour la v1.0 : on remontre la bannière pour que tu puisses tester la croix ✕ */
+  if (lireCle('salama_v1_reset', '') !== 'oui') {
+    ecrireCle('salama_v1_reset', 'oui');
+    try { localStorage.removeItem('salama_banniere_fermee'); } catch (e) {}
+  }
+  initBanniere();
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(function () {});
+  }
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', demarrer);
+else demarrer();
