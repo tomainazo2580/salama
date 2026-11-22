@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Choix du design — Salama</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',Roboto,sans-serif; background:#eceff1; padding:16px; }
+  h1 { text-align:center; font-size:1.15rem; color:#263238; margin:10px 0 4px; }
+  .sous { text-align:center; font-size:0.82rem; color:#607d8b; margin-bottom:14px; }
+  #toggleTheme {
+    display:block; margin:0 auto 20px; padding:10px 18px; border:none; border-radius:20px;
+    background:#37474f; color:#fff; font-size:0.9rem; font-weight:600; cursor:pointer;
+  }
+  .option {
+    background:#fff; border-radius:18px; padding:16px; max-width:360px;
+    margin:0 auto 24px; box-shadow:0 3px 14px rgba(0,0,0,.12);
+  }
+  .option h2 { font-size:1rem; color:#263238; margin-bottom:2px; }
+  .option .desc { font-size:0.78rem; color:#78909c; margin-bottom:12px; line-height:1.45; }
+  .tel { border-radius:16px; overflow:hidden; border:1px solid rgba(0,0,0,.15); }
+  .tel-header { display:flex; justify-content:space-between; align-items:center; padding:12px; }
+  .tel-header .titre { font-weight:700; font-size:1rem; }
+  .tel-header .lune { width:28px; height:28px; border-radius:50%; display:flex;
+    align-items:center; justify-content:center; font-size:0.8rem; }
+  .tel-corps { padding:10px; position:relative; overflow:hidden; }
+  .filigrane { position:absolute; inset:0; background-repeat:no-repeat;
+    background-position:center 45%; background-size:130px; pointer-events:none; }
+  .tel-date { font-size:0.6rem; margin-bottom:2px; position:relative; }
+  .tel-profil { font-size:0.6rem; margin-bottom:8px; position:relative; }
+  .tel-grille { display:grid; grid-template-columns:1fr 1fr; gap:8px; position:relative; }
+  .tuile { border-radius:10px; padding:14px 6px; text-align:center; font-size:1.1rem; }
+  .tuile span { display:block; font-size:0.58rem; font-weight:700; margin-top:4px; }
+  .tel-carte { border-radius:10px; padding:10px; margin-top:8px; position:relative; }
+  .tel-carte h4 { font-size:0.68rem; margin-bottom:4px; }
+  .tel-carte p { font-size:0.6rem; line-height:1.5; }
+  .badge { display:inline-block; font-size:0.55rem; padding:2px 8px; border-radius:8px; font-weight:700; }
+  .tel-disclaimer { text-align:center; font-size:0.52rem; font-style:italic; padding:10px 8px 4px; position:relative; }
+  .zone-icones { background:#fff; border-radius:18px; padding:16px; max-width:360px;
+    margin:0 auto 30px; box-shadow:0 3px 14px rgba(0,0,0,.12); }
+  .zone-icones h2 { font-size:1rem; color:#263238; margin-bottom:10px; text-align:center; }
+  .rangee-icones { display:flex; flex-wrap:wrap; gap:14px; justify-content:center; }
+  .carte-icones { text-align:center; }
+  .carte-icones .grande { width:110px; height:110px; border-radius:22px; display:block; margin:0 auto 6px; }
+  .carte-icones .petite { width:44px; height:44px; border-radius:10px; display:block; margin:0 auto 4px; }
+  .carte-icones .nom { font-size:0.75rem; color:#455a64; margin-bottom:6px; }
+  .carte-icones .mini { font-size:0.62rem; color:#90a4ae; margin-bottom:8px; }
+  .btns-dl { display:flex; gap:6px; justify-content:center; }
+  .btns-dl button { padding:6px 10px; font-size:0.7rem; border:1px solid #0e7a5f; color:#0e7a5f;
+    background:none; border-radius:8px; cursor:pointer; font-weight:600; }
+  .legende { font-size:0.72rem; color:#607d8b; text-align:center; margin-top:12px; line-height:1.5; }
+</style>
+</head>
+<body>
+<h1>🎨 Choisis le nouveau design de Salama</h1>
+<p class="sous">Regarde les 3 maquettes, bascule en mode sombre, puis réponds-moi :<br>
+« Option A / B / C » + « Icône 1 / 2 / 3 »</p>
+<button id="toggleTheme" onclick="basculerApercu()">🌙 Voir en mode sombre</button>
+<div id="zoneOptions"></div>
+
+<div class="zone-icones">
+  <h2>🔷 Les 3 icônes</h2>
+  <div class="rangee-icones" id="rangeeIcones"></div>
+  <p class="legende">Grande = à l'install · Petite = dans la liste des applis.<br>
+  Télécharge celle que tu préfères puis remplace icon-192.png et icon-512.png sur GitHub.</p>
+</div>
+
+<script>
+/* ============ LES 3 PALETTES ============ */
+const PALETTES = [
+  { cle:'A', nom:'Option A — Clinique moderne',
+    desc:'Sobre et professionnel : un seul vert, cartes nettes, filigrane vert très discret.',
+    clair:{ fond:'#f4f7f6', carte:'#ffffff', texte:'#22312b', doux:'#5f726c',
+      accent:'#0e7a5f', accentClair:'#e6f3ef', bordure:'#dde5e2',
+      header:['#0e7a5f','#0b5f4a'], texteHeader:'#ffffff',
+      tuiles:['#0e7a5f','#128266','#0c6b53','#149077'], texteTuile:'#ffffff',
+      filigrane:'#0e7a5f', opFiligrane:0.07 },
+    sombre:{ fond:'#131a1c', carte:'#1c2426', texte:'#e8efec', doux:'#9db0a9',
+      accent:'#2fbf9a', accentClair:'#1d3a33', bordure:'#2c3a3d',
+      header:['#0b3d30','#093128'], texteHeader:'#e8efec',
+      tuiles:['#0e7a5f','#128266','#0c6b53','#149077'], texteTuile:'#ffffff',
+      filigrane:'#2fbf9a', opFiligrane:0.06 } },
+  { cle:'B', nom:'Option B — Chaleur malgache',
+    desc:'Vert rizière + ambre et terre cuite : plus chaleureux, filigrane ambre discret.',
+    clair:{ fond:'#faf6ee', carte:'#ffffff', texte:'#33291d', doux:'#7d6f5c',
+      accent:'#0e7a5f', accentClair:'#efe9dc', bordure:'#e5dcc9',
+      header:['#0e7a5f','#7a5c1e'], texteHeader:'#ffffff',
+      tuiles:['#0e7a5f','#d9822b','#7a9d54','#b05a36'], texteTuile:'#ffffff',
+      filigrane:'#d9822b', opFiligrane:0.08 },
+    sombre:{ fond:'#1a1712', carte:'#241f18', texte:'#f0e9dc', doux:'#b3a48c',
+      accent:'#3fbf9a', accentClair:'#2e2a1e', bordure:'#3a332a',
+      header:['#0b3d30','#3d2c0e'], texteHeader:'#f0e9dc',
+      tuiles:['#0e7a5f','#d9822b','#7a9d54','#b05a36'], texteTuile:'#ffffff',
+      filigrane:'#d9822b', opFiligrane:0.07 } },
+  { cle:'C', nom:'Option C — Doux familial',
+    desc:'Pastels ronds et tendres, sans filigrane : moins « médical », plus « familial ».',
+    clair:{ fond:'#f7f5fb', carte:'#ffffff', texte:'#3a3447', doux:'#837c96',
+      accent:'#5da28e', accentClair:'#ece7f5', bordure:'#e2ddef',
+      header:['#7fc8b7','#5da28e'], texteHeader:'#ffffff',
+      tuiles:['#7fc8b7','#f2a48d','#a99fd6','#f0c975'], texteTuile:'#3a3447',
+      filigrane:null, opFiligrane:0 },
+    sombre:{ fond:'#17151f', carte:'#211e2b', texte:'#ece9f4', doux:'#a29ab5',
+      accent:'#8fd4c0', accentClair:'#2c2838', bordure:'#332e42',
+      header:['#3d3654','#2f2a42'], texteHeader:'#ece9f4',
+      tuiles:['#5da28e','#d98a76','#8f85ba','#d4ab5f'], texteTuile:'#ffffff',
+      filigrane:null, opFiligrane:0 } }
+];
+
+let sombreActif = false;
+
+function svgFiligrane(couleur) {
+  if (!couleur) return 'none';
+  const svg = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'>" +
+    "<rect x='70' y='18' width='60' height='164' rx='14' fill='" + couleur + "'/>" +
+    "<rect x='18' y='70' width='164' height='60' rx='14' fill='" + couleur + "'/></svg>";
+  return "url(\"data:image/svg+xml," + encodeURIComponent(svg) + "\")";
+}
+
+function maquetteHTML(p) {
+  const v = sombreActif ? p.sombre : p.clair;
+  const grad = 'linear-gradient(135deg,' + v.header[0] + ',' + v.header[1] + ')';
+  let h = '<div class="option"><h2>' + p.nom + '</h2><p class="desc">' + p.desc + '</p>';
+  h += '<div class="tel" style="background:' + v.fond + ';color:' + v.texte + '">';
+  h += '<div class="tel-header" style="background:' + grad + ';color:' + v.texteHeader + '">' +
+       '<span class="titre">🛡️ Salama</span>' +
+       '<span class="lune" style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35)">🌙</span></div>';
+  h += '<div class="tel-corps">';
+  if (v.filigrane) h += '<div class="filigrane" style="background-image:' + svgFiligrane(v.filigrane) +
+    ';opacity:' + v.opFiligrane + '"></div>';
+  h += '<p class="tel-date" style="color:' + v.doux + '">Dimanche 22 novembre</p>' +
+       '<p class="tel-profil" style="color:' + v.doux + '">👤 Aucun profil</p>';
+  const noms = ['🩺<span>Symptômes</span>','💊<span>Médicaments</span>','📓<span>Journal</span>','👤<span>Profils</span>'];
+  h += '<div class="tel-grille">' + v.tuiles.map((c,i) =>
+       '<div class="tuile" style="background:' + c + ';color:' + v.texteTuile + '">' + noms[i] + '</div>').join('') + '</div>';
+  h += '<div class="tel-carte" style="background:' + v.carte + ';border:1px solid ' + v.bordure + '">' +
+       '<h4>🫁 Grippe — 72 %</h4>' +
+       '<span class="badge" style="background:' + v.accentClair + ';color:' + v.accent + '">🟢 forte probabilité</span>' +
+       '<p style="color:' + v.doux + ';margin-top:4px">Repos, hydratation, paracétamol si fièvre...</p></div>';
+  h += '<p class="tel-disclaimer" style="color:' + v.doux + '">⚠️ Outil familial d\u2019orientation — Salama v1.0</p>';
+  h += '</div></div></div>';
+  return h;
+}
+
+function rendre() {
+  document.getElementById('zoneOptions').innerHTML =
+    PALETTES.map(maquetteHTML).join('');
+  document.getElementById('toggleTheme').textContent =
+    sombreActif ? '☀️ Voir en mode clair' : '🌙 Voir en mode sombre';
+}
+function basculerApercu() { sombreActif = !sombreActif; rendre(); }
+rendre();
+
+/* ============ LES 3 ICÔNES ============ */
+const T = 512;
+function rr(ctx,x,y,w,h,r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+function fondVert(ctx) {
+  const g = ctx.createLinearGradient(0,0,T,T);
+  g.addColorStop(0,'#12a37e'); g.addColorStop(1,'#0b5f4a');
+  ctx.fillStyle = g; ctx.fillRect(0,0,T,T);
+}
+function croixBlanche(ctx, cx, cy, taille, coin) {
+  ctx.fillStyle = '#ffffff';
+  const t = taille;
+  rr(ctx, cx - t/2, cy - t*1.45, t, t*2.9, coin); ctx.fill();
+  rr(ctx, cx - t*1.45, cy - t/2, t*2.9, t, coin); ctx.fill();
+}
+const ICONES = [
+  { nom: 'Icône 1 — Croix arrondie', dessiner: function(ctx) {
+      fondVert(ctx);
+      croixBlanche(ctx, T/2, T/2, 78, 26);
+  } },
+  { nom: 'Icône 2 — Bouclier + croix', dessiner: function(ctx) {
+      fondVert(ctx);
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.moveTo(256,72);
+      ctx.lineTo(400,128); ctx.lineTo(400,288);
+      ctx.bezierCurveTo(400,400,320,464,256,492);
+      ctx.bezierCurveTo(192,464,112,400,112,288);
+      ctx.lineTo(112,128); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#0e7a5f';
+      rr(ctx, 236, 165, 40, 150, 14); ctx.fill();
+      rr(ctx, 181, 220, 150, 40, 14); ctx.fill();
+  } },
+  { nom: 'Icône 3 — S + croix', dessiner: function(ctx) {
+      ctx.fillStyle = '#f4f7f6'; ctx.fillRect(0,0,T,T);
+      const g = ctx.createLinearGradient(0,0,T,T);
+      g.addColorStop(0,'#12a37e'); g.addColorStop(1,'#0b5f4a');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(256,256,180,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 230px sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('S', 250, 268);
+      ctx.fillStyle = '#e8963c';
+      ctx.beginPath(); ctx.arc(392,132,54,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      rr(ctx, 384, 104, 16, 56, 6); ctx.fill();
+      rr(ctx, 364, 124, 56, 16, 6); ctx.fill();
+  } }
+];
+const rangee = document.getElementById('rangeeIcones');
+ICONES.forEach((ic, i) => {
+  const div = document.createElement('div');
+  div.className = 'carte-icones';
+  const grand = document.createElement('canvas');
+  grand.width = grand.height = T;
+  grand.className = 'grande';
+  ic.dessiner(grand.getContext('2d'));
+  const petit = document.createElement('canvas');
+  petit.width = petit.height = T;
+  petit.className = 'petite';
+  ic.dessiner(petit.getContext('2d'));
+  const nom = document.createElement('div');
+  nom.className = 'nom'; nom.textContent = ic.nom;
+  const mini = document.createElement('div');
+  mini.className = 'mini'; mini.textContent = '↕ test de lisibilité en petit';
+  const btns = document.createElement('div');
+  btns.className = 'btns-dl';
+  [192,512].forEach(taille => {
+    const b = document.createElement('button');
+    b.textContent = '⬇️ ' + taille + ' px';
+    b.onclick = function() {
+      const c = document.createElement('canvas');
+      c.width = c.height = taille;
+      c.getContext('2d').drawImage(grand, 0, 0, taille, taille);
+      const a = document.createElement('a');
+      a.download = 'icon-' + taille + '.png';
+      a.href = c.toDataURL('image/png');
+      a.click();
+    };
+    btns.appendChild(b);
+  });
+  div.appendChild(grand); div.appendChild(petit);
+  div.appendChild(nom); div.appendChild(mini); div.appendChild(btns);
+  rangee.appendChild(div);
+});
+</script>
+</body>
+</html>
