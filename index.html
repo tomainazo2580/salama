@@ -30,8 +30,6 @@
         <button class="tuile" data-page="journal"><div style="font-size:1.9rem;">📔</div><div>Journal</div></button>
         <button class="tuile" data-page="profils"><div style="font-size:1.9rem;">👥</div><div>Profils</div></button>
       </div>
-      <h2>Trousse familiale</h2>
-      <div id="medocsProfil"></div>
       <div class="disclaimer">
         ⚠️ <b>Salama ne remplace pas un médecin.</b> C'est une aide d'orientation : en cas de symptômes graves, durables ou qui inquiètent, consulte toujours un centre de santé.
         <small style="display:block;margin-top:6px;">Salama v1.0</small>
@@ -103,12 +101,10 @@
   <button id="btnRemonter" data-action="remonter" aria-label="Remonter en haut" style="position:fixed;right:16px;bottom:152px;display:none;z-index:44;">⬆️</button>
 
   <div id="banniere">
+    <button id="btnFermerBanniere" data-action="fermerBanniere" aria-label="Fermer">✕</button>
     <h3>📲 Installer Salama</h3>
-    <p>Ajoute l'application à ton écran d'accueil : ouvre le menu du navigateur <b>⋮</b> (les trois points, en haut à droite) puis choisis <b>« Installer l'application »</b> ou <b>« Ajouter à l'écran d'accueil »</b>.</p>
-    <div style="display:flex;gap:8px;">
-      <button id="btnInstaller" data-action="installer">Installer</button>
-      <button id="btnFermerBanniere" data-action="fermerBanniere" style="border:1.5px solid var(--bord);">✕ Fermer</button>
-    </div>
+    <p>Menu <b>⋮</b> du navigateur → <b>« Installer l'application »</b> ou <b>« Ajouter à l'écran d'accueil »</b>.</p>
+    <button id="btnInstaller" data-action="installer">📲 Installer</button>
   </div>
 
   <nav>
