@@ -24,7 +24,9 @@ const categoriesSymptomes = [
       { id: "oppression", nom: "Oppression thoracique" },
       { id: "sifflement", nom: "Sifflements en respirant" },
       { id: "douleur_thorax", nom: "Douleur dans le thorax" },
-      { id: "respiration_rapide", nom: "Respiration rapide" }
+      { id: "respiration_rapide", nom: "Respiration rapide" },
+      { id: "toux_chronique", nom: "Toux depuis plus de 2-3 semaines" },
+      { id: "sang_crachats", nom: "Sang dans les crachats" }
     ]
   },
   {
@@ -110,7 +112,8 @@ const categoriesSymptomes = [
       { id: "jaunisse", nom: "Jaunisse (yeux ou peau jaunes)" },
       { id: "ventre_gonfle", nom: "Ventre anormalement gonflé (liquide)" },
       { id: "demangeaisons_corps", nom: "Démangeaisons généralisées" },
-      { id: "raideur_cou", nom: "Raideur de la nuque" }
+      { id: "raideur_cou", nom: "Raideur de la nuque" },
+      { id: "plaie_infectee", nom: "Plaie ou bouton devenu chaud, rouge et douloureux" }
     ]
   },
   {
@@ -122,9 +125,15 @@ const categoriesSymptomes = [
       { id: "sang_vomissements", nom: "Sang dans les vomissements" },
       { id: "brouillard_mental", nom: "Brouillard mental / difficulté de concentration" }
     ]
+  },
+  { // ✔️ v0.22 — expositions importantes pour Madagascar
+    nom: "🌾 Expositions",
+    symptomes: [
+      { id: "morsure_griffure", nom: "Morsure ou griffure d'animal (chien, chat, rat...)" },
+      { id: "baignade_eau_douce", nom: "Baignade ou travail en eau douce (rivière, rizière, lac)" }
+    ]
   }
 ];
-
 // ================= DRAPEAUX ROUGES =================
 const drapeauxRouges = [
   { id: "respiration_difficile", nom: "🚨 Difficulté grave pour respirer", message: "URGENCE — Appelle ou rends-toi immédiatement aux urgences.", symptomes: ["essoufflement", "oppression"] },
@@ -139,13 +148,20 @@ const drapeauxRouges = [
   { id: "fievre_bassin_pertes", nom: "🚨 Fièvre + douleur du bas-ventre + pertes anormales", message: "URGENCE — Infection pelvienne possible. Consulte immédiatement.", symptomes: ["fievre", "douleur_bassin", "pertes_anormales"] },
   { id: "douleur_testicule_brutale", nom: "🚨 Douleur testiculaire brutale et intense", message: "Si la douleur est arrivée BRUTALEMENT et qu'elle est TRÈS intense : URGENCE — torsion possible. Opération en quelques heures, sinon perte du testicule.", symptomes: ["douleur_testicule"] },
   { id: "fievre_flanc_urines", nom: "🚨 Fièvre + douleur d'un seul côté du dos + brûlures urinaires", message: "URGENCE — Infection rénale possible. Consulte immédiatement.", symptomes: ["fievre", "douleur_flanc", "brulures_urines"] },
-  { id: "confusion_jaunisse", nom: "🚨 Confusion mentale + jaunisse", message: "URGENCE — Atteinte hépatique grave. Urgences immédiates.", symptomes: ["confusion", "jaunisse"] }
+  { id: "confusion_jaunisse", nom: "🚨 Confusion mentale + jaunisse", message: "URGENCE — Atteinte hépatique grave. Urgences immédiates.", symptomes: ["confusion", "jaunisse"] },
+  { // ✔️ v0.22 — Madagascar
+    id: "rage_exposition", nom: "🚨 Morsure ou griffure d'animal",
+    message: "Lave la plaie à l'eau claire et au savon pendant 15 minutes, puis consulte LE JOUR MÊME un centre de santé : la vaccination antirabique d'urgence sauve la vie. Valable même si la morsure semble légère, même sans sang, et même plusieurs jours après.",
+    symptomes: ["morsure_griffure"] },
+  { // ✔️ v0.22 — Madagascar
+    id: "peste_bubon", nom: "🚨 Fièvre + ganglion gonflé et très douloureux",
+    message: "Urgence — va immédiatement au centre de santé, surtout de septembre à avril (saison des pluies) : un ganglion très douloureux (aine, aisselle, cou) avec fièvre brutale doit être traité dans les heures qui suivent. Les antibiotiques sont efficaces s'ils sont pris tôt.",
+    symptomes: ["ganglions", "fievre"] }
 ];
-
 // ================= MALADIES =================
 const TROUBLES = [
   { id: 'rhume', nom: 'Rhume',
-    symptomes: { nez_coule: 3, nez_bouche: 3, eternuements: 2, mal_gorge: 2, toux_seche: 1, mal_tete: 1, fatigue: 1, toux: 1 }, // ✔️ toux ajouté
+    symptomes: { nez_coule: 3, nez_bouche: 3, eternuements: 2, mal_gorge: 2, toux_seche: 1, mal_tete: 1, fatigue: 1, toux: 1 },
     conseils: ["Repos et boire beaucoup d'eau", 'Lavage de nez au sérum physiologique', 'Se laver les mains régulièrement'],
     consulter: "Si fièvre au-delà de 3 jours, symptômes au-delà de 10 jours, ou aggravation.",
     medocs: ['paracetamol', 'serum'] },
@@ -159,7 +175,6 @@ const TROUBLES = [
     conseils: ['Faire un test si possible', "S'isoler des personnes fragiles", 'Repos et hydratation'],
     consulter: "Si difficulté à respirer, personne à risque, ou symptômes qui s'aggravent.",
     medocs: ['paracetamol'] },
-  // ✔️ NOUVEAU : paludisme (répare l'orphelin "sueurs_nocturnes")
   { id: 'paludisme', nom: 'Paludisme (suspicion)',
     symptomes: { fievre: 3, frissons: 3, sueurs_nocturnes: 2, sueurs: 2, mal_tete: 2, fatigue: 2, nausees: 1, vomissements: 1, douleurs_musculaires: 1 },
     conseils: ["Va faire un test (TDR) au centre de santé dès que possible, même si la fièvre baisse", "Bois beaucoup d'eau", "Dors sous moustiquaire imprégnée"],
@@ -175,7 +190,6 @@ const TROUBLES = [
     conseils: ['Se reposer dans le noir et le calme', 'Prendre le médicament dès le début de la crise', "Boire de l'eau"],
     consulter: "Mal de tête brutal et violent (coup de tonnerre) : URGENCE. Sinon si première crise ou changement inhabituel.",
     medocs: ['paracetamol', 'ibuprofene'] },
-  // ✔️ NOUVEAU : méningite (répare l'orphelin "raideur_cou")
   { id: 'meningite', nom: 'Méningite (suspicion)',
     symptomes: { raideur_cou: 3, fievre: 3, mal_tete: 2, sensibilite_lumiere: 2, nausees: 1, vomissements: 1, confusion: 1 },
     conseils: ["⚠️ Ne prends AUCUN médicament, va directement à l'hôpital", "La méningite peut évoluer très vite, chaque heure compte"],
@@ -186,7 +200,6 @@ const TROUBLES = [
     conseils: ["Boire des boissons tièdes ou froides selon le soulagement", 'Pastilles ou miel pour adoucir la gorge'],
     consulter: "Consulter pour un test (TDR) : l'angine bactérienne nécessite des antibiotiques sur ordonnance.",
     medocs: ['paracetamol'] },
-  // ✔️ pression_visage ajouté à la sinusite
   { id: 'sinusite', nom: 'Sinusite',
     symptomes: { pression_visage: 3, nez_bouche: 2, nez_coule: 2, mal_tete: 2, fievre: 1, mal_gorge: 1, fatigue: 1 },
     conseils: ['Lavage de nez au sérum physiologique plusieurs fois par jour', "Inhalations de vapeur d'eau chaude", 'Bien hydrater'],
@@ -224,7 +237,6 @@ const TROUBLES = [
     conseils: ["Boire en petites gorgées régulières (SRO)", 'Repas légers dès que possible'],
     consulter: "Sang dans les selles, déshydratation, fièvre élevée, ou symptômes au-delà de 2-3 jours.",
     medocs: ['sro', 'smecta'] },
-  // ✔️ toux ajouté à la bronchite
   { id: 'bronchite', nom: 'Bronchite',
     symptomes: { toux_grasse: 3, toux: 2, toux_seche: 2, fatigue: 2, oppression: 1, fievre: 1 },
     conseils: ['Repos et hydratation abondante', 'Ne pas fumer, éviter la fumée', "Air ambiant pas trop sec", "Miel (adultes et enfants > 1 an) pour adoucir la gorge"],
@@ -235,7 +247,6 @@ const TROUBLES = [
     conseils: ["⛔ PAS d'ibuprofène ni d'aspirine : paracétamol uniquement", 'Ongles courts, ne pas gratter les boutons', "Éviter le contact avec femmes enceintes et nourrissons"],
     consulter: "Nourrisson, adulte, femme enceinte, personne immunodéprimée, ou boutons infectés.",
     medocs: ['paracetamol'] },
-  // ✔️ remontees_acides ajouté au RGO
   { id: 'rgo', nom: 'Reflux gastrique (brûlures)',
     symptomes: { brulures_estomac: 3, remontees_acides: 3, ballonnements: 1, nausees: 1, toux_seche: 1 },
     conseils: ["Éviter repas gras, épicés, café et alcool", 'Ne pas se coucher juste après manger', 'Manger léger le soir'],
@@ -251,7 +262,48 @@ const TROUBLES = [
     conseils: ["Se mettre au frais et à l'ombre immédiatement", "Boire de l'eau fraîche en petites gorgées", 'Humidifier la peau, ventiler'],
     consulter: "Confusion, perte de connaissance ou peau très chaude : appelez le 15 immédiatement.",
     medocs: ['sro'] },
-  // ✔️ ganglions_cou ajouté à l'angine bactérienne
+  { // ✔️ v0.22 — bloc Madagascar
+    id: 'tuberculose', nom: 'Tuberculose (suspicion)',
+    symptomes: { toux_chronique: 3, sueurs_nocturnes: 3, perte_poids: 3, fatigue: 2, fievre: 1, sang_crachats: 2 },
+    conseils: ["Toux depuis plus de 2-3 semaines : demande l'examen des crachats au centre de santé (gratuit)", "Le traitement est GRATUIT mais long (6 mois minimum) : ne l'arrête jamais en cours de route", "Couvre ta bouche en toussant et aère bien la chambre"],
+    consulter: "TOUJOURS consulter. URGENCE si sang dans les crachats, essoufflement important ou forte perte de poids.",
+    medocs: [] },
+  { // ✔️ v0.22
+    id: 'dengue', nom: 'Dengue (suspicion)',
+    symptomes: { fievre: 3, mal_tete: 2, douleurs_musculaires: 2, douleurs_articulaires: 2, eruption: 2, nausees: 1, fatigue: 2 },
+    conseils: ["⛔ PAS d'ibuprofène ni d'aspirine : risque de saignement — paracétamol UNIQUEMENT", "Bois beaucoup d'eau en petites gorgées", "Surveille les saignements (gencives, nez, bleus) et les douleurs du ventre", "Élimine les eaux stagnantes autour de la maison (moustiques)"],
+    consulter: "URGENCE si saignements, douleur du ventre intense, vomissements répétés, somnolence ou pas d'urine : forme grave possible.",
+    medocs: ['paracetamol'] },
+  { // ✔️ v0.22
+    id: 'typhoide', nom: 'Fièvre typhoïde (suspicion)',
+    symptomes: { fievre: 3, mal_tete: 2, mal_ventre: 2, constipation: 1, diarrhee: 1, fatigue: 2, perte_appetit: 2 },
+    conseils: ["Consulte rapidement : une prise de sang est nécessaire", "Bois beaucoup d'eau", "Ne cuisine pas pour les autres et lave bien tes mains (transmission par l'eau et les aliments)"],
+    consulter: "TOUJOURS consulter : nécessite des antibiotiques sur ordonnance. Fièvre qui monte par paliers pendant plusieurs jours.",
+    medocs: ['paracetamol'] },
+  { // ✔️ v0.22
+    id: 'amibiase', nom: 'Amibiase (dysenterie)',
+    symptomes: { diarrhee: 3, selles_sang: 2, mal_ventre: 2, fievre: 1, fatigue: 1, perte_appetit: 1 },
+    conseils: ["Consulte pour un examen des selles : il faut des antibiotiques spécifiques (pas les mêmes que pour la gastro)", "Réhydrate-toi bien (SRO)", "Bois de l'eau bouillie ou traitée, lave-toi les mains"],
+    consulter: "TOUJOURS consulter, surtout si sang ou glaires dans les selles.",
+    medocs: ['sro'] },
+  { // ✔️ v0.22
+    id: 'bilharziose', nom: 'Bilharziose (eau douce)',
+    symptomes: { baignade_eau_douce: 0, sang_urines: 2, urines_troubles: 1, mal_ventre: 1, fatigue: 1, diarrhee: 1 },
+    conseils: ["Très fréquente après baignade ou travail en eau douce (rivière, rizière, lac)", "Consulte pour un examen d'urines ou de selles : le traitement (praziquantel) est simple", "Évite de te baigner en eau douce stagnante"],
+    consulter: "Sang dans les urines d'un enfant ayant nagé en rivière : pense à la bilharziose et consulte un centre de santé.",
+    medocs: [] },
+  { // ✔️ v0.22
+    id: 'malnutrition', nom: 'Malnutrition (enfant)', age_max: 5,
+    symptomes: { perte_poids: 3, fatigue: 3, paleur: 2, ventre_gonfle: 2, perte_appetit: 1 },
+    conseils: ["Consulte le centre de santé : la prise en charge nutritionnelle est gratuite (ATPE)", "Si bébé : allaitement exclusif jusqu'à 6 mois", "Repas fréquents et riches : énergie + protéines + huile"],
+    consulter: "Enfant qui maigrit, ventre gonflé, apathique ou qui refuse de manger : consulte vite.",
+    medocs: [] },
+  { // ✔️ v0.22
+    id: 'infection_peau', nom: 'Infection de la peau (abcès)',
+    symptomes: { plaie_infectee: 3, fievre: 1, ganglions: 1 },
+    conseils: ["Ne perce pas et ne presse pas le bouton ou la plaie", "Compresses chaudes humides plusieurs fois par jour pour aider à mûrir", "Garde propre et couvert, lave tes mains après"],
+    consulter: "Si fièvre, rougeur qui s'étend vite, ou zone chaude et très douloureuse : consulte (incision + antibiotiques possibles).",
+    medocs: ['paracetamol', 'antiseptique'] },
   { id: 'angine_bacterienne', nom: 'Angine bactérienne',
     symptomes: { mal_gorge: 3, fievre: 3, ganglions: 2, ganglions_cou: 2, deglutition: 2, taches_blanches_gorge: 2, mal_tete: 1 },
     conseils: ["Repos, boire des boissons tièdes", "Gargarisme d'eau salée tiède"],
@@ -347,7 +399,6 @@ const TROUBLES = [
     conseils: ["Lavage de nez fréquent au sérum", "Fractionner les repas", "Aérer la chambre"],
     consulter: "URGENCE si le nourrisson respire très vite, se creuse sous les côtes, ou refuse de boire.",
     medocs: ['serum'] },
-  // ✔️ plaie_bouche ajouté à pieds-mains-bouche
   { id: 'pieds_mains_bouche', nom: 'Pieds-mains-bouche', age_max: 10,
     symptomes: { eruption: 2, fievre: 2, mal_gorge: 2, plaie_bouche: 2, deglutition: 1, perte_appetit: 1 },
     conseils: ["Paracétamol pour la douleur", "Boissons froides, aliments doux", "Isoler (contagieux)"],
@@ -453,7 +504,6 @@ const TROUBLES = [
     medocs: [],
     antibio: "Sevrage encadré médicalement — dangereux de stopper seul si forte dépendance." }
 ];
-
 // ================= MÉDICAMENTS =================
 const MEDICAMENTS = [
   { id: 'paracetamol', nom: 'Paracétamol', dci: 'Doliprane, Efferalgan, Dafalgan...',
