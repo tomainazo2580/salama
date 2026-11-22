@@ -9,6 +9,17 @@
   <link rel="icon" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Champs ajoutés v0.22 */
+    .aide-champ { font-size: 0.72rem; color: var(--texte-doux); margin-top: 4px; line-height: 1.4; }
+    .case-ligne {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--carte); border: 1px solid var(--bordure);
+      border-radius: 10px; padding: 11px; font-size: 0.92rem;
+      box-shadow: var(--ombre); cursor: pointer;
+    }
+    .case-ligne input[type="checkbox"] { width: 20px; height: 20px; box-shadow: none; flex-shrink: 0; }
+  </style>
 </head>
 <body>
 <header id="entete">
@@ -35,8 +46,9 @@
       <button class="tuile t-orange" onclick="aller('profils')">👤<span>Profils</span></button>
     </div>
     <p style="text-align:center;font-size:11px;opacity:.6;font-style:italic;line-height:1.5;padding:12px 24px 2px;">⚠️ Outil familial d'orientation — ne remplace pas l'avis d'un médecin. En cas de doute, consultez un professionnel de santé.</p>
-<p style="text-align:center;font-size:11px;opacity:.5;padding:6px 0 14px;">Salama v0.21</p>
+    <p style="text-align:center;font-size:11px;opacity:.5;padding:6px 0 14px;">Salama v0.22</p>
   </section>
+
   <!-- SYMPTÔMES -->
   <section id="page-symptomes" class="page cache">
     <h2>Que ressens-tu ?</h2>
@@ -59,13 +71,15 @@
     <div id="listeSymptomes"></div>
     <div id="resultats"></div>
   </section>
-    <!-- MÉDICAMENTS -->
+
+  <!-- MÉDICAMENTS -->
   <section id="page-medocs" class="page cache">
     <h2>Médicaments</h2>
     <p id="medocsProfil" class="profil-actif"></p>
     <div id="listeMedocs"></div>
     <div id="ficheMedoc" class="cache"></div>
   </section>
+
   <!-- JOURNAL -->
   <section id="page-journal" class="page cache">
     <h2>Journal de santé</h2>
@@ -76,6 +90,7 @@
     </div>
     <div id="listeJournal"></div>
   </section>
+
   <!-- PROFILS -->
   <section id="page-profils" class="page cache">
     <h2>Profils</h2>
@@ -83,13 +98,19 @@
     <button id="btnNouveauProfil" class="btn-principal" onclick="nouveauProfil()">＋ Nouveau profil</button>
     <div id="formProfil" class="cache">
       <input id="pPrenom" placeholder="Prénom">
-      <select id="pSexe">
+      <select id="pSexe" onchange="majChampGrossesse()">
         <option value="">Sexe...</option>
         <option value="femme">Femme</option>
         <option value="homme">Homme</option>
       </select>
-      <input id="pNaissance" type="number" placeholder="Année de naissance (ex : 1990)">
-      <input id="pPoids" type="number" placeholder="Poids en kg (ex : 70)">
+      <input id="pNaissance" type="number" inputmode="numeric" placeholder="Année de naissance (ex : 1990)">
+      <input id="pNaissancePrecise" type="date" aria-label="Date de naissance précise (facultatif)">
+      <p class="aide-champ">Date complète facultative — utile pour les bébés et jeunes enfants : les dosages et alertes d'âge deviennent précis au mois près.</p>
+      <label id="groupeGrossesse" class="case-ligne cache">
+        <input type="checkbox" id="pGrossesse">
+        <span>🤰 Grossesse en cours</span>
+      </label>
+      <input id="pPoids" type="number" inputmode="decimal" placeholder="Poids en kg (ex : 70)">
       <input id="pAllergies" placeholder="Allergies (ex : ibuprofène, aspirine)">
       <input id="pTraitements" placeholder="Traitements en cours (ex : cortisone)">
       <button class="btn-principal" onclick="enregistrerProfil()">Enregistrer</button>
@@ -97,6 +118,7 @@
   </section>
 </main>
 <button id="btnFlottant" class="cache" onclick="analyser()">🔍 Analyser</button>
+<button id="btnRemonter" class="cache" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="position:fixed;bottom:100px;right:16px;z-index:999;background:#0e7a5f;color:#fff;border:none;border-radius:50%;width:48px;height:48px;font-size:20px;box-shadow:0 4px 12px rgba(0,0,0,.3);cursor:pointer;">⬆️</button>
 <nav id="navBas">
   <button onclick="aller('accueil')">🏠<span>Accueil</span></button>
   <button onclick="aller('symptomes')">🩺<span>Symptômes</span></button>
@@ -105,7 +127,6 @@
   <button onclick="aller('profils')">👤<span>Profils</span></button>
 </nav>
 <script src="data.js"></script>
-<button id="btnRemonter" class="cache" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="position:fixed;bottom:100px;right:16px;z-index:999;background:#0e7a5f;color:#fff;border:none;border-radius:50%;width:48px;height:48px;font-size:20px;box-shadow:0 4px 12px rgba(0,0,0,.3);cursor:pointer;">⬆️</button>
 <script src="activation.js"></script>
 <script src="app.js"></script>
 </body>
