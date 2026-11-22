@@ -23,6 +23,11 @@
   <main>
 
     <section id="page-accueil" class="page active">
+      <div id="banniere">
+        <p id="banniereTexte">Ajoutez Salama à votre écran d'accueil.</p>
+        <button id="btnInstaller" data-action="installer">Installer</button>
+        <button id="btnFermerBanniere" data-action="fermerBanniere" aria-label="Fermer">✕</button>
+      </div>
       <div id="profilActifAccueil"></div>
       <div class="tuiles">
         <button class="tuile" data-page="symptomes"><div style="font-size:1.9rem;">🩺</div><div>Symptômes</div></button>
@@ -31,7 +36,7 @@
         <button class="tuile" data-page="profils"><div style="font-size:1.9rem;">👥</div><div>Profils</div></button>
       </div>
       <div class="disclaimer">
-        ⚠️ <b>Salama ne remplace pas un médecin.</b> C'est une aide d'orientation : en cas de symptômes graves, durables ou qui inquiètent, consulte toujours un centre de santé.
+        ⚠️ Outil familial d'orientation — ne remplace pas l'avis d'un médecin. En cas de doute, consultez un professionnel de santé.
         <small style="display:block;margin-top:6px;">Salama v1.0</small>
       </div>
     </section>
@@ -99,13 +104,6 @@
 
   <button id="btnFlottant" data-action="analyser" aria-label="Analyser les symptômes" hidden>🔍</button>
   <button id="btnRemonter" data-action="remonter" aria-label="Remonter en haut" style="position:fixed;right:16px;bottom:152px;display:none;z-index:44;">⬆️</button>
-
-  <div id="banniere">
-    <button id="btnFermerBanniere" data-action="fermerBanniere" aria-label="Fermer">✕</button>
-    <h3>📲 Installer Salama</h3>
-    <p>Menu <b>⋮</b> du navigateur → <b>« Installer l'application »</b> ou <b>« Ajouter à l'écran d'accueil »</b>.</p>
-    <button id="btnInstaller" data-action="installer">📲 Installer</button>
-  </div>
 
   <nav>
     <button data-page="accueil" class="active"><span>🏠</span><span>Accueil</span></button>
