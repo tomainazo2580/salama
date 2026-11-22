@@ -128,6 +128,15 @@ function toutDecocher() {
   $('resultats').innerHTML = '';
 }
 
+function resetSymptomes() {
+  coches.clear();
+  dureeSymptomes = 'aujourdhui';
+  $('dureeSymptomes').value = 'aujourdhui';
+  $('rechercheSymptomes').value = '';
+  $('resultats').innerHTML = '';
+  construireListeSymptomes();
+}
+
 /* ================= Analyse ================= */
 function analyser() {
   var res = $('resultats');
@@ -478,25 +487,26 @@ function rendreAccueil() {
   } else {
     c.innerHTML = '👤 Aucun profil actif <button data-page="profils" style="padding:6px 12px;font-size:0.8rem;margin-left:8px;">Créer un profil</button>';
   }
-  var base = ['paracetamol', 'serum', 'sro', 'antiseptique'];
-  $('medocsProfil').innerHTML = base.map(function (id) {
-    var m = null;
-    for (var i = 0; i < MEDICAMENTS.length; i++) {
-      if (MEDICAMENTS[i].id === id) { m = MEDICAMENTS[i]; break; }
-    }
-    if (!m) return '';
-    return '<div data-medoc="' + id + '" style="cursor:pointer;"><b>💊 ' + m.nom + '</b><p class="petit" style="margin:4px 0 0;">' + m.indication + '</p></div>';
-  }).join('');
 }
 
 /* ================= Navigation ================= */
+var pageActuelle = 'accueil';
+
 function allerA(page) {
+  if (page === pageActuelle) { window.scrollTo(0, 0); return; }
+  /* En quittant un onglet, on efface recherches et sélections */
+  if (pageActuelle === 'symptomes' && page !== 'symptomes') resetSymptomes();
+  if (pageActuelle === 'journal' && page !== 'journal') {
+    $('rechercheJournal').value = '';
+    rendreJournal();
+  }
   document.querySelectorAll('.page').forEach(function (s) { s.classList.remove('active'); });
   var cible = $('page-' + page);
   if (cible) cible.classList.add('active');
   document.querySelectorAll('nav button').forEach(function (b) {
     b.classList.toggle('active', b.dataset.page === page);
   });
+  pageActuelle = page;
   $('btnFlottant').hidden = (page !== 'symptomes');
   window.scrollTo(0, 0);
   if (page === 'accueil') rendreAccueil();
@@ -520,7 +530,10 @@ function appliquerTheme() {
 }
 
 /* ================= Bannière d'installation ================= */
+/* Fermée par la croix ✕ → revient 7 jours plus tard.
+   Après une vraie installation → disparaît pour de bon. */
 var promptInstall = null;
+var JOURS_RETOUR_BANNIERE = 7;
 
 window.addEventListener('beforeinstallprompt', function (e) {
   e.preventDefault();
@@ -560,14 +573,20 @@ function installerApp() {
   }
 }
 function fermerBanniere() {
-  ecrireCle('salama_banniere_fermee', 'oui');
+  ecrireCle('salama_banniere_fermee', Date.now());
   cacherBanniere();
 }
 function initBanniere() {
   verifierDejaInstallee().then(function (deja) {
     if (deja) return;
-    if (lireCle('salama_banniere_fermee', '') === 'oui') return;
     if (lireCle('salama_installe', '') === 'oui') return;
+    var fermee = lireCle('salama_banniere_fermee', '');
+    if (fermee) {
+      /* Ancienne version ('oui') → convertie en fermeture vieille de 8 jours :
+         la bannière se ré-affiche une fois pour montrer la nouvelle version. */
+      var ts = (fermee === 'oui') ? (Date.now() - (JOURS_RETOUR_BANNIERE + 1) * 24 * 3600 * 1000) : parseInt(fermee, 10);
+      if (isNaN(ts) || (Date.now() - ts) < JOURS_RETOUR_BANNIERE * 24 * 3600 * 1000) return;
+    }
     setTimeout(montrerBanniere, 1500);
   });
 }
@@ -637,11 +656,6 @@ function demarrer() {
   majBlocGrossesse();
   majHorsLigne();
   $('formProfil').addEventListener('submit', enregistrerProfil);
-  /* Une fois pour la v1.0 : on remontre la bannière pour que tu puisses tester la croix ✕ */
-  if (lireCle('salama_v1_reset', '') !== 'oui') {
-    ecrireCle('salama_v1_reset', 'oui');
-    try { localStorage.removeItem('salama_banniere_fermee'); } catch (e) {}
-  }
   initBanniere();
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(function () {});
