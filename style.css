@@ -206,7 +206,7 @@ nav button.active, nav button.actif {
 .tuile:nth-child(4) { background: #7a9d54; box-shadow: 0 4px 14px rgba(122, 157, 84, 0.35); }
 .tuile:active { transform: scale(0.97); }
 
-/* ---------- Accueil : profil actif ---------- */
+/* ---------- Accueil : profil actif + disclaimer en bas de page ---------- */
 #profilActifAccueil {
   background: var(--carte);
   border-radius: 14px;
@@ -214,6 +214,36 @@ nav button.active, nav button.actif {
   margin-bottom: 14px;
   box-shadow: var(--ombre);
   font-weight: 600;
+}
+#page-accueil.active {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 100px);
+}
+#page-accueil .disclaimer { margin-top: auto; }
+
+/* ---------- Bannière d'installation (petite carte, accueil uniquement) ---------- */
+#banniere {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  background: var(--carte);
+  border: 1px solid var(--bord);
+  border-radius: 12px;
+  padding: 8px 10px;
+  margin-bottom: 14px;
+  box-shadow: var(--ombre);
+}
+#banniere.visible, #banniere.show, #banniere.montree { display: flex; }
+#banniere p { margin: 0; flex: 1; font-size: 0.85rem; color: var(--texte); }
+#btnInstaller { padding: 7px 14px; font-size: 0.8rem; flex-shrink: 0; }
+#btnFermerBanniere {
+  background: none;
+  color: var(--texte2);
+  box-shadow: none;
+  padding: 6px 8px;
+  font-size: 0.9rem;
+  flex-shrink: 0;
 }
 
 /* ---------- Cartes (listes et résultats) ---------- */
@@ -300,38 +330,6 @@ nav button.active, nav button.actif {
   margin-top: 12px;
   box-shadow: var(--ombre);
 }
-
-/* ---------- Bannière d'installation (compacte) ---------- */
-#banniere {
-  position: fixed;
-  left: 12px;
-  right: 12px;
-  bottom: calc(80px + env(safe-area-inset-bottom, 0px));
-  z-index: 60;
-  display: none;
-  background: var(--carte);
-  border-radius: 14px;
-  border-top: 3px solid var(--ambre);
-  padding: 12px 14px;
-  box-shadow: var(--ombre-forte);
-}
-#banniere.visible, #banniere.show, #banniere.montree, #banniere.active { display: block; }
-#banniere h3 { margin: 0 0 4px; font-size: 1rem; }
-#banniere p { margin: 0 0 10px; font-size: 0.8rem; color: var(--texte2); }
-#btnFermerBanniere {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  border-radius: 50%;
-  font-size: 0.9rem;
-  background: none;
-  color: var(--texte2);
-  box-shadow: none;
-}
-#btnInstaller { padding: 8px 16px; font-size: 0.85rem; }
 
 /* ---------- Boutons flottants ---------- */
 #btnFlottant {
