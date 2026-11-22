@@ -530,10 +530,13 @@ function appliquerTheme() {
 }
 
 /* ================= Bannière d'installation ================= */
-/* Fermée par la croix ✕ → revient 7 jours plus tard.
+/* Petite carte d'une ligne, visible sur l'accueil uniquement.
+   Fermée par ✕ → revient au bout de 7 jours.
    Après une vraie installation → disparaît pour de bon. */
 var promptInstall = null;
+var banniereAutorisee = false;
 var JOURS_RETOUR_BANNIERE = 7;
+var TEXTE_BANNIERE = 'Ajoutez Salama à votre écran d\'accueil.';
 
 window.addEventListener('beforeinstallprompt', function (e) {
   e.preventDefault();
@@ -555,6 +558,7 @@ function verifierDejaInstallee() {
 }
 
 function montrerBanniere() {
+  if (!banniereAutorisee) return;
   var b = $('banniere');
   if (!b) return;
   $('btnInstaller').hidden = !promptInstall;
@@ -569,10 +573,20 @@ function installerApp() {
     promptInstall.prompt();
     promptInstall.userChoice.then(function () { promptInstall = null; cacherBanniere(); });
   } else {
-    $('btnInstaller').hidden = true;
+    /* Pas de popup natif disponible : on montre la marche à suivre quelques
+       secondes dans la bannière elle-même, sans bloquer les boutons. */
+    var t = $('banniereTexte');
+    if (t) {
+      t.textContent = 'Menu ⋮ du navigateur, puis « Installer l\'application ».';
+      setTimeout(function () {
+        var x = $('banniereTexte');
+        if (x) x.textContent = TEXTE_BANNIERE;
+      }, 6000);
+    }
   }
 }
 function fermerBanniere() {
+  banniereAutorisee = false;
   ecrireCle('salama_banniere_fermee', Date.now());
   cacherBanniere();
 }
@@ -587,7 +601,8 @@ function initBanniere() {
       var ts = (fermee === 'oui') ? (Date.now() - (JOURS_RETOUR_BANNIERE + 1) * 24 * 3600 * 1000) : parseInt(fermee, 10);
       if (isNaN(ts) || (Date.now() - ts) < JOURS_RETOUR_BANNIERE * 24 * 3600 * 1000) return;
     }
-    setTimeout(montrerBanniere, 1500);
+    banniereAutorisee = true;
+    setTimeout(montrerBanniere, 1200);
   });
 }
 
